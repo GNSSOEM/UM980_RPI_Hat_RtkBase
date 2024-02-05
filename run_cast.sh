@@ -13,11 +13,21 @@ in_tcp="tcpcli://localhost:${tcp_port}#${receiver_format}"
 #in_ext_tcp is mainly for dev purpose to receive a raw stream from another base
 in_ext_tcp="tcpcli://${ext_tcp_source}:${ext_tcp_port}#${receiver_format}"
 
-out_caster_A="ntrips://:${svr_pwd_a}@${svr_addr_a}:${svr_port_a}/${mnt_name_a}#rtcm3 -msg ${rtcm_msg_a} -p ${position}"
+if [[ ${mnt_name_a} == TCP ]] && [[ ${svr_pwd_a} == TCP ]]
+  then
+    out_caster_A="tcpcli://${svr_addr_a}:${svr_port_a}#rtcm3 -msg ${rtcm_msg_a} -p ${position}"
+  else
+    out_caster_A="ntrips://:${svr_pwd_a}@${svr_addr_a}:${svr_port_a}/${mnt_name_a}#rtcm3 -msg ${rtcm_msg_a} -p ${position}"
+fi
 #add receiver options if it exists
 [[ ! -z "${ntrip_a_receiver_options}" ]] && out_caster_A=""${out_caster_A}" -opt "${ntrip_a_receiver_options}""
 
-out_caster_B="ntrips://:${svr_pwd_b}@${svr_addr_b}:${svr_port_b}/${mnt_name_b}#rtcm3 -msg ${rtcm_msg_b} -p ${position}"
+if [[ ${mnt_name_b} == TCP ]] && [[ ${svr_pwd_b} == TCP ]]
+  then
+    out_caster_B="tcpcli://${svr_addr_b}:${svr_port_b}#rtcm3 -msg ${rtcm_msg_b} -p ${position}"
+  else
+    out_caster_B="ntrips://:${svr_pwd_b}@${svr_addr_b}:${svr_port_b}/${mnt_name_b}#rtcm3 -msg ${rtcm_msg_b} -p ${position}"
+fi
 #add receiver options if it exists
 [[ ! -z "${ntrip_b_receiver_options}" ]] && out_caster_B=""${out_caster_B}" -opt "${ntrip_b_receiver_options}""
 
