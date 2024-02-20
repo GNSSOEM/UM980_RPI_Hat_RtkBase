@@ -58,6 +58,12 @@ mkdir -p ${logdir}
 
   case "$2" in
     out_tcp)
+    #echo receiver="${receiver}" position="${position}"
+    # For Unicore reciever setup base position to receiver (if it's not zero)
+    if [[ ${receiver} == *Unicore* ]]  && [[ ${position} != '0.00 0.00 0.00' ]]
+    then
+       ${BASEDIR}/UnicoreSetBasePos.sh ${com_port} "${position}"
+    fi
     #echo ${cast} -in ${!1} -out $out_tcp
     # What is this ${!1} ? It's variable indirection
     ${cast} -in ${!1} -out ${out_tcp} -b 1 -t ${level} -fl ${logdir}/str2str_tcp.log &
