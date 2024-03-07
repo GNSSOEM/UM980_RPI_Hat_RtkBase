@@ -26,3 +26,4 @@
 *.jpg binary
 rtkbase_install.sh binary
 install.sh binary
+*.exe binary
