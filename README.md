@@ -24,6 +24,8 @@ Based on RtkBase
 + Timeout for PPP-solution is extended to 36 hours
 + Add port 5017 for direct configure Unicore Receiver
 + Default settings is adopted to Unicore receiver, onocoy.com and rtkdirect.com
++ Windows RTK & HAS utilitis for precise resolving rtkbase position
++ Zeroconf configuration as rtkbase.local in the local network
 
 ## License:
 UM980_RPI_Hat_RtkBase is licensed under AGPL 3 (see [LICENSE](./LICENSE) file).
