@@ -112,6 +112,55 @@ fi
 
 systemctl restart ser2net
 
+if [[ ! -f "/usr/bin/avahi-resolve" ]]
+then
+   apt-get install -y avahi-utils
+fi
+
+avahi_active=$(sudo systemctl is-active avahi-daemon)
+#echo avahi_active=$avahi_active
+if [[ $avahi_active != 'active' ]]
+then
+   apt-get install -y avahi-daemon
+fi
+
+STANDART_HOST=raspberrypi
+#STANDART_HOST=rtkbase
+RTKBASE_HOST=${RTKBASE_USER}
+#RTKBASE_HOST=raspberrypi
+CHANGE_HOST=N
+
+NOW_HOST=`hostname`
+#echo NOW_HOST=$NOW_HOST
+if [[ $NOW_HOST = $STANDART_HOST ]]
+then
+   CHANGE_HOST=Y
+fi
+
+HOSTNAME=/etc/hostname
+NOW_HOSTNAME=`cat $HOSTNAME`
+#echo NOW_HOSTNAME=$NOW_HOSTNAME
+if [[ $NOW_HOSTNAME = $STANDART_HOST ]]
+then
+   CHANGE_HOST=Y
+fi
+
+HOSTS=/etc/hosts
+NOW_HOSTS=`grep "127.0.1.1" $HOSTS | awk -F ' ' '{print $2}'`
+#echo NOW_HOSTS=$NOW_HOSTS
+if [[ $NOW_HOSTS = $STANDART_HOST ]]
+then
+   CHANGE_HOST=Y
+fi
+
+if [[ $CHANGE_HOST = Y ]]
+then
+   hostname $RTKBASE_HOST
+   echo $RTKBASE_HOST >$HOSTNAME
+   sed -i s/127\.0\.1\.1.*/127\.0\.1\.1\ $RTKBASE_HOST/ "$HOSTS"
+   systemctl restart avahi-daemon
+fi
+
 echo '################################'
 echo 'UNPACK FILES'
 echo '################################'
