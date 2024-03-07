@@ -155,7 +155,7 @@ RECVNAME=`echo ${RECVVER} | awk -F ',' '{print $10}' | awk -F ';' '{print $2}'`
 
 if [[ ${RECVNAME} == "" ]]
 then 
-   echo Receiver on ${RECVPORT} not found. Setup reciver and try again
+   echo Receiver on ${RECVPORT} not found. Setup receiver and try again
    exit
 else
    echo Receiver ${RECVNAME} found on ${RECVPORT}
