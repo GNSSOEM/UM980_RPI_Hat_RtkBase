@@ -1,1 +1,4 @@
 Other/*
+*.tmp
+*.log
+Windows/Ini.cmd
