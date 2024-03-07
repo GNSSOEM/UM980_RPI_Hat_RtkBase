@@ -126,15 +126,25 @@ echo '################################'
 echo 'CONFIGURE RECEIVER'
 echo '################################'
 
+#store service status before upgrade
+rtkbase_web_active==$(sudo systemctl is-active rtkbase_web.service)
+str2str_active=$(sudo systemctl is-active str2str_tcp)
+str2str_ntrip_A_active=$(sudo systemctl is-active str2str_ntrip_A)
+str2str_ntrip_B_active=$(sudo systemctl is-active str2str_ntrip_B)
+str2str_local_caster=$(sudo systemctl is-active str2str_local_ntrip_caster)
+str2str_rtcm=$(sudo systemctl is-active str2str_rtcm_svr)
+str2str_serial=$(sudo systemctl is-active str2str_rtcm_serial)
+str2str_file=$(sudo systemctl is-active str2str_file)
+
 # stop previously running services
-systemctl stop rtkbase_web.service
-systemctl stop str2str_tcp
-systemctl stop str2str_ntrip_A
-systemctl stop str2str_ntrip_B  
-systemctl stop str2str_local_ntrip_caster
-systemctl stop str2str_rtcm_svr
-systemctl stop str2str_rtcm_serial
-systemctl stop str2str_file
+[ $rtkbase_web_active = 'active' ] && sudo systemctl stop rtkbase_web.service
+[ $str2str_active = 'active' ] && sudo systemctl stop str2str_tcp
+[ $str2str_ntrip_A_active = 'active' ] && sudo systemctl stop str2str_ntrip_A
+[ $str2str_ntrip_B_active = 'active' ] && sudo systemctl stop str2str_ntrip_B
+[ $str2str_local_caster = 'active' ] && sudo systemctl stop str2str_local_ntrip_caster
+[ $str2str_rtcm = 'active' ] && sudo systemctl stop str2str_rtcm_svr
+[ $str2str_serial = 'active' ] && sudo systemctl stop str2str_rtcm_serial
+[ $str2str_file = 'active' ] && sudo systemctl stop str2str_file
 
 chmod +x ${BASEDIR}/${NMEACONF}
 
