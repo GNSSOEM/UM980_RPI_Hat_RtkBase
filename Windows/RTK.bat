@@ -86,7 +86,7 @@
     @Echo %Prefix% NOT configured as RTK on %Recv%
 ) else @(
     @Echo Counting base coordinates at %Period% seconds...
-    @Echo CoordFile=%CoordFile%
+    @Rem Echo CoordFile=%CoordFile%
     @Rtcm3Save.exe +%Recv% +%Rtcm3% - %Period% 2>%CoordFile%
     @If ERRORLEVEL 1 @(
         @Echo base coordinates NOT counting because ERROR

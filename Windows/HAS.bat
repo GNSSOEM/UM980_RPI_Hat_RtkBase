@@ -54,7 +54,7 @@
 ) else @(
     find "UM980"  %VerFile% >NUL
     @If NOT ERRORLEVEL 1 @(
-        Echo Receiver is UM980
+        @Echo Receiver is UM980
         @Set Prefix=UM980
    ) else (
         @Echo Receiver on %Recv% is Unknown
@@ -71,7 +71,7 @@
     @Echo %Prefix% NOT configured as HAS on %Recv%
 ) else @(
     @Echo Counting base coordinates at %Period% seconds...
-    @Echo CoordFile=%CoordFile%
+    @Rem Echo CoordFile=%CoordFile%
     @Rtcm3Save.exe +%Recv% - - %Period% 2>%CoordFile%
     @If ERRORLEVEL 1 @(
         @Echo base coordinates NOT counting because ERROR
