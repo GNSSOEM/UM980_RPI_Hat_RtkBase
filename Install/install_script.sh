@@ -22,7 +22,7 @@ configure_ttyS0(){
      #echo HAVE_CONSOLE_LOGIN=${HAVE_CONSOLE_LOGIN}
 
      if [[ ${HAVE_CONSOLE_LOGIN} != "" ]]
-     then 
+     then
         sed -i s/console=serial[0-9],[0-9]*\ //  "${CMDLINE}"
         #cat ${CMDLINE}
         #echo
@@ -37,7 +37,7 @@ configure_ttyS0(){
      #echo HAVE_UART=${HAVE_UART}
 
      if [[ ${HAVE_UART} == "" ]]
-     then 
+     then
         echo [all] >> ${BOOTCONFIG}
         echo >> ${BOOTCONFIG}
         echo enable_uart=1 >> ${BOOTCONFIG}
@@ -49,7 +49,7 @@ configure_ttyS0(){
      #echo ENABLED_UART=${ENABLED_UART}
 
      if [[ ${ENABLED_UART} == "" ]]
-     then 
+     then
         sed -i s/^enable_uart=.*/enable_uart=1/  "${BOOTCONFIG}"
         echo Uart enabled at ${BOOTCONFIG}
         NEEDREBOOT=Y
@@ -59,7 +59,7 @@ configure_ttyS0(){
 
 WHOAMI=`whoami`
 if [[ ${WHOAMI} != "root" ]]
-then 
+then
    #echo use sudo
    sudo ${0}
    #echo exit after sudo
@@ -76,33 +76,33 @@ configure_ttyS0 /boot/firmware
 
 #echo NEEDREBOOT=${NEEDREBOOT}
 if [[ ${NEEDREBOOT} == "Y" ]]
-then 
+then
    echo Please try again ${0} after reboot
    reboot now
    exit
 fi
 
 if [[ ! -c "${RECVPORT}" ]]
-then 
+then
    echo port ${RECVPORT} not found. Setup port and try again
    exit
 fi
 
 if [[ ! -f "/usr/sbin/ser2net" ]]
-then 
+then
    apt-get install -y ser2net
 fi
 
 SER2NET_CONF=/etc/ser2net.conf
 SER2NET_DEV=${RECVPORT}:115200
 if [[ -f "${SER2NET_CONF}" ]]
-then 
+then
    SER2NET_HAVEDEV=`grep "${SER2NET_DEV}" ${SER2NET_CONF}`
 fi
 #echo SER2NET_HAVEDEV=${SER2NET_HAVEDEV}
 
 if [[ ${SER2NET_HAVEDEV} == "" ]]
-then 
+then
    echo 5017:raw:0:${SER2NET_DEV} >>${SER2NET_CONF}
    #echo 5017:raw:0:${SER2NET_DEV}
 else
@@ -203,7 +203,7 @@ RECVNAME=`echo ${RECVVER} | awk -F ',' '{print $10}' | awk -F ';' '{print $2}'`
 #echo RECVNAME=${RECVNAME}
 
 if [[ ${RECVNAME} == "" ]]
-then 
+then
    echo Receiver on ${RECVPORT} not found. Setup receiver and try again
    exit
 else
@@ -213,7 +213,7 @@ fi
 RECVCONF=${BASEDIR}/${RECVNAME}_RTCM3_OUT.txt
 
 if [[ ! -f "${RECVCONF}" ]]
-then 
+then
    echo Confiuration file for ${RECVNAME} \(${RECVCONF}\) NOT FOUND.
    exit
 fi
@@ -225,7 +225,7 @@ echo 'ADD RTKBASE USER'
 echo '################################'
 
 if [[ ! -d "${RTKBASE_PATH}" ]]
-then 
+then
    #echo mkdir ${RTKBASE_PATH}
    mkdir ${RTKBASE_PATH}
 fi
@@ -233,7 +233,7 @@ fi
 HAVEUSER=`cat /etc/passwd | grep ${RTKBASE_USER}`
 #echo HAVEUSER=${HAVEUSER}
 if [[ ${HAVEUSER} == "" ]]
-then 
+then
    #echo adduser --comment "RTKBase user" --disabled-password --home ${RTKBASE_PATH} ${RTKBASE_USER}
    adduser --comment "RTKBase user" --disabled-password --home ${RTKBASE_PATH} ${RTKBASE_USER}
 fi
@@ -241,7 +241,7 @@ fi
 RTKBASE_SUDOER=/etc/sudoers.d/${RTKBASE_USER}
 #echo RTKBASE_SUDOER=${RTKBASE_SUDOER}
 if [[ ! -f "${RTKBASE_SUDOER}" ]]
-then 
+then
    #echo echo "rtkbase ALL=NOPASSWD: ALL" \> ${RTKBASE_SUDOER}
    echo "rtkbase ALL=NOPASSWD: ALL" > ${RTKBASE_SUDOER}
 fi
