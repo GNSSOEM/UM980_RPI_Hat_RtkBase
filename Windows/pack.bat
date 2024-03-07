@@ -1,0 +1,1 @@
+@"%ProgramFiles%\WinRar\WinRar" U -m5 -rr -afzip -sfx ..\WinRtkBaseUtils HAS.bat RTK.bat nmeaConf.exe rtcm3save.exe UM*.txt

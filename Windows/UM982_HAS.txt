@@ -1,0 +1,6 @@
+FRESET
+MODE ROVER SURVEY DEFAULT
+CONFIG SIGNALGROUP 3 6
+Config ppp enable E6-HAS
+Config ppp datum wgs84
+gpgga 1
