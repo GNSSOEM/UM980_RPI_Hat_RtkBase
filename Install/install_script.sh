@@ -57,6 +57,19 @@ configure_ttyS0(){
   fi
 }
 
+is_packet_not_installed(){
+   instaled=`dpkg-query -W ${1} 2>/dev/null | grep ${1}`
+   #echo 1=${1} instaled=${instaled}
+   if [[ ${instaled} != "" ]]
+   then
+      return 1
+   fi
+}
+
+install_packet_if_not_installed(){
+   is_packet_not_installed ${1} && apt-get install -y ${1}
+}
+
 WHOAMI=`whoami`
 if [[ ${WHOAMI} != "root" ]]
 then
@@ -88,10 +101,7 @@ then
    exit
 fi
 
-if [[ ! -f "/usr/sbin/ser2net" ]]
-then
-   apt-get install -y ser2net
-fi
+install_packet_if_not_installed ser2net
 
 SER2NET_CONF=/etc/ser2net.conf
 SER2NET_DEV=${RECVPORT}:115200
@@ -112,17 +122,8 @@ fi
 
 systemctl restart ser2net
 
-if [[ ! -f "/usr/bin/avahi-resolve" ]]
-then
-   apt-get install -y avahi-utils
-fi
-
-avahi_active=$(sudo systemctl is-active avahi-daemon)
-#echo avahi_active=$avahi_active
-if [[ $avahi_active != 'active' ]]
-then
-   apt-get install -y avahi-daemon
-fi
+install_packet_if_not_installed avahi-utils
+install_packet_if_not_installed avahi-daemon
 
 STANDART_HOST=raspberrypi
 #STANDART_HOST=rtkbase
