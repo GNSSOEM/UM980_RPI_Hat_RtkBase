@@ -129,7 +129,8 @@ install_additional_utilies(){
       #echo sed -i s@^.*${SER2NET_DEV}@5017:raw:0:${SER2NET_DEV}@ ${SER2NET_CONF}
    fi
 
-   systemctl restart ser2net
+   ser2net_active==$(systemctl is-active ser2net)
+   [ $ser2net_active = 'active' ] && systemctl restart ser2net
 
    install_packet_if_not_installed avahi-utils
    install_packet_if_not_installed avahi-daemon
@@ -168,7 +169,8 @@ install_additional_utilies(){
       hostname $RTKBASE_HOST
       echo $RTKBASE_HOST >$HOSTNAME
       sed -i s/127\.0\.1\.1.*/127\.0\.1\.1\ $RTKBASE_HOST/ "$HOSTS"
-      systemctl restart avahi-daemon
+      avahi_active==$(systemctl is-active avahi-daemon)
+      [ $avahi_active = 'active' ] && systemctl restart avahi-daemon
    fi
 }
 
