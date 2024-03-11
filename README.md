@@ -16,6 +16,11 @@ Based on RtkBase
   ```
 + RTFM
 
+## Two phase installation:
+
++ ./install.sh -1 for part of installation without receiver
++ ./install.sh -2 for part of installation with receiver
+
 ## main feature, added to RtkBase
 
 + Full configure for Unicore receiver and RPI
