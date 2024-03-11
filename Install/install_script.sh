@@ -74,8 +74,8 @@ restart_as_root(){
    WHOAMI=`whoami`
    if [[ ${WHOAMI} != "root" ]]
    then
-      #echo use sudo
-      sudo ${0}
+      #echo sudo ${0} ${1}
+      sudo ${0} ${1}
       #echo exit after sudo
       exit
    fi
@@ -89,7 +89,9 @@ check_boot_configiration(){
 
    configure_ttyS0 /boot
    configure_ttyS0 /boot/firmware
+}
 
+do_reboot(){
    #echo NEEDREBOOT=${NEEDREBOOT}
    if [[ ${NEEDREBOOT} == "Y" ]]
    then
@@ -98,6 +100,17 @@ check_boot_configiration(){
       exit
    fi
 
+}
+
+info_reboot(){
+   #echo NEEDREBOOT=${NEEDREBOOT}
+   if [[ ${NEEDREBOOT} == "Y" ]]
+   then
+      echo Please REBOOT, because start configuration changed!
+   fi
+}
+
+check_port(){
    if [[ ! -c "${RECVPORT}" ]]
    then
       echo port ${RECVPORT} not found. Setup port and try again
@@ -183,10 +196,10 @@ unpack_files(){
    ARCHIVE=$(awk '/^__ARCHIVE__/ {print NR + 1; exit 0; }' "${0}")
    # Check if there is some content after __ARCHIVE__ marker (more than 100 lines)
    [[ $(sed -n '/__ARCHIVE__/,$p' "${0}" | wc -l) -lt 100 ]] && echo "UM980_RPI_Hat_RtkBase isn't bundled inside install.sh" && exit 1  
-   tail -n+${ARCHIVE} "${0}" | tar xpJv
+   tail -n+${ARCHIVE} "${0}" | tar xpJv ${FILES_EXTRACT}
 }
 
-stop_rtkbase_sercices(){
+stop_rtkbase_services(){
    #store service status before upgrade
    rtkbase_web_active==$(sudo systemctl is-active rtkbase_web.service)
    str2str_active=$(sudo systemctl is-active str2str_tcp)
@@ -272,9 +285,6 @@ copy_rtkbase_install_file(){
   echo 'COPY RTKBASE INSTALL FILE'
   echo '################################'
 
-  #echo ${RTKBASE_PATH}
-  cd ${RTKBASE_PATH}
-
   CACHE_PIP=${RTKBASE_PATH}/.cache/pip
   #echo CACHE_PIP=${CACHE_PIP}
   if [[ ! -d ${CACHE_PIP} ]]
@@ -310,17 +320,22 @@ configure_for_unicore(){
    #echo cp ${BASEDIR}/${NMEACONF} ${RTKBASE_GIT}
    mv ${BASEDIR}/${NMEACONF} ${RTKBASE_GIT}
 
+   SERVER_PY=${RTKBASE_GIT}web_app/server.py
+   #echo SERVER_PY=${SERVER_PY}
+   sed -i s/^rtkcv_standby_delay\ *=.*/rtkcv_standby_delay\ =\ 129600/ ${SERVER_PY}
+}
+
+configure_settings(){
+   echo '################################'
+   echo 'CONFIGURE SETTINGS'
+   echo '################################'
+
    #echo cp ${BASEDIR}/${UNICORE_SETTIGNS} ${RTKBASE_PATH}/
    mv ${BASEDIR}/${UNICORE_SETTIGNS} ${RTKBASE_PATH}/
    #echo chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
    chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
    #echo ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
    ${RTKBASE_PATH}/${UNICORE_SETTIGNS} ${RECVNAME}
-
-   SERVER_PY=${RTKBASE_GIT}web_app/server.py 
-   #echo SERVER_PY=${SERVER_PY}
-   sed -i s/^rtkcv_standby_delay\ *=.*/rtkcv_standby_delay\ =\ 129600/ ${SERVER_PY}
-
    #echo rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
    rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
 }
@@ -331,27 +346,86 @@ start_rtkbase_services(){
 }
 
 delete_garbage(){
-   echo '################################'
-   echo 'DELETE GARBAGE'
-   echo '################################'
+   if [[ "${FILES_DELETE}" != "" ]]
+   then
+      echo '################################'
+      echo 'DELETE GARBAGE'
+      echo '################################'
 
-   #echo cd ${BASEDIR}
-   cd ${BASEDIR}
-   rm -f UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt install.sh 
+      #echo rm -f ${FILES_DELETE}
+      rm -f ${FILES_DELETE}
+   fi
 }
 
-restart_as_root
-check_boot_configiration
-install_additional_utilies
+HAVE_RECEIVER=0
+HAVE_PHASE1=0
+HAVE_FULL=0
+
+have_receiver(){
+   return ${HAVE_RECEIVER}
+}
+have_phase1(){
+   return ${HAVE_PHASE1}
+}
+have_full(){
+   return ${HAVE_FULL}
+}
+
+FILES_EXTRACT="NmeaConf UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt \
+              run_cast.sh UnicoreSetBasePos.sh UnicoreSettings.sh \
+              uninstall.sh rtkbase_install.sh"
+FILES_DELETE="${0} NmeaConf UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt"
+
+check_phases(){
+   if [[ ${1} == "-1" ]]
+   then
+      HAVE_RECEIVER=1
+      HAVE_PHASE1=0
+      HAVE_FULL=1
+      FILES_EXTRACT="NmeaConf run_cast.sh UnicoreSetBasePos.sh UnicoreSettings.sh rtkbase_install.sh"
+      FILES_DELETE=
+   else
+      if [[ ${1} == "-2" ]]
+      then
+         HAVE_RECEIVER=0
+         HAVE_PHASE1=1
+         HAVE_FULL=1
+         FILES_EXTRACT="NmeaConf UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt UnicoreSettings.sh"
+      else
+        if [[ ${1} != "" ]]
+        then
+           echo Invalid argument \"${1}\"
+           exit
+        fi
+      fi
+   fi
+
+   #echo HAVE_RECEIVER=${HAVE_RECEIVER} HAVE_PHASE1=${HAVE_PHASE1} HAVE_FULL=${HAVE_FULL}
+   #echo FILES_EXTRACT=${FILES_EXTRACT}
+   #echo FILES_DELETE=${FILES_DELETE}
+}
+
+restart_as_root ${1}
+check_phases $1
+have_phase1 && check_boot_configiration
+have_full && do_reboot
+have_receiver && check_port
+have_phase1 && install_additional_utilies
 unpack_files
-stop_rtkbase_sercices
-configure_receiver
-add_rtkbase_user
-copy_rtkbase_install_file
-rtkbase_install
-configure_for_unicore
-start_rtkbase_services
-delete_garbage
+stop_rtkbase_services
+have_receiver && configure_receiver
+have_phase1 && add_rtkbase_user
+#echo ${RTKBASE_PATH}
+cd ${RTKBASE_PATH}
+have_phase1 && copy_rtkbase_install_file
+have_phase1 && rtkbase_install
+have_phase1 && configure_for_unicore
+configure_settings
+have_receiver && start_rtkbase_services
+#echo cd ${BASEDIR}
+cd ${BASEDIR}
+have_receiver && delete_garbage
+have_full || info_reboot
 exit
 
 __ARCHIVE__
