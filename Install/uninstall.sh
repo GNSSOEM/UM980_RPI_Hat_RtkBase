@@ -2,6 +2,15 @@
 RTKBASE_USER=rtkbase
 RTKBASE_PATH=/usr/local/${RTKBASE_USER}
 
+WHOAMI=`whoami`
+if [[ ${WHOAMI} != "root" ]]
+then
+   #echo use sudo
+   sudo ${0} ${1}
+   #echo exit after sudo
+   exit
+fi
+
 RTKBASE_UNINSTALL=${RTKBASE_PATH}/rtkbase/tools/uninstall.sh
 #echo RTKBASE_UNINSTAL=${RTKBASE_UNINSTALL}
 if [[ -f "${RTKBASE_UNINSTALL}" ]]
