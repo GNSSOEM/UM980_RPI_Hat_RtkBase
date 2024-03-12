@@ -10,7 +10,7 @@ Based on RtkBase
 + Open a terminal and:
 
   ```bash
-  wget https://raw.githubusercontent.com/GNSSOEM/UM980_RPI_Hat_RtkBase/main/install.sh
+  wget https://raw.githubusercontent.com/Alex0161/UM980_RPI_Hat_RtkBase/main/install.sh
   chmod +x install.sh
   ./install.sh
   ```
