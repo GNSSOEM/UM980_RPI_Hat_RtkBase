@@ -202,6 +202,9 @@ unpack_files(){
 }
 
 stop_rtkbase_services(){
+  echo '################################'
+  echo 'STOP RTKBASE SERVICES'
+  echo '################################'
    #store service status before upgrade
    rtkbase_web_active==$(sudo systemctl is-active rtkbase_web.service)
    str2str_active=$(sudo systemctl is-active str2str_tcp)
@@ -359,6 +362,11 @@ delete_garbage(){
    fi
 }
 
+info_open(){
+   NOW_HOST=`hostname`
+   echo You can open your browser to http://${NOW_HOST}.local into local network
+}
+
 HAVE_RECEIVER=0
 HAVE_PHASE1=0
 HAVE_FULL=0
@@ -429,6 +437,7 @@ cd ${BASEDIR}
 have_receiver && delete_garbage
 cd ${ORIGDIR}
 have_full || info_reboot
+have_phase1 || info_open
 exit
 
 __ARCHIVE__
