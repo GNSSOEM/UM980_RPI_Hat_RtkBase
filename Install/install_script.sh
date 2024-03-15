@@ -3,6 +3,8 @@ RTKBASE_USER=rtkbase
 RTKBASE_PATH=/usr/local/${RTKBASE_USER}
 RTKBASE_GIT=${RTKBASE_PATH}/rtkbase/
 BASEDIR=`dirname $(readlink -f "$0")`
+BASENAME=`basename $(readlink -f "$0")`
+ORIGDIR=`pwd`
 #echo BASEDIR=${BASEDIR}
 RECVPORT=/dev/ttyS0
 RTKBASE_INSTALL=rtkbase_install.sh
@@ -196,7 +198,7 @@ unpack_files(){
    ARCHIVE=$(awk '/^__ARCHIVE__/ {print NR + 1; exit 0; }' "${0}")
    # Check if there is some content after __ARCHIVE__ marker (more than 100 lines)
    [[ $(sed -n '/__ARCHIVE__/,$p' "${0}" | wc -l) -lt 100 ]] && echo "UM980_RPI_Hat_RtkBase isn't bundled inside install.sh" && exit 1  
-   tail -n+${ARCHIVE} "${0}" | tar xpJv ${FILES_EXTRACT}
+   tail -n+${ARCHIVE} "${0}" | tar xpJv -C ${BASEDIR} ${FILES_EXTRACT}
 }
 
 stop_rtkbase_services(){
@@ -374,7 +376,7 @@ have_full(){
 FILES_EXTRACT="NmeaConf UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt \
               run_cast.sh UnicoreSetBasePos.sh UnicoreSettings.sh \
               uninstall.sh rtkbase_install.sh"
-FILES_DELETE="${0} NmeaConf UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt"
+FILES_DELETE="${BASENAME} NmeaConf UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt"
 
 check_phases(){
    if [[ ${1} == "-1" ]]
@@ -425,6 +427,7 @@ have_receiver && start_rtkbase_services
 #echo cd ${BASEDIR}
 cd ${BASEDIR}
 have_receiver && delete_garbage
+cd ${ORIGDIR}
 have_full || info_reboot
 exit
 
