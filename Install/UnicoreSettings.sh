@@ -1,4 +1,14 @@
 #!/bin/bash
+
+WHOAMI=`whoami`
+if [[ ${WHOAMI} != "root" ]]
+then
+   #echo sudo ${0} ${1}
+   sudo ${0} ${1}
+   #echo exit after sudo
+   exit
+fi
+
 rtkbase_path=$(pwd)/rtkbase
 settings="${rtkbase_path}"/settings.conf
 rtcm_msg="1005(10),1033(10),1077,1087,1097,1107,1117,1127"
