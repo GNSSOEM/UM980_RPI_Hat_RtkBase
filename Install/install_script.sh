@@ -145,7 +145,7 @@ install_additional_utilies(){
    fi
 
    ser2net_active==$(systemctl is-active ser2net)
-   [ $ser2net_active = 'active' ] && systemctl restart ser2net
+   [ "${ser2net_active}" = "active" ] && systemctl restart ser2net
 
    install_packet_if_not_installed avahi-utils
    install_packet_if_not_installed avahi-daemon
@@ -185,7 +185,7 @@ install_additional_utilies(){
       echo $RTKBASE_HOST >$HOSTNAME
       sed -i s/127\.0\.1\.1.*/127\.0\.1\.1\ $RTKBASE_HOST/ "$HOSTS"
       avahi_active==$(systemctl is-active avahi-daemon)
-      [ $avahi_active = 'active' ] && systemctl restart avahi-daemon
+      [ "${avahi_active}" = "active" ] && systemctl restart avahi-daemon
    fi
 }
 
@@ -206,24 +206,24 @@ stop_rtkbase_services(){
   echo 'STOP RTKBASE SERVICES'
   echo '################################'
    #store service status before upgrade
-   rtkbase_web_active==$(sudo systemctl is-active rtkbase_web.service)
-   str2str_active=$(sudo systemctl is-active str2str_tcp)
-   str2str_ntrip_A_active=$(sudo systemctl is-active str2str_ntrip_A)
-   str2str_ntrip_B_active=$(sudo systemctl is-active str2str_ntrip_B)
-   str2str_local_caster=$(sudo systemctl is-active str2str_local_ntrip_caster)
-   str2str_rtcm=$(sudo systemctl is-active str2str_rtcm_svr)
-   str2str_serial=$(sudo systemctl is-active str2str_rtcm_serial)
-   str2str_file=$(sudo systemctl is-active str2str_file)
+   rtkbase_web_active==$(systemctl is-active rtkbase_web.service)
+   str2str_active=$(systemctl is-active str2str_tcp)
+   str2str_ntrip_A_active=$(systemctl is-active str2str_ntrip_A)
+   str2str_ntrip_B_active=$(systemctl is-active str2str_ntrip_B)
+   str2str_local_caster=$(systemctl is-active str2str_local_ntrip_caster)
+   str2str_rtcm=$(systemctl is-active str2str_rtcm_svr)
+   str2str_serial=$(systemctl is-active str2str_rtcm_serial)
+   str2str_file=$(systemctl is-active str2str_file)
 
    # stop previously running services
-   [ $rtkbase_web_active = 'active' ] && sudo systemctl stop rtkbase_web.service
-   [ $str2str_active = 'active' ] && sudo systemctl stop str2str_tcp
-   [ $str2str_ntrip_A_active = 'active' ] && sudo systemctl stop str2str_ntrip_A
-   [ $str2str_ntrip_B_active = 'active' ] && sudo systemctl stop str2str_ntrip_B
-   [ $str2str_local_caster = 'active' ] && sudo systemctl stop str2str_local_ntrip_caster
-   [ $str2str_rtcm = 'active' ] && sudo systemctl stop str2str_rtcm_svr
-   [ $str2str_serial = 'active' ] && sudo systemctl stop str2str_rtcm_serial
-   [ $str2str_file = 'active' ] && sudo systemctl stop str2str_file
+   [ "${rtkbase_web_active}" = "active" ] && systemctl stop rtkbase_web.service
+   [ "${str2str_active}" = "active" ] && systemctl stop str2str_tcp
+   [ "${str2str_ntrip_A_active}" = "active" ] && systemctl stop str2str_ntrip_A
+   [ "${str2str_ntrip_B_active}" = "active" ] && systemctl stop str2str_ntrip_B
+   [ "${str2str_local_caster}" = "active" ] && systemctl stop str2str_local_ntrip_caster
+   [ "${str2str_rtcm}" = "'active" ] && systemctl stop str2str_rtcm_svr
+   [ "${str2str_serial}" = "active" ] && systemctl stop str2str_rtcm_serial
+   [ "${str2str_file}" = "active" ] && systemctl stop str2str_file
 }
 
 configure_receiver(){
