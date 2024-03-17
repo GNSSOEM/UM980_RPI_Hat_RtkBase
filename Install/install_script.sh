@@ -392,7 +392,7 @@ check_phases(){
       HAVE_RECEIVER=1
       HAVE_PHASE1=0
       HAVE_FULL=1
-      FILES_EXTRACT="NmeaConf run_cast.sh UnicoreSetBasePos.sh UnicoreSettings.sh rtkbase_install.sh"
+      FILES_EXTRACT="NmeaConf run_cast.sh UnicoreSetBasePos.sh rtkbase_install.sh"
       FILES_DELETE=
    else
       if [[ ${1} == "-2" ]]
@@ -430,7 +430,7 @@ cd ${RTKBASE_PATH}
 have_phase1 && copy_rtkbase_install_file
 have_phase1 && rtkbase_install
 have_phase1 && configure_for_unicore
-configure_settings
+have_receiver && configure_settings
 have_receiver && start_rtkbase_services
 #echo cd ${BASEDIR}
 cd ${BASEDIR}
