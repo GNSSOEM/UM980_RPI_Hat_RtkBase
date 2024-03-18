@@ -62,7 +62,8 @@ mkdir -p ${logdir}
     # For Unicore reciever setup base position to receiver (if it's not zero)
     if [[ ${receiver} == *Unicore* ]]  && [[ ${position} != '0.00 0.00 0.00' ]]
     then
-       ${BASEDIR}/UnicoreSetBasePos.sh ${com_port} "${position}"
+       #echo ${BASEDIR}/UnicoreSetBasePos.sh ${com_port}:${com_port_settings} "${position}"
+       ${BASEDIR}/UnicoreSetBasePos.sh ${com_port}:${com_port_settings} "${position}"
     fi
     #echo ${cast} -in ${!1} -out $out_tcp
     # What is this ${!1} ? It's variable indirection
