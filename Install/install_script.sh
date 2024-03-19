@@ -309,6 +309,8 @@ copy_rtkbase_install_file(){
 rtkbase_install(){
    #echo ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -r -t -g
    ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -r -t -g
+   #echo rm -f ${RTKBASE_PATH}/${RTKBASE_INSTALL}
+   rm -f ${RTKBASE_PATH}/${RTKBASE_INSTALL}
 }
 
 configure_for_unicore(){
@@ -346,8 +348,8 @@ configure_settings(){
 }
 
 start_rtkbase_services(){
-  #echo ./${RTKBASE_INSTALL} -u ${RTKBASE_USER} -s
-  ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -s
+  #echo ${RTKBASE_GIT}tools/insall.sh -u ${RTKBASE_USER} -s
+  ${RTKBASE_GIT}tools/install.sh -u ${RTKBASE_USER} -s
 }
 
 delete_garbage(){
