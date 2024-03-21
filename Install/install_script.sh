@@ -198,7 +198,7 @@ unpack_files(){
    ARCHIVE=$(awk '/^__ARCHIVE__/ {print NR + 1; exit 0; }' "${0}")
    # Check if there is some content after __ARCHIVE__ marker (more than 100 lines)
    [[ $(sed -n '/__ARCHIVE__/,$p' "${0}" | wc -l) -lt 100 ]] && echo "UM980_RPI_Hat_RtkBase isn't bundled inside install.sh" && exit 1  
-   tail -n+${ARCHIVE} "${0}" | tar xpJv -C ${BASEDIR} ${FILES_EXTRACT}
+   tail -n+${ARCHIVE} "${0}" | tar xpJv --no-same-owner --no-same-permissions -C ${BASEDIR} ${FILES_EXTRACT}
 }
 
 stop_rtkbase_services(){
