@@ -1,7 +1,7 @@
 #!/bin/bash
 RTKBASE_USER=rtkbase
 RTKBASE_PATH=/usr/local/${RTKBASE_USER}
-RTKBASE_GIT=${RTKBASE_PATH}/rtkbase/
+RTKBASE_GIT=${RTKBASE_PATH}/rtkbase
 BASEDIR=`dirname $(readlink -f "$0")`
 BASENAME=`basename $(readlink -f "$0")`
 ORIGDIR=`pwd`
@@ -324,22 +324,24 @@ configure_for_unicore(){
    echo 'CONFIGURE FOR UNICORE'
    echo '################################'
 
-   #echo cp ${BASEDIR}/${RUN_CAST} ${RTKBASE_GIT}
-   mv ${BASEDIR}/${RUN_CAST} ${RTKBASE_GIT}
-   #echo cp ${BASEDIR}/${SET_BASE_POS} ${RTKBASE_GIT}
-   mv ${BASEDIR}/${SET_BASE_POS} ${RTKBASE_GIT}
+   #echo cp ${BASEDIR}/${RUN_CAST} ${RTKBASE_GIT}/
+   mv ${BASEDIR}/${RUN_CAST} ${RTKBASE_GIT}/
    #echo chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}/${RUN_CAST}
    chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}/${RUN_CAST}
+   #echo mv ${BASEDIR}/${SET_BASE_POS} ${RTKBASE_GIT}/
+   mv ${BASEDIR}/${SET_BASE_POS} ${RTKBASE_GIT}/
    #echo chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}/${SET_BASE_POS}
    chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}/${SET_BASE_POS}
-   #echo chmod +x ${RTKBASE_PATH}/${SET_BASE_POS}
-   chmod +x ${RTKBASE_GIT}${SET_BASE_POS}
-   #echo cp ${BASEDIR}/${NMEACONF} ${RTKBASE_GIT}
-   mv ${BASEDIR}/${NMEACONF} ${RTKBASE_GIT}
-
-   SERVER_PY=${RTKBASE_GIT}web_app/server.py
+   #echo chmod +x ${RTKBASE_GIT}/${SET_BASE_POS}
+   chmod +x ${RTKBASE_GIT}/${SET_BASE_POS}
+   #echo mv ${BASEDIR}/${NMEACONF} ${RTKBASE_GIT}/
+   mv ${BASEDIR}/${NMEACONF} ${RTKBASE_GIT}/
    #echo chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}/${NMEACONF}
    chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}/${NMEACONF}
+   #echo chmod +x ${RTKBASE_GIT}/${NMEACONF}
+   chmod +x ${RTKBASE_GIT}/${NMEACONF}
+
+   SERVER_PY=${RTKBASE_GIT}/web_app/server.py
    #echo SERVER_PY=${SERVER_PY}
    sed -i s/^rtkcv_standby_delay\ *=.*/rtkcv_standby_delay\ =\ 129600/ ${SERVER_PY}
 }
