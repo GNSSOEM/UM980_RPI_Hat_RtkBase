@@ -12,7 +12,7 @@ RTKBASE_INSTALL=rtkbase_install.sh
 RUN_CAST=run_cast.sh
 SET_BASE_POS=UnicoreSetBasePos.sh
 UNICORE_SETTIGNS=UnicoreSettings.sh
-NMEACONF=NmeaConf 
+NMEACONF=NmeaConf
 
 configure_ttyS0(){
   CMDLINE=$1/cmdline.txt
@@ -360,7 +360,7 @@ configure_settings(){
    fi
    #echo chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
    chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
-   #echo ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
+   #echo ${RTKBASE_PATH}/${UNICORE_SETTIGNS} ${RECVNAME}
    ${RTKBASE_PATH}/${UNICORE_SETTIGNS} ${RECVNAME}
    #echo rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
    rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
