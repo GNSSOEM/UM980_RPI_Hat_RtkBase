@@ -31,6 +31,7 @@ Based on RtkBase
 + Default settings is adopted to Unicore receiver, onocoy.com and rtkdirect.com
 + Windows RTK & HAS utilitis for precise resolving rtkbase position
 + Zeroconf configuration as rtkbase.local in the local network
++ Then change speed in main settings, speed of receiver will be changing too
 
 ## License:
 UM980_RPI_Hat_RtkBase is licensed under AGPL 3 (see [LICENSE](./LICENSE) file).
