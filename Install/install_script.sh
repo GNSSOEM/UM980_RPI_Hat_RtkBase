@@ -300,8 +300,12 @@ copy_rtkbase_install_file(){
   #echo chown ${RTKBASE_USER}:${RTKBASE_USER} ${CACHE_PIP}
   chown ${RTKBASE_USER}:${RTKBASE_USER} ${CACHE_PIP}
 
-  #echo cp ${BASEDIR}/${RTKBASE_INSTALL} ${RTKBASE_PATH}/
-  mv ${BASEDIR}/${RTKBASE_INSTALL} ${RTKBASE_PATH}/
+  #echo BASEDIR=${BASEDIR} RTKBASE_PATH=${RTKBASE_PATH}
+  if [[ "${BASEDIR}" != "${RTKBASE_PATH}" ]]
+  then
+     #echo mv ${BASEDIR}/${RTKBASE_INSTALL} ${RTKBASE_PATH}/
+     mv ${BASEDIR}/${RTKBASE_INSTALL} ${RTKBASE_PATH}/
+  fi
   #echo chmod +x ${RTKBASE_PATH}/${RTKBASE_INSTALL}
   chmod +x ${RTKBASE_PATH}/${RTKBASE_INSTALL}
 }
@@ -337,8 +341,12 @@ configure_settings(){
    echo 'CONFIGURE SETTINGS'
    echo '################################'
 
-   #echo cp ${BASEDIR}/${UNICORE_SETTIGNS} ${RTKBASE_PATH}/
-   mv ${BASEDIR}/${UNICORE_SETTIGNS} ${RTKBASE_PATH}/
+   #echo BASEDIR=${BASEDIR} RTKBASE_PATH=${RTKBASE_PATH}
+   if [[ "${BASEDIR}" != "${RTKBASE_PATH}" ]]
+   then
+      #echo mv ${BASEDIR}/${UNICORE_SETTIGNS} ${RTKBASE_PATH}/
+      mv ${BASEDIR}/${UNICORE_SETTIGNS} ${RTKBASE_PATH}/
+   fi
    #echo chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
    chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
    #echo ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
