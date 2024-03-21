@@ -437,8 +437,8 @@ check_phases(){
 }
 
 restart_as_root ${1}
+check_phases ${1}
 have_phase1 && export LANG=C
-check_phases $1
 have_phase1 && check_boot_configiration
 have_full && do_reboot
 have_receiver && check_port
