@@ -2,6 +2,7 @@
 RTKBASE_USER=rtkbase
 RTKBASE_PATH=/usr/local/${RTKBASE_USER}
 RTKBASE_GIT=${RTKBASE_PATH}/rtkbase
+RTKBASE_TOOLS=${RTKBASE_GIT}/tools
 BASEDIR=`dirname $(readlink -f "$0")`
 BASENAME=`basename $(readlink -f "$0")`
 ORIGDIR=`pwd`
@@ -366,8 +367,8 @@ configure_settings(){
 }
 
 start_rtkbase_services(){
-  #echo ${RTKBASE_GIT}tools/insall.sh -u ${RTKBASE_USER} -s
-  ${RTKBASE_GIT}tools/install.sh -u ${RTKBASE_USER} -s
+  #echo ${RTKBASE_TOOLS}/insall.sh -u ${RTKBASE_USER} -s
+  ${RTKBASE_TOOLS}/install.sh -u ${RTKBASE_USER} -s
 }
 
 delete_garbage(){
