@@ -9,8 +9,14 @@ then
    exit
 fi
 
+if [[ "${RTKBASE_USER}" = "" ]]
+then
+   RTKBASE_USER=rtkbase
+fi
+
 rtkbase_path=$(pwd)/rtkbase
 settings="${rtkbase_path}"/settings.conf
+#echo settings=${settings}
 rtcm_msg="1005(10),1033(10),1077,1087,1097,1107,1117,1127"
 rtcm_msg_full="1005,1033,1019,1020,1042,1044,1045,1046,1077,1087,1097,1107,1117,1127"
 
@@ -33,24 +39,26 @@ str2str_active=$(systemctl is-active str2str_tcp)
 [ "${rtkbase_web_active}" = "active" ] && systemctl stop rtkbase_web.service
 [ "${str2str_active}" = "active" ] && systemctl stop str2str_tcp
 
-sed -i s/^position=.*/position=\'0\.00\ 0\.00\ 0\.00\'/ "${settings}"
-sed -i s/^com_port=.*/com_port=\'ttyS0\'/ "${settings}"
-sed -i s/^com_port_settings=.*/com_port_settings=\'115200:8:n:1\'/ "${settings}"
-sed -i s/^receiver=.*/receiver=\'${recvfullname}\'/ "${settings}"
-sed -i s/^receiver_format=.*/receiver_format=\'rtcm3\'/ "${settings}"
-sed -i s/^antenna_info=.*/antenna_info=\'ELT0123\'/ "${settings}"
+sed="sudo -u "${RTKBASE_USER}" sed -i"
+#echo sed=${sed}
+${sed} s/^position=.*/position=\'0\.00\ 0\.00\ 0\.00\'/ "${settings}"
+${sed} s/^com_port=.*/com_port=\'ttyS0\'/ "${settings}"
+${sed} s/^com_port_settings=.*/com_port_settings=\'115200:8:n:1\'/ "${settings}"
+${sed} s/^receiver=.*/receiver=\'${recvfullname}\'/ "${settings}"
+${sed} s/^receiver_format=.*/receiver_format=\'rtcm3\'/ "${settings}"
+${sed} s/^antenna_info=.*/antenna_info=\'ELT0123\'/ "${settings}"
 
-sed -i s/^svr_addr_a=.*/svr_addr_a=\'servers.onocoy.com\'/ "${settings}"
-sed -i s/^svr_addr_b=.*/svr_addr_b=\'ntrip.rtkdirect.com\'/ "${settings}"
-sed -i s/^svr_port_b=.*/svr_port_b=\'\'/ "${settings}"
-sed -i s/^svr_pwd_b=.*/svr_pwd_b=\'TCP\'/ "${settings}"
-sed -i s/^mnt_name_b=.*/mnt_name_b=\'TCP\'/ "${settings}"
+${sed} s/^svr_addr_a=.*/svr_addr_a=\'servers.onocoy.com\'/ "${settings}"
+${sed} s/^svr_addr_b=.*/svr_addr_b=\'ntrip.rtkdirect.com\'/ "${settings}"
+${sed} s/^svr_port_b=.*/svr_port_b=\'\'/ "${settings}"
+${sed} s/^svr_pwd_b=.*/svr_pwd_b=\'TCP\'/ "${settings}"
+${sed} s/^mnt_name_b=.*/mnt_name_b=\'TCP\'/ "${settings}"
 
-sed -i s/^rtcm_msg_a=.*/rtcm_msg_a=\'${rtcm_msg}\'/ "${settings}"
-sed -i s/^rtcm_msg_b=.*/rtcm_msg_b=\'${rtcm_msg}\'/ "${settings}"
-sed -i s/^local_ntripc_msg=.*/local_ntripc_msg=\'${rtcm_msg}\'/ "${settings}"
-sed -i s/^rtcm_svr_msg=.*/rtcm_svr_msg=\'${rtcm_msg_full}\'/ "${settings}"
-sed -i s/^rtcm_serial_msg=.*/rtcm_serial_msg=\'${rtcm_msg_full}\'/ "${settings}"
+${sed} s/^rtcm_msg_a=.*/rtcm_msg_a=\'${rtcm_msg}\'/ "${settings}"
+${sed} s/^rtcm_msg_b=.*/rtcm_msg_b=\'${rtcm_msg}\'/ "${settings}"
+${sed} s/^local_ntripc_msg=.*/local_ntripc_msg=\'${rtcm_msg}\'/ "${settings}"
+${sed} s/^rtcm_svr_msg=.*/rtcm_svr_msg=\'${rtcm_msg_full}\'/ "${settings}"
+${sed} s/^rtcm_serial_msg=.*/rtcm_serial_msg=\'${rtcm_msg_full}\'/ "${settings}"
 
 # start previously running services
 #[ "${rtkbase_web_active}" = "active" ] && echo rtkbase_web.service Active
