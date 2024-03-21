@@ -24,24 +24,14 @@ fi
 #echo recvfullname=${recvfullname}
 
 #store service status before upgrade
-rtkbase_web_active==$(systemctl is-active rtkbase_web.service)
+rtkbase_web_active=$(systemctl is-active rtkbase_web.service)
 str2str_active=$(systemctl is-active str2str_tcp)
-str2str_ntrip_A_active=$(systemctl is-active str2str_ntrip_A)
-str2str_ntrip_B_active=$(systemctl is-active str2str_ntrip_B)
-str2str_local_caster=$(systemctl is-active str2str_local_ntrip_caster)
-str2str_rtcm=$(systemctl is-active str2str_rtcm_svr)
-str2str_serial=$(systemctl is-active str2str_rtcm_serial)
-str2str_file=$(systemctl is-active str2str_file)
+#echo rtkbase_web_active=${rtkbase_web_active} str2str_active=${str2str_active}
 
 # stop previously running services
+#[ "${rtkbase_web_active}" = "active" ] && echo rtkbase_web.service Active
 [ "${rtkbase_web_active}" = "active" ] && systemctl stop rtkbase_web.service
 [ "${str2str_active}" = "active" ] && systemctl stop str2str_tcp
-[ "${str2str_ntrip_A_active}" = "active" ] && systemctl stop str2str_ntrip_A
-[ "${str2str_ntrip_B_active}" = "active" ] && systemctl stop str2str_ntrip_B
-[ "${str2str_local_caster}" = "active" ] && systemctl stop str2str_local_ntrip_caster
-[ "${str2str_rtcm}" = "'active" ] && systemctl stop str2str_rtcm_svr
-[ "${str2str_serial}" = "active" ] && systemctl stop str2str_rtcm_serial
-[ "${str2str_file}" = "active" ] && systemctl stop str2str_file
 
 sed -i s/^position=.*/position=\'0\.00\ 0\.00\ 0\.00\'/ "${settings}"
 sed -i s/^com_port=.*/com_port=\'ttyS0\'/ "${settings}"
@@ -63,11 +53,6 @@ sed -i s/^rtcm_svr_msg=.*/rtcm_svr_msg=\'${rtcm_msg_full}\'/ "${settings}"
 sed -i s/^rtcm_serial_msg=.*/rtcm_serial_msg=\'${rtcm_msg_full}\'/ "${settings}"
 
 # start previously running services
+#[ "${rtkbase_web_active}" = "active" ] && echo rtkbase_web.service Active
 [ "${rtkbase_web_active}" = "active" ] && systemctl start rtkbase_web.service
 [ "${str2str_active}" = "active" ] && systemctl start str2str_tcp
-[ "${str2str_ntrip_A_active}" = "active" ] && systemctl start str2str_ntrip_A
-[ "${str2str_ntrip_B_active}" = "active" ] && systemctl start str2str_ntrip_B
-[ "${str2str_local_caster}" = "active" ] && systemctl start str2str_local_ntrip_caster
-[ "${str2str_rtcm}" = "'active" ] && systemctl start str2str_rtcm_svr
-[ "${str2str_serial}" = "active" ] && systemctl start str2str_rtcm_serial
-[ "${str2str_file}" = "active" ] && systemctl start str2str_file
