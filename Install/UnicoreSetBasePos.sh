@@ -48,10 +48,15 @@ OLDDEV=/dev/${com_port}:${recv_speed}
 DEVICE=/dev/${com_port}:${com_speed}
 #echo SETSPEED=${SETSPEED} SETPOS=${SETPOS} OLDDEV=${OLDDEV} DEVICE=${DEVICE}
 
+RECVCOM=COM1
 if [[ ${SETSPEED} == Y ]]
 then
-   #echo ${BASEDIR}/NmeaConf ${OLDDEV} "CONFIG COM2 ${com_speed}" QUIET
-   ${BASEDIR}/NmeaConf ${OLDDEV} "CONFIG COM2 ${com_speed}" QUIET
+   if [[ "${com_port}" == "ttyS0" ]]
+   then
+      RECVCOM=COM2
+   fi
+   #echo ${BASEDIR}/NmeaConf ${OLDDEV} "CONFIG ${RECVCOM} ${com_speed}" QUIET
+   ${BASEDIR}/NmeaConf ${OLDDEV} "CONFIG ${RECVCOM} ${com_speed}" QUIET
    if [[ $? == 0 ]]
    then
       #echo ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
