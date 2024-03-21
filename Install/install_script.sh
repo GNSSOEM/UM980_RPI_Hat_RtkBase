@@ -3,10 +3,10 @@ RTKBASE_USER=rtkbase
 RTKBASE_PATH=/usr/local/${RTKBASE_USER}
 RTKBASE_GIT=${RTKBASE_PATH}/rtkbase
 RTKBASE_TOOLS=${RTKBASE_GIT}/tools
-BASEDIR=`dirname $(readlink -f "$0")`
+BASEDIR=`realpath $(dirname $(readlink -f "$0"))`
 BASENAME=`basename $(readlink -f "$0")`
 ORIGDIR=`pwd`
-#echo BASEDIR=${BASEDIR}
+#echo BASEDIR=${BASEDIR} BASENAME=${BASENAME}
 RECVPORT=/dev/ttyS0
 RTKBASE_INSTALL=rtkbase_install.sh
 RUN_CAST=run_cast.sh
