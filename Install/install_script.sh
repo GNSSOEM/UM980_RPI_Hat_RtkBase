@@ -402,10 +402,10 @@ have_full(){
    return ${HAVE_FULL}
 }
 
-FILES_EXTRACT="NmeaConf UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt \
-              run_cast.sh UnicoreSetBasePos.sh UnicoreSettings.sh \
-              uninstall.sh rtkbase_install.sh"
-FILES_DELETE="${BASENAME} NmeaConf UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt"
+FILES_EXTRACT="${NMEACONF} UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt \
+              ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
+              uninstall.sh ${RTKBASE_INSTALL}"
+FILES_DELETE="${BASENAME} ${NMEACONF} UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt"
 
 check_phases(){
    if [[ ${1} == "-1" ]]
@@ -413,7 +413,7 @@ check_phases(){
       HAVE_RECEIVER=1
       HAVE_PHASE1=0
       HAVE_FULL=1
-      FILES_EXTRACT="NmeaConf run_cast.sh UnicoreSetBasePos.sh rtkbase_install.sh"
+      FILES_EXTRACT="${NMEACONF} ${RUN_CAST} ${SET_BASE_POS} ${RTKBASE_INSTALL}"
       FILES_DELETE=
    else
       if [[ ${1} == "-2" ]]
@@ -421,7 +421,7 @@ check_phases(){
          HAVE_RECEIVER=0
          HAVE_PHASE1=1
          HAVE_FULL=1
-         FILES_EXTRACT="NmeaConf UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt UnicoreSettings.sh"
+         FILES_EXTRACT="${NMEACONF} UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt ${UNICORE_SETTIGNS}"
       else
         if [[ ${1} != "" ]]
         then
