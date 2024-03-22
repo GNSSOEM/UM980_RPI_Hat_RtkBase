@@ -158,29 +158,29 @@ install_additional_utilies(){
    #STANDART_HOST=rtkbase
    RTKBASE_HOST=${RTKBASE_USER}
    #RTKBASE_HOST=raspberrypi
-   CHANGE_HOST=N
+   CHANGE_HOST=Y
 
    NOW_HOST=`hostname`
    #echo NOW_HOST=$NOW_HOST
-   if [[ $NOW_HOST = $STANDART_HOST ]]
+   if [[ $NOW_HOST != $STANDART_HOST ]]
    then
-      CHANGE_HOST=Y
+      CHANGE_HOST=N
    fi
 
    HOSTNAME=/etc/hostname
    NOW_HOSTNAME=`cat $HOSTNAME`
    #echo NOW_HOSTNAME=$NOW_HOSTNAME
-   if [[ $NOW_HOSTNAME = $STANDART_HOST ]]
+   if [[ $NOW_HOSTNAME != $STANDART_HOST ]]
    then
-      CHANGE_HOST=Y
+      CHANGE_HOST=N
    fi
 
    HOSTS=/etc/hosts
    NOW_HOSTS=`grep "127.0.1.1" $HOSTS | awk -F ' ' '{print $2}'`
    #echo NOW_HOSTS=$NOW_HOSTS
-   if [[ $NOW_HOSTS = $STANDART_HOST ]]
+   if [[ $NOW_HOSTS != $STANDART_HOST ]]
    then
-      CHANGE_HOST=Y
+      CHANGE_HOST=N
    fi
 
    if [[ $CHANGE_HOST = Y ]]
