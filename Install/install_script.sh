@@ -13,6 +13,9 @@ RUN_CAST=run_cast.sh
 SET_BASE_POS=UnicoreSetBasePos.sh
 UNICORE_SETTIGNS=UnicoreSettings.sh
 NMEACONF=NmeaConf
+CONF_TAIL=RTCM3_OUT.txt
+CONF980=UM980_${CONF_TAIL}
+CONF982=UM982_${CONF_TAIL}
 
 configure_ttyS0(){
   CMDLINE=$1/cmdline.txt
@@ -247,7 +250,7 @@ configure_receiver(){
      echo Receiver ${RECVNAME} found on ${RECVPORT}
   fi
 
-  RECVCONF=${BASEDIR}/${RECVNAME}_RTCM3_OUT.txt
+  RECVCONF=${BASEDIR}/${RECVNAME}_${CONF_TAIL}
 
   if [[ ! -f "${RECVCONF}" ]]
   then
@@ -402,10 +405,10 @@ have_full(){
    return ${HAVE_FULL}
 }
 
-FILES_EXTRACT="${NMEACONF} UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt \
+FILES_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} \
               ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
               uninstall.sh ${RTKBASE_INSTALL}"
-FILES_DELETE="${BASENAME} ${NMEACONF} UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt"
+FILES_DELETE="${BASENAME} ${NMEACONF} ${CONF980} ${CONF982}"
 
 check_phases(){
    if [[ ${1} == "-1" ]]
@@ -421,7 +424,7 @@ check_phases(){
          HAVE_RECEIVER=0
          HAVE_PHASE1=1
          HAVE_FULL=1
-         FILES_EXTRACT="${NMEACONF} UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt ${UNICORE_SETTIGNS}"
+         FILES_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${UNICORE_SETTIGNS}"
       else
         if [[ ${1} != "" ]]
         then
