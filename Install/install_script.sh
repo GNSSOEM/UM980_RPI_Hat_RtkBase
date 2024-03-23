@@ -3,6 +3,7 @@ RTKBASE_USER=rtkbase
 RTKBASE_PATH=/usr/local/${RTKBASE_USER}
 RTKBASE_GIT=${RTKBASE_PATH}/rtkbase
 RTKBASE_TOOLS=${RTKBASE_GIT}/tools
+RTKBASE_RECV=${RTKBASE_GIT}/receiver_cfg
 BASEDIR=`realpath $(dirname $(readlink -f "$0"))`
 BASENAME=`basename $(readlink -f "$0")`
 ORIGDIR=`pwd`
@@ -12,6 +13,7 @@ RTKBASE_INSTALL=rtkbase_install.sh
 RUN_CAST=run_cast.sh
 SET_BASE_POS=UnicoreSetBasePos.sh
 UNICORE_SETTIGNS=UnicoreSettings.sh
+UNICORE_CONFIGURE=UnicoreConfigure.sh
 NMEACONF=NmeaConf
 CONF_TAIL=RTCM3_OUT.txt
 CONF980=UM980_${CONF_TAIL}
@@ -194,15 +196,18 @@ install_additional_utilies(){
 }
 
 unpack_files(){
-   echo '################################'
-   echo 'UNPACK FILES'
-   echo '################################'
+   if [[ "${FILES_EXTRACT}" != "" ]]
+   then
+      echo '################################'
+      echo 'UNPACK FILES'
+      echo '################################'
 
-   # Find __ARCHIVE__ marker, read archive content and decompress it
-   ARCHIVE=$(awk '/^__ARCHIVE__/ {print NR + 1; exit 0; }' "${0}")
-   # Check if there is some content after __ARCHIVE__ marker (more than 100 lines)
-   [[ $(sed -n '/__ARCHIVE__/,$p' "${0}" | wc -l) -lt 100 ]] && echo "UM980_RPI_Hat_RtkBase isn't bundled inside install.sh" && exit 1  
-   tail -n+${ARCHIVE} "${0}" | tar xpJv --no-same-owner --no-same-permissions -C ${BASEDIR} ${FILES_EXTRACT}
+      # Find __ARCHIVE__ marker, read archive content and decompress it
+      ARCHIVE=$(awk '/^__ARCHIVE__/ {print NR + 1; exit 0; }' "${0}")
+      # Check if there is some content after __ARCHIVE__ marker (more than 100 lines)
+      [[ $(sed -n '/__ARCHIVE__/,$p' "${0}" | wc -l) -lt 100 ]] && echo "UM980_RPI_Hat_RtkBase isn't bundled inside install.sh" && exit 1  
+      tail -n+${ARCHIVE} "${0}" | tar xpJv --no-same-owner --no-same-permissions -C ${BASEDIR} ${FILES_EXTRACT}
+   fi
 }
 
 stop_rtkbase_services(){
@@ -228,37 +233,6 @@ stop_rtkbase_services(){
    [ "${str2str_rtcm}" = "'active" ] && systemctl stop str2str_rtcm_svr
    [ "${str2str_serial}" = "active" ] && systemctl stop str2str_rtcm_serial
    [ "${str2str_file}" = "active" ] && systemctl stop str2str_file
-}
-
-configure_receiver(){
-  echo '################################'
-  echo 'CONFIGURE RECEIVER'
-  echo '################################'
-
-  chmod +x ${BASEDIR}/${NMEACONF}
-
-  RECVVER=`${BASEDIR}/${NMEACONF} ${RECVPORT} VERSION QUIET`
-  #echo RECVVER=${RECVVER}
-  RECVNAME=`echo ${RECVVER} | awk -F ',' '{print $10}' | awk -F ';' '{print $2}'`
-  #echo RECVNAME=${RECVNAME}
-
-  if [[ ${RECVNAME} == "" ]]
-  then
-     echo Receiver on ${RECVPORT} not found. Setup receiver and try again
-     exit
-  else
-     echo Receiver ${RECVNAME} found on ${RECVPORT}
-  fi
-
-  RECVCONF=${BASEDIR}/${RECVNAME}_${CONF_TAIL}
-
-  if [[ ! -f "${RECVCONF}" ]]
-  then
-     echo Confiuration file for ${RECVNAME} \(${RECVCONF}\) NOT FOUND.
-     exit
-  fi
-
-  ${BASEDIR}/${NMEACONF} ${RECVPORT} ${RECVCONF} QUIET
 }
 
 add_rtkbase_user(){
@@ -332,12 +306,14 @@ configure_for_unicore(){
    mv ${BASEDIR}/${RUN_CAST} ${RTKBASE_GIT}/
    #echo chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}/${RUN_CAST}
    chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}/${RUN_CAST}
+
    #echo mv ${BASEDIR}/${SET_BASE_POS} ${RTKBASE_GIT}/
    mv ${BASEDIR}/${SET_BASE_POS} ${RTKBASE_GIT}/
    #echo chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}/${SET_BASE_POS}
    chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}/${SET_BASE_POS}
    #echo chmod +x ${RTKBASE_GIT}/${SET_BASE_POS}
    chmod +x ${RTKBASE_GIT}/${SET_BASE_POS}
+
    #echo mv ${BASEDIR}/${NMEACONF} ${RTKBASE_GIT}/
    mv ${BASEDIR}/${NMEACONF} ${RTKBASE_GIT}/
    #echo chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}/${NMEACONF}
@@ -345,9 +321,27 @@ configure_for_unicore(){
    #echo chmod +x ${RTKBASE_GIT}/${NMEACONF}
    chmod +x ${RTKBASE_GIT}/${NMEACONF}
 
+   #echo mv ${BASEDIR}/${UNICORE_CONFIGURE} ${RTKBASE_TOOLS}/
+   mv ${BASEDIR}/${UNICORE_CONFIGURE} ${RTKBASE_TOOLS}/
+   #echo chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE}
+   chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE}
+   #echo chmod +x ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE}
+   chmod +x ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE}
+
+   #echo mv ${BASEDIR}/${CONF980} ${RTKBASE_RECV}/
+   mv ${BASEDIR}/${CONF980} ${RTKBASE_RECV}/
+   #echo chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_RECV}/${CONF980}
+   chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_RECV}/${CONF980}
+
+   #echo mv ${BASEDIR}/${CONF982} ${RTKBASE_RECV}/
+   mv ${BASEDIR}/${CONF982} ${RTKBASE_RECV}/
+   #echo chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_RECV}/${CONF982}
+   chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_RECV}/${CONF982}
+
    SERVER_PY=${RTKBASE_GIT}/web_app/server.py
    #echo SERVER_PY=${SERVER_PY}
-   sed -i s/^rtkcv_standby_delay\ *=.*/rtkcv_standby_delay\ =\ 129600/ ${SERVER_PY}
+   sudo -u ${RTKBASE_USER} sed -i s/^rtkcv_standby_delay\ *=.*/rtkcv_standby_delay\ =\ 129600/ ${SERVER_PY}
+   sudo -u ${RTKBASE_USER} sed -i s/\"install.sh\"/\"UnicoreConfigure.sh\"/ ${SERVER_PY}
 }
 
 configure_settings(){
@@ -364,9 +358,16 @@ configure_settings(){
    #echo chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
    chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
    #echo ${RTKBASE_PATH}/${UNICORE_SETTIGNS} ${RECVNAME}
-   ${RTKBASE_PATH}/${UNICORE_SETTIGNS} ${RECVNAME}
+   ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
    #echo rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
    rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
+}
+
+configure_gnss(){
+   #echo ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
+   ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -e
+   #echo ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
+   ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
 }
 
 start_rtkbase_services(){
@@ -405,10 +406,10 @@ have_full(){
    return ${HAVE_FULL}
 }
 
-FILES_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} \
+FILES_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${UNICORE_CONFIGURE} \
               ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
-              uninstall.sh ${RTKBASE_INSTALL}"
-FILES_DELETE="${BASENAME} ${NMEACONF} ${CONF980} ${CONF982}"
+              ${RTKBASE_INSTALL} uninstall.sh"
+FILES_DELETE="${BASENAME}"
 
 check_phases(){
    if [[ ${1} == "-1" ]]
@@ -416,7 +417,7 @@ check_phases(){
       HAVE_RECEIVER=1
       HAVE_PHASE1=0
       HAVE_FULL=1
-      FILES_EXTRACT="${NMEACONF} ${RUN_CAST} ${SET_BASE_POS} ${RTKBASE_INSTALL}"
+      FILES_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${UNICORE_CONFIGURE} ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} ${RTKBASE_INSTALL}"
       FILES_DELETE=
    else
       if [[ ${1} == "-2" ]]
@@ -424,7 +425,7 @@ check_phases(){
          HAVE_RECEIVER=0
          HAVE_PHASE1=1
          HAVE_FULL=1
-         FILES_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${UNICORE_SETTIGNS}"
+         FILES_EXTRACT=
       else
         if [[ ${1} != "" ]]
         then
@@ -448,14 +449,14 @@ have_receiver && check_port
 have_phase1 && install_additional_utilies
 unpack_files
 stop_rtkbase_services
-have_receiver && configure_receiver
 have_phase1 && add_rtkbase_user
 #echo ${RTKBASE_PATH}
 cd ${RTKBASE_PATH}
 have_phase1 && copy_rtkbase_install_file
 have_phase1 && rtkbase_install
 have_phase1 && configure_for_unicore
-have_receiver && configure_settings
+have_phase1  && configure_settings
+have_receiver && configure_gnss
 have_receiver && start_rtkbase_services
 #echo cd ${BASEDIR}
 cd ${BASEDIR}
