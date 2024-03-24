@@ -486,7 +486,7 @@ cd ${BASEDIR}
 have_receiver && delete_garbage
 cd ${ORIGDIR}
 have_full || info_reboot
-have_phase1 || info_open
+have_receiver || info_open
 exit
 
 __ARCHIVE__
