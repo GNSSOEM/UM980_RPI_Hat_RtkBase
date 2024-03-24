@@ -105,15 +105,17 @@ detect_configure() {
       if [[ ${#detected_gnss[*]} -eq 3 ]] && [[ "${1}" -eq 0 ]]
         then
           echo 'GNSS RECEIVER DETECTED: /dev/'"${detected_gnss[0]}" ' - ' "${detected_gnss[1]}" ' - ' "${detected_gnss[2]}"
-          #if [[ ${detected_gnss[1]} =~ 'u-blox' ]]
-          #then
-          #  gnss_format='ubx'
-          #fi
+
           if [[ -f "${rtkbase_path}/settings.conf" ]]  && grep -qE "^com_port=.*" "${rtkbase_path}"/settings.conf #check if settings.conf exists
           then
             #change the com port value/settings inside settings.conf
             sudo -u "${RTKBASE_USER}" sed -i s/^com_port=.*/com_port=\'${detected_gnss[0]}\'/ "${rtkbase_path}"/settings.conf
             sudo -u "${RTKBASE_USER}" sed -i s/^com_port_settings=.*/com_port_settings=\'${detected_gnss[2]}:8:n:1\'/ "${rtkbase_path}"/settings.conf
+
+            RECEIVER_CONF=${rtkbase_path}/receiver.conf
+            echo recv_port=${detected_gnss[0]}>${RECEIVER_CONF}
+            echo recv_speed=${detected_gnss[2]}>>${RECEIVER_CONF}
+            echo recv_position=>>${RECEIVER_CONF}
           else
             echo 'settings.conf is missing'
             return 1
@@ -167,6 +169,10 @@ configure_gnss(){
                 sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'Unicore_${RECVNAME}\'/ "${rtkbase_path}"/settings.conf
                 sudo -u "${RTKBASE_USER}" sed -i s/^receiver_format=.*/receiver_format=\'rtcm3\'/ "${rtkbase_path}"/settings.conf
              fi
+             RECEIVER_CONF=${rtkbase_path}/receiver.conf
+             echo recv_port=${com_port}>${RECEIVER_CONF}
+             echo recv_speed=115200>>${RECEIVER_CONF}
+             echo recv_position=>>${RECEIVER_CONF}
              return ${exitcode}
           else
              echo Confiuration file for ${RECVNAME} \(${RECVCONF}\) NOT FOUND.
