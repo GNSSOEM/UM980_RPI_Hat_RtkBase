@@ -155,18 +155,24 @@ install_additional_utilies(){
 
    install_packet_if_not_installed avahi-utils
    install_packet_if_not_installed avahi-daemon
+}
 
+change_hostname(){
+   echo '################################'
+   echo 'CHANGE HOSTNAME IF STANDART'
+   echo '################################'
    STANDART_HOST=raspberrypi
    #STANDART_HOST=rtkbase
    RTKBASE_HOST=${RTKBASE_USER}
    #RTKBASE_HOST=raspberrypi
-   CHANGE_HOST=Y
+   CHANGE_HOST_RTKBASE=Y
+   CHANGE_HOST_NOW=N
 
    NOW_HOST=`hostname`
    #echo NOW_HOST=$NOW_HOST
    if [[ $NOW_HOST != $STANDART_HOST ]]
    then
-      CHANGE_HOST=N
+      CHANGE_HOST_RTKBASE=N
    fi
 
    HOSTNAME=/etc/hostname
@@ -174,7 +180,11 @@ install_additional_utilies(){
    #echo NOW_HOSTNAME=$NOW_HOSTNAME
    if [[ $NOW_HOSTNAME != $STANDART_HOST ]]
    then
-      CHANGE_HOST=N
+      CHANGE_HOST_RTKBASE=N
+   fi
+   if [[ $NOW_HOSTNAME != $NOW_HOST ]]
+   then
+       CHANGE_HOST_NOW=Y
    fi
 
    HOSTS=/etc/hosts
@@ -182,14 +192,26 @@ install_additional_utilies(){
    #echo NOW_HOSTS=$NOW_HOSTS
    if [[ $NOW_HOSTS != $STANDART_HOST ]]
    then
-      CHANGE_HOST=N
+      CHANGE_HOST_RTKBASE=N
+   fi
+   if [[ $NOW_HOSTS != $NOW_HOST ]]
+   then
+       CHANGE_HOST_NOW=Y
    fi
 
-   if [[ $CHANGE_HOST = Y ]]
+   if [[ $CHANGE_HOST_RTKBASE = Y ]]
    then
+      echo Set \"$RTKBASE_HOST\" as host
       hostname $RTKBASE_HOST
       echo $RTKBASE_HOST >$HOSTNAME
       sed -i s/127\.0\.1\.1.*/127\.0\.1\.1\ $RTKBASE_HOST/ "$HOSTS"
+      avahi_active==$(systemctl is-active avahi-daemon)
+      [ "${avahi_active}" = "active" ] && systemctl restart avahi-daemon
+   elif [[ $CHANGE_HOST_NOW = Y ]]
+   then
+      echo Set \"$NOW_HOST\" as host
+      echo $NOW_HOST >$HOSTNAME
+      sed -i s/127\.0\.1\.1.*/127\.0\.1\.1\ $NOW_HOST/ "$HOSTS"
       avahi_active==$(systemctl is-active avahi-daemon)
       [ "${avahi_active}" = "active" ] && systemctl restart avahi-daemon
    fi
@@ -447,6 +469,7 @@ have_phase1 && check_boot_configiration
 have_full && do_reboot
 have_receiver && check_port
 have_phase1 && install_additional_utilies
+have_receiver && change_hostname
 unpack_files
 stop_rtkbase_services
 have_phase1 && add_rtkbase_user
