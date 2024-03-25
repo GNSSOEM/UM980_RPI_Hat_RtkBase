@@ -198,6 +198,7 @@ change_hostname(){
        CHANGE_HOST_NOW=Y
    fi
 
+   #echo 1=${1}
    RESTART_AVAHI=N
    if [[ $CHANGE_HOST_RTKBASE = Y ]]
    then
@@ -208,12 +209,15 @@ change_hostname(){
       RESTART_AVAHI=Y
    elif [[ $CHANGE_HOST_NOW = Y ]]
    then
-      echo Set \"$NOW_HOST\" as host
-      echo $NOW_HOST >$HOSTNAME
-      sed -i s/127\.0\.1\.1.*/127\.0\.1\.1\ $NOW_HOST/ "$HOSTS"
-      avahi_active==$(systemctl is-active avahi-daemon)
-      [ "${avahi_active}" = "active" ] && systemctl restart avahi-daemon
+      if [[ "${1}" != "0" ]]
+      then
+         echo Set \"$NOW_HOST\" as host
+         echo $NOW_HOST >$HOSTNAME
+         sed -i s/127\.0\.1\.1.*/127\.0\.1\.1\ $NOW_HOST/ "$HOSTS"
          RESTART_AVAHI=Y
+      else
+         echo WARNING!!! hostname=$NOW_HOST /etc/hostname=$NOW_HOSTNAME /etc/hosts resolve $NOW_HOSTS
+      fi
    fi
    if [[ $RESTART_AVAHI = Y ]]
    then
@@ -474,7 +478,7 @@ have_phase1 && check_boot_configiration
 have_full && do_reboot
 have_receiver && check_port
 have_phase1 && install_additional_utilies
-have_receiver && change_hostname
+have_receiver && change_hostname ${HAVE_FULL}
 unpack_files
 stop_rtkbase_services
 have_phase1 && add_rtkbase_user
