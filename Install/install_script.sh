@@ -150,8 +150,7 @@ install_additional_utilies(){
       #echo sed -i s@^.*${SER2NET_DEV}@5017:raw:0:${SER2NET_DEV}@ ${SER2NET_CONF}
    fi
 
-   ser2net_active==$(systemctl is-active ser2net)
-   [ "${ser2net_active}" = "active" ] && systemctl restart ser2net
+   systemctl is-active --quiet ser2net && sudo systemctl restart ser2net
 
    install_packet_if_not_installed avahi-utils
    install_packet_if_not_installed avahi-daemon
@@ -199,14 +198,14 @@ change_hostname(){
        CHANGE_HOST_NOW=Y
    fi
 
+   RESTART_AVAHI=N
    if [[ $CHANGE_HOST_RTKBASE = Y ]]
    then
       echo Set \"$RTKBASE_HOST\" as host
       hostname $RTKBASE_HOST
       echo $RTKBASE_HOST >$HOSTNAME
       sed -i s/127\.0\.1\.1.*/127\.0\.1\.1\ $RTKBASE_HOST/ "$HOSTS"
-      avahi_active==$(systemctl is-active avahi-daemon)
-      [ "${avahi_active}" = "active" ] && systemctl restart avahi-daemon
+      RESTART_AVAHI=Y
    elif [[ $CHANGE_HOST_NOW = Y ]]
    then
       echo Set \"$NOW_HOST\" as host
@@ -214,6 +213,11 @@ change_hostname(){
       sed -i s/127\.0\.1\.1.*/127\.0\.1\.1\ $NOW_HOST/ "$HOSTS"
       avahi_active==$(systemctl is-active avahi-daemon)
       [ "${avahi_active}" = "active" ] && systemctl restart avahi-daemon
+         RESTART_AVAHI=Y
+   fi
+   if [[ $RESTART_AVAHI = Y ]]
+   then
+      systemctl is-active --quiet avahi-daemon && sudo systemctl restart avahi-daemon
    fi
 }
 
