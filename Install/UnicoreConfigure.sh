@@ -116,6 +116,7 @@ detect_configure() {
             echo recv_port=${detected_gnss[0]}>${RECEIVER_CONF}
             echo recv_speed=${detected_gnss[2]}>>${RECEIVER_CONF}
             echo recv_position=>>${RECEIVER_CONF}
+            chown ${RTKBASE_USER}:${RTKBASE_USER} ${RECEIVER_CONF}
           else
             echo 'settings.conf is missing'
             return 1
@@ -153,7 +154,7 @@ configure_gnss(){
 
         if [[ ${RECVNAME} != "" ]]
         then
-          echo Receiver ${RECVNAME}\(${FIRMWARE}\) found on ${com_port}
+          echo Receiver ${RECVNAME}\(${FIRMWARE}\) found on ${com_port}\(${com_port_settings%%:*}\)
           RECVCONF=${rtkbase_path}/receiver_cfg/${RECVNAME}_RTCM3_OUT.txt
           #echo RECVCONF=${RECVCONF}
 
@@ -161,6 +162,7 @@ configure_gnss(){
           then
              ${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVCONF} QUIET
              exitcode=$?
+             #echo exitcode=${exitcode}
              if [[ ${exitcode} == 0 ]]
              then
                 #now that the receiver is configured, we can set the right values inside settings.conf
@@ -173,13 +175,14 @@ configure_gnss(){
              echo recv_port=${com_port}>${RECEIVER_CONF}
              echo recv_speed=115200>>${RECEIVER_CONF}
              echo recv_position=>>${RECEIVER_CONF}
+             chown ${RTKBASE_USER}:${RTKBASE_USER} ${RECEIVER_CONF}
              return ${exitcode}
           else
              echo Confiuration file for ${RECVNAME} \(${RECVCONF}\) NOT FOUND.
              return 1
           fi
         else
-          echo 'No Gnss receiver has been set. We can'\''t configure ${RECVPORT}'
+          echo 'No Gnss receiver has been set. We can'\''t configure '${RECVPORT}
           return 1
         fi
       else

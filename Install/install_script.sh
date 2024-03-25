@@ -390,6 +390,7 @@ configure_gnss(){
    ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -e
    #echo ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
    ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
+   systemctl is-active --quiet rtkbase_web.service && sudo systemctl restart rtkbase_web.service
 }
 
 start_rtkbase_services(){
