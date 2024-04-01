@@ -157,6 +157,7 @@ install_additional_utilies(){
 
    install_packet_if_not_installed avahi-utils
    install_packet_if_not_installed avahi-daemon
+   install_packet_if_not_installed uuid
 }
 
 change_hostname(){
