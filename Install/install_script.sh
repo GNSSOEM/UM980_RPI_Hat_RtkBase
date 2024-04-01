@@ -18,6 +18,10 @@ NMEACONF=NmeaConf
 CONF_TAIL=RTCM3_OUT.txt
 CONF980=UM980_${CONF_TAIL}
 CONF982=UM982_${CONF_TAIL}
+SYSCONGIG=RtkbaseSystemConfigure.sh
+SYSSERVICE=RtkbaseSystemConfigure.service
+SYSPROXY=RtkbaseSystemConfigureProxy.sh
+SERVICE_PATH=/etc/systemd/system
 
 configure_ttyS0(){
   CMDLINE=$1/cmdline.txt
@@ -328,6 +332,36 @@ copy_rtkbase_install_file(){
   chmod +x ${RTKBASE_PATH}/${RTKBASE_INSTALL}
 }
 
+install_rtkbase_system_configure(){
+  echo '################################'
+  echo 'INSTALL RTKBASE SYSTEM CONFIGURE'
+  echo '################################'
+
+  #echo BASEDIR=${BASEDIR} RTKBASE_PATH=${RTKBASE_PATH}
+  if [[ "${BASEDIR}" != "${RTKBASE_PATH}" ]]
+  then
+     #echo mv ${BASEDIR}/${SYSCONGIG} ${RTKBASE_PATH}/
+     mv ${BASEDIR}/${SYSCONGIG} ${RTKBASE_PATH}/
+  fi
+  #echo chmod +x ${RTKBASE_PATH}/${SYSCONGIG}
+  chmod +x ${RTKBASE_PATH}/${SYSCONGIG}
+
+  if [[ "${BASEDIR}" != "${RTKBASE_PATH}" ]]
+  then
+     #echo mv ${BASEDIR}/${SYSPROXY} ${RTKBASE_PATH}/
+     mv ${BASEDIR}/${SYSPROXY} ${RTKBASE_PATH}/
+  fi
+  #echo chmod +x ${RTKBASE_PATH}/${SYSPROXY}
+  chmod +x ${RTKBASE_PATH}/${SYSPROXY}
+
+  #echo mv ${BASEDIR}/${SYSSERVICE} ${SERVICE_PATH}/
+  mv ${BASEDIR}/${SYSSERVICE} ${SERVICE_PATH}/
+  #echo systemctl daemon-reload
+  systemctl daemon-reload
+  #echo systemctl enable ${SYSSERVICE}
+  systemctl enable ${SYSSERVICE}
+}
+
 rtkbase_install(){
    #echo ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -r -t -g
    ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -r -t -g
@@ -452,7 +486,8 @@ have_full(){
 
 FILES_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${UNICORE_CONFIGURE} \
               ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
-              ${RTKBASE_INSTALL} uninstall.sh"
+              ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY} \
+              uninstall.sh"
 FILES_DELETE="${BASENAME}"
 
 check_phases(){
@@ -461,7 +496,7 @@ check_phases(){
       HAVE_RECEIVER=1
       HAVE_PHASE1=0
       HAVE_FULL=1
-      FILES_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${UNICORE_CONFIGURE} ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} ${RTKBASE_INSTALL}"
+      FILES_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${UNICORE_CONFIGURE} ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY}"
       FILES_DELETE=
    else
       if [[ ${1} == "-2" ]]
@@ -493,6 +528,7 @@ have_receiver && check_port
 have_phase1 && install_additional_utilies
 have_receiver && change_hostname ${HAVE_FULL}
 unpack_files
+have_phase1 && install_rtkbase_system_configure
 stop_rtkbase_services
 have_phase1 && add_rtkbase_user
 #echo ${RTKBASE_PATH}

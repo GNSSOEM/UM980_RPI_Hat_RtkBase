@@ -19,6 +19,7 @@
 *.svg text eol=lf
 *.js text eol=lf
 *.sh text eol=lf
+*.service text eol=lf
 
 
 # Denote all files that are truly binary and should not be modified.

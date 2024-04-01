@@ -27,3 +27,9 @@ fi
 
 rm -rf ${RTKBASE_PATH}
 rm -f /etc/sudoers.d/${RTKBASE_USER}
+
+SYSSERVICE=RtkbaseSystemConfigure.service
+systemctl stop ${SYSSERVICE}
+systemctl enable ${SYSSERVICE}
+rm -f /etc/systemd/system/${SYSSERVICE}
+systemctl daemon-reload

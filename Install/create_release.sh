@@ -9,7 +9,9 @@ tar --exclude-vcs \
     $TAR_ARG $ARCHIVE_NAME \
     NmeaConf UM980_RTCM3_OUT.txt UM982_RTCM3_OUT.txt \
     run_cast.sh UnicoreSetBasePos.sh UnicoreSettings.sh \
-    uninstall.sh rtkbase_install.sh UnicoreConfigure.sh
+    uninstall.sh rtkbase_install.sh UnicoreConfigure.sh \
+    RtkbaseSystemConfigure.sh RtkbaseSystemConfigure.service \
+    RtkbaseSystemConfigureProxy.sh
  
 cat install_script.sh $ARCHIVE_NAME > $BUNDLE_NAME
 chmod +x $BUNDLE_NAME
