@@ -150,7 +150,10 @@ install_additional_utilies(){
       #echo sed -i s@^.*${SER2NET_DEV}@5017:raw:0:${SER2NET_DEV}@ ${SER2NET_CONF}
    fi
 
-   systemctl is-active --quiet ser2net && sudo systemctl restart ser2net
+   if ! ischroot
+   then
+      systemctl is-active --quiet ser2net && sudo systemctl restart ser2net
+   fi
 
    install_packet_if_not_installed avahi-utils
    install_packet_if_not_installed avahi-daemon
@@ -219,9 +222,12 @@ change_hostname(){
          echo WARNING!!! hostname=$NOW_HOST /etc/hostname=$NOW_HOSTNAME /etc/hosts resolve $NOW_HOSTS
       fi
    fi
-   if [[ $RESTART_AVAHI = Y ]]
+   if ! ischroot
    then
-      systemctl is-active --quiet avahi-daemon && sudo systemctl restart avahi-daemon
+      if [[ $RESTART_AVAHI = Y ]]
+      then
+         systemctl is-active --quiet avahi-daemon && sudo systemctl restart avahi-daemon
+      fi
    fi
 }
 
@@ -241,28 +247,31 @@ unpack_files(){
 }
 
 stop_rtkbase_services(){
-  echo '################################'
-  echo 'STOP RTKBASE SERVICES'
-  echo '################################'
-   #store service status before upgrade
-   rtkbase_web_active==$(systemctl is-active rtkbase_web.service)
-   str2str_active=$(systemctl is-active str2str_tcp)
-   str2str_ntrip_A_active=$(systemctl is-active str2str_ntrip_A)
-   str2str_ntrip_B_active=$(systemctl is-active str2str_ntrip_B)
-   str2str_local_caster=$(systemctl is-active str2str_local_ntrip_caster)
-   str2str_rtcm=$(systemctl is-active str2str_rtcm_svr)
-   str2str_serial=$(systemctl is-active str2str_rtcm_serial)
-   str2str_file=$(systemctl is-active str2str_file)
+  if ! ischroot
+  then
+     echo '################################'
+     echo 'STOP RTKBASE SERVICES'
+     echo '################################'
+      #store service status before upgrade
+      rtkbase_web_active==$(systemctl is-active rtkbase_web.service)
+      str2str_active=$(systemctl is-active str2str_tcp)
+      str2str_ntrip_A_active=$(systemctl is-active str2str_ntrip_A)
+      str2str_ntrip_B_active=$(systemctl is-active str2str_ntrip_B)
+      str2str_local_caster=$(systemctl is-active str2str_local_ntrip_caster)
+      str2str_rtcm=$(systemctl is-active str2str_rtcm_svr)
+      str2str_serial=$(systemctl is-active str2str_rtcm_serial)
+      str2str_file=$(systemctl is-active str2str_file)
 
-   # stop previously running services
-   [ "${rtkbase_web_active}" = "active" ] && systemctl stop rtkbase_web.service
-   [ "${str2str_active}" = "active" ] && systemctl stop str2str_tcp
-   [ "${str2str_ntrip_A_active}" = "active" ] && systemctl stop str2str_ntrip_A
-   [ "${str2str_ntrip_B_active}" = "active" ] && systemctl stop str2str_ntrip_B
-   [ "${str2str_local_caster}" = "active" ] && systemctl stop str2str_local_ntrip_caster
-   [ "${str2str_rtcm}" = "'active" ] && systemctl stop str2str_rtcm_svr
-   [ "${str2str_serial}" = "active" ] && systemctl stop str2str_rtcm_serial
-   [ "${str2str_file}" = "active" ] && systemctl stop str2str_file
+      # stop previously running services
+      [ "${rtkbase_web_active}" = "active" ] && systemctl stop rtkbase_web.service
+      [ "${str2str_active}" = "active" ] && systemctl stop str2str_tcp
+      [ "${str2str_ntrip_A_active}" = "active" ] && systemctl stop str2str_ntrip_A
+      [ "${str2str_ntrip_B_active}" = "active" ] && systemctl stop str2str_ntrip_B
+      [ "${str2str_local_caster}" = "active" ] && systemctl stop str2str_local_ntrip_caster
+      [ "${str2str_rtcm}" = "'active" ] && systemctl stop str2str_rtcm_svr
+      [ "${str2str_serial}" = "active" ] && systemctl stop str2str_rtcm_serial
+      [ "${str2str_file}" = "active" ] && systemctl stop str2str_file
+   fi
 }
 
 add_rtkbase_user(){
@@ -398,7 +407,10 @@ configure_gnss(){
    ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -e
    #echo ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
    ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
-   systemctl is-active --quiet rtkbase_web.service && sudo systemctl restart rtkbase_web.service
+   if ! ischroot
+   then
+      systemctl is-active --quiet rtkbase_web.service && sudo systemctl restart rtkbase_web.service
+   fi
 }
 
 start_rtkbase_services(){

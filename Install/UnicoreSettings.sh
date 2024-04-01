@@ -29,15 +29,18 @@ else
 fi
 #echo recvfullname=${recvfullname}
 
-#store service status before upgrade
-rtkbase_web_active=$(systemctl is-active rtkbase_web.service)
-str2str_active=$(systemctl is-active str2str_tcp)
-#echo rtkbase_web_active=${rtkbase_web_active} str2str_active=${str2str_active}
+if ! ischroot
+then
+   #store service status before upgrade
+   rtkbase_web_active=$(systemctl is-active rtkbase_web.service)
+   str2str_active=$(systemctl is-active str2str_tcp)
+   #echo rtkbase_web_active=${rtkbase_web_active} str2str_active=${str2str_active}
 
-# stop previously running services
-#[ "${rtkbase_web_active}" = "active" ] && echo rtkbase_web.service Active
-[ "${rtkbase_web_active}" = "active" ] && systemctl stop rtkbase_web.service
-[ "${str2str_active}" = "active" ] && systemctl stop str2str_tcp
+   # stop previously running services
+   #[ "${rtkbase_web_active}" = "active" ] && echo rtkbase_web.service Active
+   [ "${rtkbase_web_active}" = "active" ] && systemctl stop rtkbase_web.service
+   [ "${str2str_active}" = "active" ] && systemctl stop str2str_tcp
+fi
 
 sed="sudo -u "${RTKBASE_USER}" sed -i"
 #echo sed=${sed}
@@ -60,7 +63,10 @@ ${sed} s/^local_ntripc_msg=.*/local_ntripc_msg=\'${rtcm_msg}\'/ "${settings}"
 ${sed} s/^rtcm_svr_msg=.*/rtcm_svr_msg=\'${rtcm_msg_full}\'/ "${settings}"
 ${sed} s/^rtcm_serial_msg=.*/rtcm_serial_msg=\'${rtcm_msg_full}\'/ "${settings}"
 
-# start previously running services
-#[ "${rtkbase_web_active}" = "active" ] && echo rtkbase_web.service Active
-[ "${rtkbase_web_active}" = "active" ] && systemctl start rtkbase_web.service
-[ "${str2str_active}" = "active" ] && systemctl start str2str_tcp
+if ! ischroot
+then
+   # start previously running services
+   #[ "${rtkbase_web_active}" = "active" ] && echo rtkbase_web.service Active
+   [ "${rtkbase_web_active}" = "active" ] && systemctl start rtkbase_web.service
+   [ "${str2str_active}" = "active" ] && systemctl start str2str_tcp
+fi
