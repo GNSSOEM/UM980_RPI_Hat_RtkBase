@@ -65,8 +65,11 @@ then
 
    if [ -f /usr/lib/raspberrypi-sys-mods/imager_custom ]
    then
-      #echo /usr/lib/raspberrypi-sys-mods/imager_custom set_wlan ${HIDkey} ${SSID} ${KEY}
-      /usr/lib/raspberrypi-sys-mods/imager_custom set_wlan ${HIDkey} ${SSID} ${KEY}
+      #echo /usr/lib/raspberrypi-sys-mods/imager_custom set_wlan ${HIDkey} "${SSID}" "${KEY}"
+      /usr/lib/raspberrypi-sys-mods/imager_custom set_wlan ${HIDkey} "${SSID}" "${KEY}"
+      ExitCodeCheck $?
+      #echo systemctl restart NetworkManager
+      systemctl restart NetworkManager
       ExitCodeCheck $?
    else
       #https://www.raspberrypi.com/documentation/computers/configuration.html
@@ -80,9 +83,9 @@ fi
 
 if [[ -n "${LOGIN}" ]]
 then
-   USER_HOME=/home/${LOGIN}
+   USER_HOME=/home/"${LOGIN}"
    #echo sed 's/:.*//' /etc/passwd \| grep ${LOGIN}
-   FOUND=`sed 's/:.*//' /etc/passwd | grep ${LOGIN}`
+   FOUND=`sed 's/:.*//' /etc/passwd | grep "${LOGIN}"`
    #echo LOGIN=${LOGIN} PWD=${PWD} USER_HOME=${USER_HOME} FOUND=${FOUND}
    #echo SSH=${SSH}
    if [[ -z "${FOUND}" ]]
@@ -95,15 +98,17 @@ then
          #echo CRYPTO=${CRYPTO}
          ExitCodeCheck $?
          #echo useradd --comment "Added by system" --create-home --password "${CRYPTO}" "${LOGIN}"
-         useradd --comment "Added by system" --create-home --password "${CRYPTO}" "${LOGIN}"
+         useradd --comment "Added by RtkBaseSystemConfigure" --create-home --password "${CRYPTO}" "${LOGIN}"
          ExitCodeCheck $?
          echo Added user ${LOGIN} with password -- code ${exitcode}
       else
          #echo useradd --comment "Added by system" --create-home --disabled-password "${LOGIN}"
-         useradd --comment "Added by system" --create-home "${LOGIN}"
+         useradd --comment "Added by RtkBaseSystemConfigure" --create-home "${LOGIN}"
          ExitCodeCheck $?
          echo Added user ${LOGIN} without password -- code ${exitcode}
       fi
+      #echo ""${LOGIN}" ALL=NOPASSWD: ALL" \> /etc/sudoers.d/"${LOGIN}"
+      echo ""${LOGIN}" ALL=NOPASSWD: ALL" > /etc/sudoers.d/"${LOGIN}"
    else
       if [[ -n "${PWD}" ]]
       then
@@ -112,14 +117,14 @@ then
    fi
    if [[ -n "${SSH}" ]]
    then
-      SSH_HOME=${USER_HOME}/.ssh
+      SSH_HOME="${USER_HOME}"/.ssh
       if [[ ! -d "${SSH_HOME}" ]]
       then
           #echo install -o "${LOGIN}" -g "${LOGIN}" -m 700 -d "${SSH_HOME}"
           install -o "${LOGIN}" -g "${LOGIN}" -m 700 -d "${SSH_HOME}"
           ExitCodeCheck $?
       fi
-      AUTHORISED_KEYS_FILE="${SSH_HOME}/authorized_keys"
+      AUTHORISED_KEYS_FILE="${SSH_HOME}"/authorized_keys
       if [[ -f "${AUTHORISED_KEYS_FILE}" ]]
       then
          #echo grep "${SSH}" "${AUTHORISED_KEYS_FILE}"
@@ -145,6 +150,9 @@ then
          echo This ssh public key for ${LOGIN} already present
       fi
    fi
+   #echo sudo raspi-config nonint do_ssh 0
+   sudo raspi-config nonint do_ssh 0
+   ExitCodeCheck $?
    WORK=Y
 fi
 
