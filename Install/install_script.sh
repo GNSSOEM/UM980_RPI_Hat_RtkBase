@@ -377,8 +377,12 @@ install_rtkbase_system_configure(){
 
   #echo mv ${BASEDIR}/${SYSSERVICE} ${SERVICE_PATH}/
   mv ${BASEDIR}/${SYSSERVICE} ${SERVICE_PATH}/
-  #echo systemctl daemon-reload
-  systemctl daemon-reload
+
+  if ! ischroot
+  then
+     #echo systemctl daemon-reload
+     systemctl daemon-reload
+  fi
   #echo systemctl enable ${SYSSERVICE}
   systemctl enable ${SYSSERVICE}
 }
