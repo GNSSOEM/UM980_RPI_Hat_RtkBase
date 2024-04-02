@@ -22,6 +22,8 @@ SYSCONGIG=RtkbaseSystemConfigure.sh
 SYSSERVICE=RtkbaseSystemConfigure.service
 SYSPROXY=RtkbaseSystemConfigureProxy.sh
 SERVICE_PATH=/etc/systemd/system
+PI=pi
+BANNER=/etc/ssh/sshd_config.d/rename_user.conf
 
 configure_ttyS0(){
   CMDLINE=$1/cmdline.txt
@@ -162,6 +164,25 @@ install_additional_utilies(){
    install_packet_if_not_installed avahi-utils
    install_packet_if_not_installed avahi-daemon
    install_packet_if_not_installed uuid
+}
+
+delete_pi_user(){
+   FOUND=`sed 's/:.*//' /etc/passwd | grep "${PI}"`
+   if [[ -n "${FOUND}" ]]
+   then
+      echo '################################'
+      echo 'DELETE PI USER'
+      echo '################################'
+      userdel -r "${PI}"
+   fi
+   if [[ -f "${BANNER}" ]]
+   then
+      rm -r "${BANNER}"
+      if ! ischroot
+      then
+         systemctl restart sshd
+      fi
+   fi
 }
 
 change_hostname(){
@@ -526,6 +547,7 @@ have_phase1 && check_boot_configiration
 have_full && do_reboot
 have_receiver && check_port
 have_phase1 && install_additional_utilies
+have_full || delete_pi_user
 have_receiver && change_hostname ${HAVE_FULL}
 unpack_files
 have_phase1 && install_rtkbase_system_configure
