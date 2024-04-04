@@ -32,6 +32,8 @@ Based on RtkBase
 + Windows RTK & HAS utilitis for precise resolving rtkbase position
 + Zeroconf configuration as rtkbase.local in the local network
 + Then change speed in main settings, speed of receiver will be changing too
++ Configuring WIFi via an Windows application  (not only on first boot)
++ Adding users via an Windows application  (not only on first boot)
 
 ## License:
 UM980_RPI_Hat_RtkBase is licensed under AGPL 3 (see [LICENSE](./LICENSE) file).
