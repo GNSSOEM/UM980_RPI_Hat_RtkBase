@@ -3,3 +3,8 @@ Test/*
 *.tmp
 *.log
 Windows/Ini.cmd
+*.~*
+*.obj
+*.tds
+*.res
+*.dsk

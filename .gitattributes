@@ -20,6 +20,7 @@
 *.js text eol=lf
 *.sh text eol=lf
 *.service text eol=lf
+iso3166.tab text eol=lf
 
 
 # Denote all files that are truly binary and should not be modified.

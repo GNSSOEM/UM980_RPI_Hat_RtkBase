@@ -1,0 +1,8 @@
+#include "iso3166.h"
+
+#ifndef ISO3166_STRING
+#define ISO3166_STRING "iso3166.tab"
+#endif // ISO3166_STRING
+
+IDD_RCDATA_ISO3166     RCDATA	                ISO3166_STRING
+
