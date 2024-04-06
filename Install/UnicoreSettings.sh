@@ -18,7 +18,7 @@ rtkbase_path=$(pwd)/rtkbase
 settings="${rtkbase_path}"/settings.conf
 #echo settings=${settings}
 rtcm_msg="1005(10),1033(10),1077,1087,1097,1107,1117,1127"
-rtcm_msg_full="1005,1033,1019,1020,1042,1044,1045,1046,1077,1087,1097,1107,1117,1127"
+rtcm_msg_full="1005,1006,1007,1033,1019,1020,1042,1044,1045,1046,1077,1087,1097,1107,1117,1127"
 
 recvname=${1}
 if [[ ${recvname} == "" ]]
