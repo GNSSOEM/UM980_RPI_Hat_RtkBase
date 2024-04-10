@@ -156,6 +156,8 @@ install_additional_utilies(){
       #echo sed -i s@^.*${SER2NET_DEV}@5017:raw:0:${SER2NET_DEV}@ ${SER2NET_CONF}
    fi
 
+   sed -i s@^CONFFILE\=.*@CONFFILE\=\"\/etc\/ser2net\.conf\"@    /etc/default/ser2net
+
    if ! ischroot
    then
       systemctl is-active --quiet ser2net && sudo systemctl restart ser2net
