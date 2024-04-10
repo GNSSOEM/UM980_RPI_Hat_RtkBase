@@ -3,6 +3,7 @@ RTKBASE_USER=rtkbase
 RTKBASE_PATH=/usr/local/${RTKBASE_USER}
 RTKBASE_GIT=${RTKBASE_PATH}/rtkbase
 RTKBASE_TOOLS=${RTKBASE_GIT}/tools
+RTKBASE_WEB=${RTKBASE_GIT}/web_app
 RTKBASE_RECV=${RTKBASE_GIT}/receiver_cfg
 BASEDIR=`realpath $(dirname $(readlink -f "$0"))`
 BASENAME=`basename $(readlink -f "$0")`
@@ -439,10 +440,21 @@ configure_for_unicore(){
    #echo chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_RECV}/${CONF982}
    chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_RECV}/${CONF982}
 
-   SERVER_PY=${RTKBASE_GIT}/web_app/server.py
+   SERVER_PY=${RTKBASE_WEB}/server.py
    #echo SERVER_PY=${SERVER_PY}
    sudo -u ${RTKBASE_USER} sed -i s/^rtkcv_standby_delay\ *=.*/rtkcv_standby_delay\ =\ 129600/ ${SERVER_PY}
    sudo -u ${RTKBASE_USER} sed -i s/\"install.sh\"/\"UnicoreConfigure.sh\"/ ${SERVER_PY}
+
+   SETTINGS_HTML=${RTKBASE_WEB}/templates/settings.html
+   #echo SETTINGS_HTML=${SETTINGS_HTML}
+   sudo -u ${RTKBASE_USER} sed -i s/\>File\ rotation.*\:\ \</\>File\ rotation\ time\ \(in\ hour\)\:\ \</ ${SETTINGS_HTML}
+   sudo -u ${RTKBASE_USER} sed -i s/\>File\ overlap.*\:\ \</\>File\ overlap\ time\ \(in\ seconds\)\:\ \</ ${SETTINGS_HTML}
+   sudo -u ${RTKBASE_USER} sed -i s/\>Archive\ dur.*\:\ \</\>Archive\ duration\ \(in\ days\)\:\ \</ ${SETTINGS_HTML}
+
+   if ! ischroot
+   then
+      systemctl is-active --quiet rtkbase_web.service && sudo systemctl restart rtkbase_web.service
+   fi
 }
 
 configure_settings(){
