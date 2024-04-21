@@ -83,13 +83,5 @@
     )
 )
 
-@Echo Restore BASE configuration %Prefix% on %Recv%
-@NmeaConf.exe +%Recv% %Prefix%_RTCM3_OUT.txt  QUIET
-@If ERRORLEVEL 1 @(
-    @Echo %Prefix% NOT configured as base on %Recv%
-    @Pause
-    @Exit
-)
-
 @EndLocal
 @Pause
