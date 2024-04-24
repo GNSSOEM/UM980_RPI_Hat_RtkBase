@@ -102,7 +102,7 @@ then
    #echo SAVE OLDCONF=${OLDCONF} recv_port=${recv_port} recv_speed=${recv_speed} recv_position=${recv_position}
    echo recv_port=${recv_port}>${OLDCONF}
    echo recv_speed=${recv_speed}>>${OLDCONF}
-   echo recv_position=${recv_position}>>${OLDCONF}
+   echo recv_position=\"${recv_position}\">>${OLDCONF}
 fi
 
 #echo ${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET
