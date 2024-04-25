@@ -10,6 +10,18 @@ com_speed=${2}
 position=${3}
 #echo com_port="${com_port}"  com_speed=${com_speed} position="${position}"
 
+lastcode=N
+exitcode=0
+
+ExitCodeCheck(){
+  lastcode=$1
+  if [[ $lastcode > $exitcode ]]
+  then
+     exitcode=${lastcode}
+     #echo exitcode=${exitcode}
+  fi
+}
+
 SAVECONF=N
 if [[ -f ${OLDCONF} ]]
 then
@@ -87,6 +99,7 @@ if [[ ${SETPOS} == Y ]]
 then
    #echo ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 ${position}" QUIET
    ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 ${position}" QUIET >/dev/null
+   ExitCodeCheck $?
    CHECKPOS=Y
    SAVEPOS=Y
 fi
@@ -96,6 +109,7 @@ if [[ ${CHECKPOS} == Y ]]
 then
    #echo ${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET
    UNICORE_ANSWER=`${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET`
+   ExitCodeCheck $?
    #echo UNICORE_ANSWER=${UNICORE_ANSWER}
    POSITION_INCORRECT=`echo ${UNICORE_ANSWER} | grep -c "not correct"`
    #echo POSITION_INCORRECT=${POSITION_INCORRECT}
@@ -138,6 +152,7 @@ if [[ ${TIMEPOS} == Y ]]
 then
    #echo ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 TIME 60 1" QUIET
    ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 TIME 60 1" QUIET
+   ExitCodeCheck $?
    recv_position="BAD"
    SAVEPOS=Y
 fi
@@ -146,6 +161,7 @@ if [[ ${SAVEPOS} == Y ]]
 then
    #echo ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
    ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
+   ExitCodeCheck $?
 fi
 
 if [[ ${SAVECONF} == Y ]]
@@ -156,5 +172,12 @@ then
    echo recv_position=\"${recv_position}\">>${OLDCONF}
 fi
 
-#echo ${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET
-${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET
+if [[ ${lastcode} == N ]]
+then
+   #echo ${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET
+   ${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET
+   ExitCodeCheck $?
+fi
+
+#echo exit $0 with code ${exitcode}
+exit ${exitcode}
