@@ -19,6 +19,7 @@ NMEACONF=NmeaConf
 CONF_TAIL=RTCM3_OUT.txt
 CONF980=UM980_${CONF_TAIL}
 CONF982=UM982_${CONF_TAIL}
+SERVER_PATCH=server_py.patch
 SYSCONGIG=RtkbaseSystemConfigure.sh
 SYSSERVICE=RtkbaseSystemConfigure.service
 SYSPROXY=RtkbaseSystemConfigureProxy.sh
@@ -442,6 +443,7 @@ configure_for_unicore(){
 
    SERVER_PY=${RTKBASE_WEB}/server.py
    #echo SERVER_PY=${SERVER_PY}
+   sudo -u ${RTKBASE_USER} patch -f ${SERVER_PY} ${BASEDIR}/${SERVER_PATCH}
    sudo -u ${RTKBASE_USER} sed -i s/^rtkcv_standby_delay\ *=.*/rtkcv_standby_delay\ =\ 129600/ ${SERVER_PY}
    sudo -u ${RTKBASE_USER} sed -i s/\"install.sh\"/\"UnicoreConfigure.sh\"/ ${SERVER_PY}
 
@@ -523,11 +525,12 @@ have_full(){
    return ${HAVE_FULL}
 }
 
-FILES_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${UNICORE_CONFIGURE} \
+BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${UNICORE_CONFIGURE} \
               ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
               ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY} \
-              uninstall.sh"
-FILES_DELETE="${BASENAME}"
+              ${SERVER_PATCH}"
+FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
+FILES_DELETE="${BASENAME} ${SERVER_PATCH}"
 
 check_phases(){
    if [[ ${1} == "-1" ]]
@@ -535,8 +538,8 @@ check_phases(){
       HAVE_RECEIVER=1
       HAVE_PHASE1=0
       HAVE_FULL=1
-      FILES_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${UNICORE_CONFIGURE} ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY}"
-      FILES_DELETE=
+      FILES_EXTRACT="${BASE_EXTRACT}"
+      FILES_DELETE="${SERVER_PATCH}"
    else
       if [[ ${1} == "-2" ]]
       then

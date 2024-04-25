@@ -3,6 +3,8 @@
 
 BASEDIR=`realpath $(dirname "$0")`
 OLDCONF=${BASEDIR}/receiver.conf
+BADPOSFILE=${BASEDIR}/GNSS_coordinate_error.flg
+#DEBUGLOG="${BASEDIR}/debug.log"
 com_port=${1}
 com_speed=${2}
 position=${3}
@@ -23,6 +25,8 @@ fi
 
 SETSPEED=Y
 SETPOS=Y
+TIMEPOS=N
+BADPOS=
 if [[ "${com_port}" == "${recv_port}" ]]
 then
    if [[ "${com_speed}" == "${recv_speed}" ]]
@@ -32,6 +36,13 @@ then
    if [[ "${position}" == "${recv_position}" ]]
    then
       SETPOS=N
+   else
+      if [[ "${position}" == "0.00 0.00 0.00" ]]
+      then
+         TIMEPOS=Y
+         SETPOS=N
+         BADPOS=N
+      fi
    fi
 else
    recv_port=${com_port}
@@ -39,14 +50,9 @@ else
    SAVECONF=Y
 fi
 
-if [[ "${position}" == "0.00 0.00 0.00" ]]
-then
-   SETPOS=N
-fi
-
 OLDDEV=/dev/${com_port}:${recv_speed}
 DEVICE=/dev/${com_port}:${com_speed}
-#echo SETSPEED=${SETSPEED} SETPOS=${SETPOS} OLDDEV=${OLDDEV} DEVICE=${DEVICE}
+#echo SETSPEED=${SETSPEED} SETPOS=${SETPOS} TIMEPOS=${TIMEPOS} BADPOS=${BADPOS} OLDDEV=${OLDDEV} DEVICE=${DEVICE}
 
 RECVCOM=COM1
 if [[ ${SETSPEED} == Y ]]
@@ -75,26 +81,71 @@ then
    fi
 fi
 
+CHECKPOS=N
+SAVEPOS=N
 if [[ ${SETPOS} == Y ]]
 then
    #echo ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 ${position}" QUIET
-   ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 ${position}" QUIET
+   ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 ${position}" QUIET >/dev/null
+   CHECKPOS=Y
+   SAVEPOS=Y
+fi
+
+#echo CHECKPOS=${CHECKPOS} SAVEPOS=${SAVEPOS}
+if [[ ${CHECKPOS} == Y ]]
+then
    #echo ${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET
    UNICORE_ANSWER=`${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET`
    #echo UNICORE_ANSWER=${UNICORE_ANSWER}
    POSITION_INCORRECT=`echo ${UNICORE_ANSWER} | grep -c "not correct"`
    #echo POSITION_INCORRECT=${POSITION_INCORRECT}
-   if [[ ${POSITION_INCORRECT} = "0" ]]
+   if [[ ${POSITION_INCORRECT} == "0" ]]
    then
-      #echo ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
-      ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
       recv_position=${position}
+      BADPOS=N
    else
-      #echo ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 TIME 60 1" QUIET
-      ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 TIME 60 1" QUIET
-      recv_position="BAD"
+      BADPOS=Y
+      TIMEPOS=Y
    fi
    SAVECONF=Y
+fi
+
+if [[ "${BADPOS}" != "" ]]
+then
+   if [[ -f ${BADPOSFILE} ]]
+   then
+      BADNOW=Y
+   else
+      BADNOW=N
+   fi
+   #echo BADPOS=${BADPOS} BADNOW=${BADNOW} BADPOSFILE=${BADPOSFILE}
+   if [[ ${BADPOS} != ${BADNOW} ]]
+   then
+      if [[ ${BADPOS} == Y ]]
+      then
+         #echo cp /dev/null ${BADPOSFILE}
+         cp /dev/null ${BADPOSFILE}
+      else
+         #echo rm -f ${BADPOSFILE}
+         rm -f ${BADPOSFILE}
+      fi
+   fi
+   #echo ls -la ${BADPOSFILE}
+   #ls -la ${BADPOSFILE} >>${DEBUGLOG} 2>&1
+fi
+
+if [[ ${TIMEPOS} == Y ]]
+then
+   #echo ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 TIME 60 1" QUIET
+   ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 TIME 60 1" QUIET
+   recv_position="BAD"
+   SAVEPOS=Y
+fi
+
+if [[ ${SAVEPOS} == Y ]]
+then
+   #echo ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
+   ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
 fi
 
 if [[ ${SAVECONF} == Y ]]
