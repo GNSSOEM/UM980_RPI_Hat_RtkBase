@@ -571,10 +571,10 @@ have_phase1 && install_additional_utilies
 have_full || delete_pi_user
 have_receiver && change_hostname ${HAVE_FULL}
 unpack_files
-have_phase1 && install_rtkbase_system_configure
 stop_rtkbase_services
 have_phase1 && add_rtkbase_user
 #echo ${RTKBASE_PATH}
+have_phase1 && install_rtkbase_system_configure
 cd ${RTKBASE_PATH}
 have_phase1 && copy_rtkbase_install_file
 have_phase1 && rtkbase_install
