@@ -57,7 +57,7 @@ configure_ttyS0(){
         echo [all] >> ${BOOTCONFIG}
         echo >> ${BOOTCONFIG}
         echo enable_uart=1 >> ${BOOTCONFIG}
-        echo uart added to ${BOOTCONFIG}
+        echo Uart added to ${BOOTCONFIG}
         NEEDREBOOT=Y
      fi
 
@@ -158,6 +158,7 @@ install_additional_utilies(){
 
    SER2NET_CONF=/etc/ser2net.conf
    SER2NET_DEV=${RECVPORT}:115200
+   SER2NET_PORT=5017
    if [[ -f "${SER2NET_CONF}" ]]
    then
       SER2NET_HAVEDEV=`grep "${SER2NET_DEV}" ${SER2NET_CONF}`
@@ -166,11 +167,11 @@ install_additional_utilies(){
 
    if [[ ${SER2NET_HAVEDEV} == "" ]]
    then
-      echo 5017:raw:0:${SER2NET_DEV} >>${SER2NET_CONF}
-      #echo 5017:raw:0:${SER2NET_DEV}
+      echo ${SER2NET_PORT}:raw:0:${SER2NET_DEV} >>${SER2NET_CONF}
+      #echo ${SER2NET_PORT}:raw:0:${SER2NET_DEV}
    else
-      sed -i s@^.*${SER2NET_DEV}@5017:raw:0:${SER2NET_DEV}@ ${SER2NET_CONF}
-      #echo sed -i s@^.*${SER2NET_DEV}@5017:raw:0:${SER2NET_DEV}@ ${SER2NET_CONF}
+      sed -i s@^.*${SER2NET_DEV}@${SER2NET_PORT}:raw:0:${SER2NET_DEV}@ ${SER2NET_CONF}
+      #echo sed -i s@^.*${SER2NET_DEV}@${SER2NET_PORT}:raw:0:${SER2NET_DEV}@ ${SER2NET_CONF}
    fi
 
    sed -i s@^CONFFILE\=.*@CONFFILE\=\"\/etc\/ser2net\.conf\"@    /etc/default/ser2net
