@@ -49,7 +49,7 @@ configure_ttyS0(){
 
   if [[ -f ${BOOTCONFIG} ]]
   then
-     HAVE_UART=`grep "enable_uart=" ${BOOTCONFIG}`
+     HAVE_UART=`grep "^enable_uart=" ${BOOTCONFIG}`
      #echo HAVE_UART=${HAVE_UART}
 
      if [[ ${HAVE_UART} == "" ]]
@@ -61,7 +61,7 @@ configure_ttyS0(){
         NEEDREBOOT=Y
      fi
 
-     ENABLED_UART=`grep "enable_uart=1" ${BOOTCONFIG}`
+     ENABLED_UART=`grep "^enable_uart=1" ${BOOTCONFIG}`
      #echo ENABLED_UART=${ENABLED_UART}
 
      if [[ ${ENABLED_UART} == "" ]]
@@ -298,7 +298,7 @@ stop_rtkbase_services(){
      echo 'STOP RTKBASE SERVICES'
      echo '################################'
       #store service status before upgrade
-      rtkbase_web_active==$(systemctl is-active rtkbase_web.service)
+      rtkbase_web_active=$(systemctl is-active rtkbase_web.service)
       str2str_active=$(systemctl is-active str2str_tcp)
       str2str_ntrip_A_active=$(systemctl is-active str2str_ntrip_A)
       str2str_ntrip_B_active=$(systemctl is-active str2str_ntrip_B)
@@ -458,7 +458,8 @@ configure_for_unicore(){
 
    SERVER_PY=${RTKBASE_WEB}/server.py
    #echo SERVER_PY=${SERVER_PY}
-   sudo -u ${RTKBASE_USER} patch -f ${SERVER_PY} ${BASEDIR}/${SERVER_PATCH}
+   patch -f ${SERVER_PY} ${BASEDIR}/${SERVER_PATCH}
+   chmod 644 ${SERVER_PY}
    sudo -u ${RTKBASE_USER} sed -i s/^rtkcv_standby_delay\ *=.*/rtkcv_standby_delay\ =\ 129600/ ${SERVER_PY}
    sudo -u ${RTKBASE_USER} sed -i s/\"install.sh\"/\"UnicoreConfigure.sh\"/ ${SERVER_PY}
 
