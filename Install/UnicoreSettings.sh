@@ -45,7 +45,7 @@ fi
 sed="sudo -u "${RTKBASE_USER}" sed -i"
 #echo sed=${sed}
 ${sed} s/^position=.*/position=\'0\.00\ 0\.00\ 0\.00\'/ "${settings}"
-${sed} s/^com_port=.*/com_port=\'ttyS0\'/ "${settings}"
+${sed} s/^com_port=.*/com_port=\'serial0\'/ "${settings}"
 ${sed} s/^com_port_settings=.*/com_port_settings=\'115200:8:n:1\'/ "${settings}"
 ${sed} s/^receiver=.*/receiver=\'${recvfullname}\'/ "${settings}"
 ${sed} s/^receiver_format=.*/receiver_format=\'rtcm3\'/ "${settings}"

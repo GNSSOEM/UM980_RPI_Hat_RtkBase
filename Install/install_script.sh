@@ -9,7 +9,7 @@ BASEDIR=`realpath $(dirname $(readlink -f "$0"))`
 BASENAME=`basename $(readlink -f "$0")`
 ORIGDIR=`pwd`
 #echo BASEDIR=${BASEDIR} BASENAME=${BASENAME}
-RECVPORT=/dev/ttyS0
+RECVPORT=/dev/serial0
 RTKBASE_INSTALL=rtkbase_install.sh
 RUN_CAST=run_cast.sh
 SET_BASE_POS=UnicoreSetBasePos.sh
@@ -70,6 +70,18 @@ configure_ttyS0(){
         echo Uart enabled at ${BOOTCONFIG}
         NEEDREBOOT=Y
      fi
+
+     HAVE_BT=`grep "^dtoverlay=disable-bt" ${BOOTCONFIG}`
+     #echo HAVE_BT=${HAVE_BT}
+
+     if [[ ${HAVE_BT} == "" ]]
+     then
+        echo [all] >> ${BOOTCONFIG}
+        echo >> ${BOOTCONFIG}
+        echo dtoverlay=disable-bt >> ${BOOTCONFIG}
+        echo Bluetooth disabled into ${BOOTCONFIG}
+        NEEDREBOOT=Y
+     fi
   fi
 }
 
@@ -105,6 +117,9 @@ check_boot_configiration(){
 
    configure_ttyS0 /boot
    configure_ttyS0 /boot/firmware
+
+   hciuart_enabled=$(systemctl is-enabled hciuart.service)
+   [[ "${hciuart_enabled}" != "disabled" ]] && [[ "${hciuart_enabled}" != "masked" ]] && systemctl disable hciuart
 }
 
 do_reboot(){

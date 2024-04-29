@@ -81,7 +81,7 @@ detect_uart() {
     echo '################################'
       if [[ ${#detected_gnss[*]} < 2 ]]; then
         systemctl is-active --quiet str2str_tcp.service && sudo systemctl stop str2str_tcp.service && echo 'Stopping str2str_tcp service'
-        for port in ttyS0 ttyS1 serial0 ttyS2 ttyS3; do
+        for port in serial0 ttyS0 ttyAMA0; do
             if [[ -c /dev/${port} ]]
             then
                detect_speed ${port}
