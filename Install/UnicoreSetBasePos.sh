@@ -108,7 +108,7 @@ fi
 if [[ ${CHECKPOS} == Y ]]
 then
    #echo ${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET
-   UNICORE_ANSWER=`${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET`
+   UNICORE_ANSWER=`${BASEDIR}/NmeaConf ${DEVICE} CONFIG QUIET`
    ExitCodeCheck $?
    #echo UNICORE_ANSWER=${UNICORE_ANSWER}
    POSITION_INCORRECT=`echo ${UNICORE_ANSWER} | grep -c "not correct"`
