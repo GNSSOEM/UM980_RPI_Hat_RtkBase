@@ -51,36 +51,41 @@ configure_ttyS0(){
   then
      HAVE_UART=`grep "^enable_uart=" ${BOOTCONFIG}`
      #echo HAVE_UART=${HAVE_UART}
+     ENABLED_UART=`grep "^enable_uart=1" ${BOOTCONFIG}`
+     #echo ENABLED_UART=${ENABLED_UART}
+     HAVE_BT=`grep "^dtoverlay=disable-bt" ${BOOTCONFIG}`
+     #echo HAVE_BT=${HAVE_BT}
+     HAVE_UART3=`grep "^dtoverlay=uart3" ${BOOTCONFIG}`
+     #echo HAVE_UART3=${HAVE_UART3}
+
+     if [[ ${HAVE_UART} == "" ]] || [[ ${HAVE_BT} == "" ]] || [[ ${HAVE_UART3} == "" ]]
+     then
+        echo [all] >> ${BOOTCONFIG}
+        echo >> ${BOOTCONFIG}
+        NEEDREBOOT=Y
+     fi
 
      if [[ ${HAVE_UART} == "" ]]
      then
-        echo [all] >> ${BOOTCONFIG}
-        echo >> ${BOOTCONFIG}
         echo enable_uart=1 >> ${BOOTCONFIG}
-        echo Uart added to ${BOOTCONFIG}
-        NEEDREBOOT=Y
-     fi
-
-     ENABLED_UART=`grep "^enable_uart=1" ${BOOTCONFIG}`
-     #echo ENABLED_UART=${ENABLED_UART}
-
-     if [[ ${ENABLED_UART} == "" ]]
+        echo Uart0 added to ${BOOTCONFIG}
+     elif [[ ${ENABLED_UART} == "" ]]
      then
         sed -i s/^enable_uart=.*/enable_uart=1/  "${BOOTCONFIG}"
-        echo Uart enabled at ${BOOTCONFIG}
+        echo Uart0 enabled at ${BOOTCONFIG}
         NEEDREBOOT=Y
      fi
-
-     HAVE_BT=`grep "^dtoverlay=disable-bt" ${BOOTCONFIG}`
-     #echo HAVE_BT=${HAVE_BT}
 
      if [[ ${HAVE_BT} == "" ]]
      then
-        echo [all] >> ${BOOTCONFIG}
-        echo >> ${BOOTCONFIG}
         echo dtoverlay=disable-bt >> ${BOOTCONFIG}
         echo Bluetooth disabled into ${BOOTCONFIG}
-        NEEDREBOOT=Y
+     fi
+
+     if [[ ${HAVE_UART3} == "" ]]
+     then
+        echo dtoverlay=uart3 >> ${BOOTCONFIG}
+        echo Uart3 added to ${BOOTCONFIG}
      fi
   fi
 }
