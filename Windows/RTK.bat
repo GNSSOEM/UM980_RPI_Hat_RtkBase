@@ -79,7 +79,7 @@
 )
 
 @Echo Configure %Prefix% on %Recv% as RTK...
-@Set CoordFile=coord.tmp
+@Set CoordFile=coordRTK.tmp
 @NmeaConf.exe +%Recv% UM_RTK.txt QUIET
 @Rem Echo NmeaConf ErrorLevel=%ErrorLevel%
 @If ERRORLEVEL 1 @(

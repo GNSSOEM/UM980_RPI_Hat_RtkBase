@@ -64,7 +64,7 @@
 )
 
 @Echo Configure %Prefix% on %Recv% as HAS...
-@Set CoordFile=coord.tmp
+@Set CoordFile=coordHAS.tmp
 @NmeaConf.exe +%Recv% %Prefix%_HAS.txt QUIET
 @Rem Echo NmeaConf ErrorLevel=%ErrorLevel%
 @If ERRORLEVEL 1 @(
