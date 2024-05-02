@@ -2,6 +2,7 @@
 Description=RTKBase system configure at start
 After=local-fs.target
 After=network.target
+After=rtkbase_setup.service
 
 [Service]
 ExecStart=/usr/local/rtkbase/RtkbaseSystemConfigureProxy.sh
