@@ -42,11 +42,11 @@ out_local_caster_source_table="${local_ntripc_mnt_name};rtcm3;${local_ntripc_msg
 out_local_caster="ntripc://${local_ntripc_user}:${local_ntripc_pwd}@:${local_ntripc_port}/${local_ntripc_mnt_name}:${out_local_caster_source_table}#rtcm3 -msg ${local_ntripc_msg} -p ${position}"
 #add receiver options if it exists
 [[ ! -z "${local_ntripc_receiver_options}" ]] && out_local_caster="${out_local_caster} -opt ${local_ntripc_receiver_options}"
-out_tcp="tcpsvr://:${tcp_port}"
+out_tcp="tcpsvr://localhost:${tcp_port}"
 
 out_file="file://${datadir}/${file_name}.${receiver_format}::T::S=${file_rotate_time} -f ${file_overlap_time}"
 
-out_rtcm_svr="tcpsvr://:${rtcm_svr_port}#rtcm3 -msg ${rtcm_svr_msg} -p ${position}"
+out_rtcm_svr="tcpsvr://:${rtcm_svr_port} -b 1 -msg ${rtcm_svr_msg} -p ${position}"
 #add receiver options if it exists
 [[ ! -z "${rtcm_receiver_options}" ]] && out_rtcm_svr=""${out_rtcm_svr}" -opt "${rtcm_receiver_options}""
 

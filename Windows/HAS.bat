@@ -5,7 +5,7 @@
 @Set IniFile=Ini.cmd
 
 @Set RecvIP=rtkbase.local
-@Set RecvPort=5017
+@Set RecvPort=5016
 @Set RtcmIP=igs-ip.net
 @Set RtcmPort=2101
 @Set RtcmMount=RIGA00LVA0

@@ -159,33 +159,6 @@ install_additional_utilies(){
    echo 'INSTALL ADDITIONAL UTILITIES'
    echo '################################'
 
-   install_packet_if_not_installed ser2net
-
-   SER2NET_CONF=/etc/ser2net.conf
-   SER2NET_DEV=${RECVPORT}:115200
-   SER2NET_PORT=5017
-   if [[ -f "${SER2NET_CONF}" ]]
-   then
-      SER2NET_HAVEDEV=`grep "${SER2NET_DEV}" ${SER2NET_CONF}`
-   fi
-   #echo SER2NET_HAVEDEV=${SER2NET_HAVEDEV}
-
-   if [[ ${SER2NET_HAVEDEV} == "" ]]
-   then
-      echo ${SER2NET_PORT}:raw:0:${SER2NET_DEV} >>${SER2NET_CONF}
-      #echo ${SER2NET_PORT}:raw:0:${SER2NET_DEV}
-   else
-      sed -i s@^.*${SER2NET_DEV}@${SER2NET_PORT}:raw:0:${SER2NET_DEV}@ ${SER2NET_CONF}
-      #echo sed -i s@^.*${SER2NET_DEV}@${SER2NET_PORT}:raw:0:${SER2NET_DEV}@ ${SER2NET_CONF}
-   fi
-
-   sed -i s@^CONFFILE\=.*@CONFFILE\=\"\/etc\/ser2net\.conf\"@    /etc/default/ser2net
-
-   if ! ischroot
-   then
-      systemctl is-active --quiet ser2net && sudo systemctl restart ser2net
-   fi
-
    install_packet_if_not_installed avahi-utils
    install_packet_if_not_installed avahi-daemon
    install_packet_if_not_installed uuid
