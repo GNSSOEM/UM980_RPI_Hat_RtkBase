@@ -70,3 +70,4 @@ then
    [ "${rtkbase_web_active}" = "active" ] && systemctl start rtkbase_web.service
    [ "${str2str_active}" = "active" ] && systemctl start str2str_tcp
 fi
+exit 0
