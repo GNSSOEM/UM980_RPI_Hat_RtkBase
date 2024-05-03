@@ -66,10 +66,10 @@ OLDDEV=/dev/${com_port}:${recv_speed}
 DEVICE=/dev/${com_port}:${com_speed}
 #echo SETSPEED=${SETSPEED} SETPOS=${SETPOS} TIMEPOS=${TIMEPOS} BADPOS=${BADPOS} OLDDEV=${OLDDEV} DEVICE=${DEVICE}
 
-RECVCOM=COM1
 if [[ ${SETSPEED} == Y ]]
 then
-   if [[ "${com_port}" == "ttyS0" ]]
+   RECVCOM=COM1
+   if [[ "${com_port}" == ttyS[0-9] ]] || [[ "${com_port}" == ttyAMA[0-9] ]] || [[ "${com_port}" == serial[0-9] ]]
    then
       RECVCOM=COM2
    fi
