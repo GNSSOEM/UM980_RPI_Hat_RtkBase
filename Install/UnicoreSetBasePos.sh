@@ -68,10 +68,15 @@ DEVICE=/dev/${com_port}:${com_speed}
 
 if [[ ${SETSPEED} == Y ]]
 then
-   RECVCOM=COM1
    if [[ "${com_port}" == ttyS[0-9] ]] || [[ "${com_port}" == ttyAMA[0-9] ]] || [[ "${com_port}" == serial[0-9] ]]
    then
       RECVCOM=COM2
+   elif [[ "${com_port}" == ttyUSB[0-9] ]] || [[ "${com_port}" == ttyACM[0-9] ]]
+   then
+      RECVCOM=COM1
+   else
+      echo Unknown receiver port for change speed
+      exit 1
    fi
    #echo ${BASEDIR}/NmeaConf ${OLDDEV} "CONFIG ${RECVCOM} ${com_speed}" QUIET
    ${BASEDIR}/NmeaConf ${OLDDEV} "CONFIG ${RECVCOM} ${com_speed}" QUIET
