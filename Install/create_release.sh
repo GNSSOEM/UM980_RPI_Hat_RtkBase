@@ -11,7 +11,8 @@ tar --exclude-vcs \
     run_cast.sh UnicoreSetBasePos.sh UnicoreSettings.sh \
     uninstall.sh rtkbase_install.sh UnicoreConfigure.sh \
     RtkbaseSystemConfigure.sh RtkbaseSystemConfigure.service \
-    RtkbaseSystemConfigureProxy.sh server_py.patch
+    RtkbaseSystemConfigureProxy.sh server_py.patch \
+    status_js.patch
  
 cat install_script.sh $ARCHIVE_NAME > $BUNDLE_NAME
 chmod +x $BUNDLE_NAME

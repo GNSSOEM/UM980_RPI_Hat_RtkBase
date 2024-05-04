@@ -20,6 +20,7 @@ CONF_TAIL=RTCM3_OUT.txt
 CONF980=UM980_${CONF_TAIL}
 CONF982=UM982_${CONF_TAIL}
 SERVER_PATCH=server_py.patch
+STATUS_PATCH=status_js.patch
 SYSCONGIG=RtkbaseSystemConfigure.sh
 SYSSERVICE=RtkbaseSystemConfigure.service
 SYSPROXY=RtkbaseSystemConfigureProxy.sh
@@ -493,6 +494,13 @@ configure_for_unicore(){
    sudo -u ${RTKBASE_USER} sed -i s/\"install.sh\"/\"UnicoreConfigure.sh\"/ ${SERVER_PY}
    ExitCodeCheck $?
 
+   STATUS_JS=${RTKBASE_WEB}/static/status.js
+   #echo STATUS_JS=${STATUS_JS}
+   patch -f ${STATUS_JS} ${BASEDIR}/${STATUS_PATCH}
+   ExitCodeCheck $?
+   chmod 644 ${STATUS_JS}
+   ExitCodeCheck $?
+
    SETTINGS_HTML=${RTKBASE_WEB}/templates/settings.html
    #echo SETTINGS_HTML=${SETTINGS_HTML}
    sudo -u ${RTKBASE_USER} sed -i s/\>File\ rotation.*\:\ \</\>File\ rotation\ time\ \(in\ hour\)\:\ \</ ${SETTINGS_HTML}
@@ -590,9 +598,9 @@ have_full(){
 BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${UNICORE_CONFIGURE} \
               ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
               ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY} \
-              ${SERVER_PATCH}"
+              ${SERVER_PATCH} ${STATUS_PATCH}"
 FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
-FILES_DELETE="${SERVER_PATCH}"
+FILES_DELETE="${SERVER_PATCH} ${STATUS_PATCH}"
 
 check_phases(){
    if [[ ${1} == "-1" ]]
