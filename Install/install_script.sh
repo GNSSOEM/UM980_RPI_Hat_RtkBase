@@ -489,10 +489,6 @@ configure_for_unicore(){
    ExitCodeCheck $?
    chmod 644 ${SERVER_PY}
    ExitCodeCheck $?
-   sudo -u ${RTKBASE_USER} sed -i s/^rtkcv_standby_delay\ *=.*/rtkcv_standby_delay\ =\ 129600/ ${SERVER_PY}
-   ExitCodeCheck $?
-   sudo -u ${RTKBASE_USER} sed -i s/\"install.sh\"/\"UnicoreConfigure.sh\"/ ${SERVER_PY}
-   ExitCodeCheck $?
 
    STATUS_JS=${RTKBASE_WEB}/static/status.js
    #echo STATUS_JS=${STATUS_JS}

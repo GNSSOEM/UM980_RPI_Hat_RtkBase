@@ -1,7 +1,16 @@
 diff --git a/web_app/server.py b/web_app/server.py
-index 0b82d29..b1442fd 100755
+index 0b82d29..4bd23fb 100755
 --- a/web_app/server.py
 +++ b/web_app/server.py
+@@ -112,7 +112,7 @@ services_list = [{"service_unit" : "str2str_tcp.service", "name" : "main"},
+                  ]
+ 
+ #Delay before rtkrcv will stop if no user is on status.html page
+-rtkcv_standby_delay = 600
++rtkcv_standby_delay = 129600
+ connected_clients = 0
+ 
+ class User(UserMixin):
 @@ -195,9 +195,10 @@ def repaint_services_button(services_list):
      """ 
      for service in services_list:
@@ -16,3 +25,21 @@ index 0b82d29..b1442fd 100755
          elif service.get("result") == "exit-code":
              service["btn_color"] = "warning"
          elif service.get("status") == "auto-restart":
+@@ -578,7 +579,7 @@ def deleteLog(json_msg):
+ def detect_receiver(json_msg):
+     print("Detecting gnss receiver")
+     #print("DEBUG json_msg: ", json_msg)
+-    answer = subprocess.run([os.path.join(rtkbase_path, "tools", "install.sh"), "--user", rtkbaseconfig.get("general", "user"), "--detect-gnss", "--no-write-port"], encoding="UTF-8", stderr=subprocess.PIPE, stdout=subprocess.PIPE)
++    answer = subprocess.run([os.path.join(rtkbase_path, "tools", "UnicoreConfigure.sh"), "--user", rtkbaseconfig.get("general", "user"), "--detect-gnss", "--no-write-port"], encoding="UTF-8", stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+     if answer.returncode == 0 and "/dev/" in answer.stdout:
+         #print("DEBUG ok stdout: ", answer.stdout)
+         try:
+@@ -610,7 +611,7 @@ def configure_receiver(brand="u-blox", model="F9P"):
+         restart_main = False
+ 
+     print("configuring {} gnss receiver model {}".format(brand, model))
+-    answer = subprocess.run([os.path.join(rtkbase_path, "tools", "install.sh"), "--user", rtkbaseconfig.get("general", "user"), "--configure-gnss"], encoding="UTF-8", stderr=subprocess.PIPE, stdout=subprocess.PIPE)
++    answer = subprocess.run([os.path.join(rtkbase_path, "tools", "UnicoreConfigure.sh"), "--user", rtkbaseconfig.get("general", "user"), "--configure-gnss"], encoding="UTF-8", stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+     #print("DEBUG - stdout: ", answer.stdout)
+     #print("DEBUG - returncode: ", answer.returncode)
+ 
