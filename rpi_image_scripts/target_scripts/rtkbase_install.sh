@@ -30,7 +30,16 @@ if test -x /usr/local/rtkbase/install.sh
 then
   HOME=/usr/local/rtkbase
   export HOME
+  if test -x /usr/local/rtkbase/tune_power.sh
+  then
+    /usr/local/rtkbase/tune_power.sh >> /usr/local/rtkbase/install.log 2>&1
+  fi
   /usr/local/rtkbase/install.sh -2 >> /usr/local/rtkbase/install.log 2>&1
+else
+  if test -x /usr/local/rtkbase/tune_power.sh
+  then
+    /usr/local/rtkbase/tune_power.sh
+  fi
 fi
 EOF
 

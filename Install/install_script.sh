@@ -24,6 +24,7 @@ STATUS_PATCH=status_js.patch
 SYSCONGIG=RtkbaseSystemConfigure.sh
 SYSSERVICE=RtkbaseSystemConfigure.service
 SYSPROXY=RtkbaseSystemConfigureProxy.sh
+TUNE_POWER=tune_power.sh
 SERVICE_PATH=/etc/systemd/system
 PI=pi
 BANNER=/etc/ssh/sshd_config.d/rename_user.conf
@@ -177,6 +178,8 @@ install_additional_utilies(){
    install_packet_if_not_installed avahi-utils
    install_packet_if_not_installed avahi-daemon
    install_packet_if_not_installed uuid
+   install_packet_if_not_installed cpufrequtils
+   install_packet_if_not_installed uhubctl
 }
 
 delete_pi_user(){
@@ -416,6 +419,23 @@ install_rtkbase_system_configure(){
   ExitCodeCheck $?
 }
 
+install_tune_power(){
+  echo '################################'
+  echo 'INSTALL POWER TUNE'
+  echo '################################'
+
+  #echo BASEDIR=${BASEDIR} RTKBASE_PATH=${RTKBASE_PATH}
+  if [[ "${BASEDIR}" != "${RTKBASE_PATH}" ]]
+  then
+     #echo mv ${BASEDIR}/${TUNE_POWER} ${RTKBASE_PATH}/
+     mv ${BASEDIR}/${TUNE_POWER} ${RTKBASE_PATH}/
+     ExitCodeCheck $?
+  fi
+  #echo chmod +x ${RTKBASE_PATH}/${TUNE_POWER}
+  chmod +x ${RTKBASE_PATH}/${TUNE_POWER}
+  ExitCodeCheck $?
+}
+
 rtkbase_install(){
    #echo ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -r -t -g
    ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -r -t -g
@@ -594,7 +614,7 @@ have_full(){
 BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${UNICORE_CONFIGURE} \
               ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
               ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY} \
-              ${SERVER_PATCH} ${STATUS_PATCH}"
+              ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER}"
 FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
 FILES_DELETE="${SERVER_PATCH} ${STATUS_PATCH}"
 
@@ -640,6 +660,7 @@ stop_rtkbase_services
 have_phase1 && add_rtkbase_user
 #echo ${RTKBASE_PATH}
 have_phase1 && install_rtkbase_system_configure
+have_phase1 && install_tune_power
 cd ${RTKBASE_PATH}
 have_phase1 && copy_rtkbase_install_file
 have_phase1 && rtkbase_install
