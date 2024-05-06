@@ -12,7 +12,7 @@ tar --exclude-vcs \
     uninstall.sh rtkbase_install.sh UnicoreConfigure.sh \
     RtkbaseSystemConfigure.sh RtkbaseSystemConfigure.service \
     RtkbaseSystemConfigureProxy.sh server_py.patch \
-    status_js.patch tune_power.sh config.txt
+    status_js.patch tune_power.sh config.txt rtklib/*
  
 cat install_script.sh $ARCHIVE_NAME > $BUNDLE_NAME
 chmod +x $BUNDLE_NAME

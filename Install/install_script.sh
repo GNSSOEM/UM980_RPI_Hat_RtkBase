@@ -26,6 +26,7 @@ SYSSERVICE=RtkbaseSystemConfigure.service
 SYSPROXY=RtkbaseSystemConfigureProxy.sh
 TUNE_POWER=tune_power.sh
 CONFIG=config.txt
+RTKLIB=rtklib
 SERVICE_PATH=/etc/systemd/system
 PI=pi
 BANNER=/etc/ssh/sshd_config.d/rename_user.conf
@@ -339,7 +340,7 @@ unpack_files(){
       ARCHIVE=$(awk '/^__ARCHIVE__/ {print NR + 1; exit 0; }' "${0}")
       # Check if there is some content after __ARCHIVE__ marker (more than 100 lines)
       [[ $(sed -n '/__ARCHIVE__/,$p' "${0}" | wc -l) -lt 100 ]] && echo "UM980_RPI_Hat_RtkBase isn't bundled inside install.sh" && exit 1  
-      tail -n+${ARCHIVE} "${0}" | tar xpJv --no-same-owner --no-same-permissions -C ${BASEDIR} ${FILES_EXTRACT}
+      tail -n+${ARCHIVE} "${0}" | tar xpJv --no-same-owner --no-same-permissions  --wildcards -C ${BASEDIR} ${FILES_EXTRACT}
       ExitCodeCheck $?
    fi
 }
@@ -400,6 +401,18 @@ add_rtkbase_user(){
       #echo echo "rtkbase ALL=NOPASSWD: ALL" \> ${RTKBASE_SUDOER}
       echo "rtkbase ALL=NOPASSWD: ALL" > ${RTKBASE_SUDOER}
    fi
+}
+
+install_rtklib() {
+    echo '################################'
+    echo 'INSTALLING RTKLIB'
+    echo '################################'
+    #echo  mv ${RTKLIB}/* /usr/local/bin/
+    mv ${RTKLIB}/* /usr/local/bin/
+    ExitCodeCheck $?
+    #echo rm -rf ${RTKLIB}
+    rm -rf ${RTKLIB}
+    ExitCodeCheck $?
 }
 
 copy_rtkbase_install_file(){
@@ -490,7 +503,7 @@ install_tune_power(){
 
 rtkbase_install(){
    #echo ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -r -t -g
-   ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -r -t -g
+   ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -t -g
    ExitCodeCheck $?
    #echo rm -f ${RTKBASE_PATH}/${RTKBASE_INSTALL}
    rm -f ${RTKBASE_PATH}/${RTKBASE_INSTALL}
@@ -666,7 +679,7 @@ have_full(){
 BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${UNICORE_CONFIGURE} \
               ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
               ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY} \
-              ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER} ${CONFIG}"
+              ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER} ${CONFIG} ${RTKLIB}/*"
 FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
 FILES_DELETE="${SERVER_PATCH} ${STATUS_PATCH} ${CONFIG}"
 
@@ -710,9 +723,10 @@ have_full || delete_pi_user
 have_receiver && change_hostname ${HAVE_FULL}
 stop_rtkbase_services
 have_phase1 && add_rtkbase_user
-#echo ${RTKBASE_PATH}
 have_phase1 && install_rtkbase_system_configure
 have_phase1 && install_tune_power
+have_phase1 && install_rtklib
+#echo cd ${RTKBASE_PATH}
 cd ${RTKBASE_PATH}
 have_phase1 && copy_rtkbase_install_file
 have_phase1 && rtkbase_install
