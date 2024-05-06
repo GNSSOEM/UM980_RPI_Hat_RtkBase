@@ -409,8 +409,11 @@ install_rtklib() {
     echo 'INSTALLING RTKLIB'
     echo '################################'
     #echo  mv ${RTKLIB}/* /usr/local/bin/
+    chmod 711 ${RTKLIB}/*
+    ExitCodeCheck $?
     mv ${RTKLIB}/* /usr/local/bin/
     ExitCodeCheck $?
+    #ls -la /usr/local/bin/
     #echo rm -rf ${RTKLIB}
     rm -rf ${RTKLIB}
     ExitCodeCheck $?
