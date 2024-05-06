@@ -130,13 +130,13 @@ replace_config(){
      if [[ "${DONT_EDIT}" == "" ]]
      then
         IS_DIFF=`diff -q ${CONFIG} ${BOOTCONFIG}`
-        echo IS_DIFF=${IS_DIFF}
+        #echo IS_DIFF=${IS_DIFF}
         if [[ "${IS_DIFF}" != "" ]]
         then
-           echo cp ${BOOTCONFIG} ${BOOTCONFIG}.old
+           #echo cp ${BOOTCONFIG} ${BOOTCONFIG}.old
            cp ${BOOTCONFIG} ${BOOTCONFIG}.old
            ExitCodeCheck $?
-           echo mv ${BASEDIR}/${CONFIG} ${BOOTCONFIG}
+           #echo mv ${BASEDIR}/${CONFIG} ${BOOTCONFIG}
            mv ${BASEDIR}/${CONFIG} ${BOOTCONFIG}
            ExitCodeCheck $?
            NEEDREBOOT=Y
