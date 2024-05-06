@@ -141,6 +141,7 @@ replace_config(){
            mv ${BASEDIR}/${CONFIG} ${BOOTCONFIG}
            ExitCodeCheck $?
            NEEDREBOOT=Y
+           echo ${BOOTCONFIG} replaced. Old version in the ${BOOTCONFIG}.old
         fi
      fi
   fi
