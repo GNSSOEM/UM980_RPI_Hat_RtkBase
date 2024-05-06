@@ -49,3 +49,6 @@ hostname raspberrypi
 /usr/local/rtkbase/install.sh -1 2>&1
 
 systemctl enable rtkbase_setup.service
+
+apt clean
+

@@ -1,2 +1,2 @@
-## Scripts for creating a Raspian image with RtkBase
+## Scripts for creating a Raspbian image with RtkBase
 
