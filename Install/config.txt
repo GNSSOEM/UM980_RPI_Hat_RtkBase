@@ -55,4 +55,7 @@ dvfs=1
 temp_soft_limit=60
 disable_poe_fan=1
 disable_splash=1
+enable_tvout=0
+ignore_lcd=1
+disable_touchscreen=1
 
