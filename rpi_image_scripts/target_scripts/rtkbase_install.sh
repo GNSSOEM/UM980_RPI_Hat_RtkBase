@@ -30,16 +30,21 @@ if test -x /usr/local/rtkbase/install.sh
 then
   HOME=/usr/local/rtkbase
   export HOME
+
+  /usr/local/rtkbase/install.sh -2 >> /usr/local/rtkbase/install.log 2>&1
+
   if test -x /usr/local/rtkbase/tune_power.sh
   then
     /usr/local/rtkbase/tune_power.sh >> /usr/local/rtkbase/install.log 2>&1
   fi
-  /usr/local/rtkbase/install.sh -2 >> /usr/local/rtkbase/install.log 2>&1
+
 else
+
   if test -x /usr/local/rtkbase/tune_power.sh
   then
     /usr/local/rtkbase/tune_power.sh
   fi
+
 fi
 EOF
 
@@ -48,7 +53,6 @@ chmod +x /usr/local/rtkbase/setup_2nd_stage.sh
 hostname raspberrypi
 /usr/local/rtkbase/install.sh -1 2>&1
 
-systemctl enable rtkbase_setup.service
-
 apt clean
 
+systemctl enable rtkbase_setup.service

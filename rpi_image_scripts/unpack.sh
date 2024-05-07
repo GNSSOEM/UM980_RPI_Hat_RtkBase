@@ -1,10 +1,9 @@
 #!/bin/sh
 
 SOURCE_IMAGE="${1}"
-#SOURCE_IMAGE=2023-10-10-raspios-bookworm-arm64-lite-estimo-lv5-base.img
-
 DESTINATION_IMAGE="${2}"
-#DESTINATION_IMAGE=2023-10-10-raspios-bookworm-arm64-lite-estimo-lv5-006.img
+
+echo Unpacking "${SOURCE_IMAGE}" to "${DESTINATION_IMAGE}"
 
 if (echo "${SOURCE_IMAGE}" | grep -Eq '\.xz$')
 then
