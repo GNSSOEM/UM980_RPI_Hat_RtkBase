@@ -98,5 +98,13 @@
     )
 )
 
+@Echo Restore BASE configuration %Prefix% on %Recv%
+@NmeaConf.exe +%Recv% %Prefix%_RESET.txt QUIET
+@If ERRORLEVEL 1 @(
+    @Echo %Prefix% NOT configured as base on %Recv%
+    @Pause
+    @Exit
+)
+
 @EndLocal
 @Pause
