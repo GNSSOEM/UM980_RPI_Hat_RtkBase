@@ -44,7 +44,7 @@
 
 @Set Recv=%RecvIP%:%RecvPort%
 @Echo Check Receiver on %Recv%...
-@Set VerFile=version.tmp
+@Set VerFile=versionRTK.tmp
 @NmeaConf.exe +%Recv% Version QUIET >%VerFile%
 @Rem Echo NmeaConf ErrorLevel=%ErrorLevel%
 @If ERRORLEVEL 1 @(
