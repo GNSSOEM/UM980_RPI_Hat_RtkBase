@@ -24,7 +24,7 @@ _check_user() {
   fi
 }
 
-detect_speed() {
+detect_speed_Unicore() {
     for port_speed in 115200 921600 230400 460800 57600 38400 19200 9600; do
         echo 'DETECTION ON ' ${1} ' at ' ${port_speed}
         RECVPORT=/dev/${1}:${port_speed}
@@ -48,6 +48,31 @@ detect_speed() {
     done
 }
 
+detect_Bynav() {
+    echo 'DETECTION ON ' ${1} ' at ' ${2}
+    RECVPORT=/dev/${1}:${2}
+    RECVINFO=`${rtkbase_path}/${NMEACONF} ${RECVPORT} "LOG AUTHORIZATION" QUIET`
+    if [[ "${RECVINFO}" != "" ]]
+    then
+       #echo RECVINFO=${RECVINFO}
+       RECVNAME=`echo ${RECVINFO} | awk -F ';' '{print $2}'| awk -F ' ' '{print $2}'`
+       if [[ ${RECVNAME} != "" ]]
+       then
+          #echo Receiver ${RECVNAME} found on ${1} ${port_speed}
+          detected_gnss[0]=${1}
+          detected_gnss[1]=ByNav_${RECVNAME}
+          detected_gnss[2]=${2}
+       fi
+    fi
+}
+
+detect_speed_Bynav() {
+    for port_speed in 115200 921600 230400 460800 57600 38400 19200 9600; do
+        detect_Bynav ${1} ${port_speed}
+        [[ ${#detected_gnss[*]} -eq 3 ]] && break
+    done
+}
+
 detect_usb() {
     echo '################################'
     echo 'USB GNSS RECEIVER DETECTION'
@@ -67,9 +92,15 @@ detect_usb() {
              if [[ -z "$ID_SERIAL" ]]; then continue; fi
              if [[ "$ID_SERIAL" =~ FTDI_FT230X_Basic_UART ]]
              then
-               detect_speed ${devname}
+               detect_speed_Unicore ${devname}
                #echo '/dev/'"${detected_gnss[0]}" ' - ' "${detected_gnss[1]}"' - ' "${detected_gnss[2]}"
              fi
+             if [[ "$ID_SERIAL" =~ 1a86_USB_Dual_Serial ]]
+             then
+               detect_speed_Bynav ${devname}
+               #echo '/dev/'"${detected_gnss[0]}" ' - ' "${detected_gnss[1]}"' - ' "${detected_gnss[2]}"
+             fi
+             [[ ${#detected_gnss[*]} -eq 3 ]] && break
          done
       fi
 }
@@ -84,7 +115,7 @@ detect_uart() {
         for port in ttyAMA5 ttyAMA4 ttyAMA3 ttyAMA2 ttyAMA1 ttyAMA0 ttyS0 serial0; do
             if [[ -c /dev/${port} ]]
             then
-               detect_speed ${port}
+               detect_speed_Unicore ${port}
                #exit loop if a receiver is detected
                [[ ${#detected_gnss[*]} -eq 3 ]] && break
             fi
