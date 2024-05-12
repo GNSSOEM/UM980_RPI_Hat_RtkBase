@@ -19,6 +19,7 @@ NMEACONF=NmeaConf
 CONF_TAIL=RTCM3_OUT.txt
 CONF980=UM980_${CONF_TAIL}
 CONF982=UM982_${CONF_TAIL}
+CONFBYNAV=Bynav_${CONF_TAIL}
 SERVER_PATCH=server_py.patch
 STATUS_PATCH=status_js.patch
 SYSCONGIG=RtkbaseSystemConfigure.sh
@@ -575,6 +576,13 @@ configure_for_unicore(){
    chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_RECV}/${CONF982}
    ExitCodeCheck $?
 
+   #echo mv ${BASEDIR}/${CONFBYNAV} ${RTKBASE_RECV}/
+   mv ${BASEDIR}/${CONFBYNAV} ${RTKBASE_RECV}/
+   ExitCodeCheck $?
+   #echo chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_RECV}/${CONFBYNAV}
+   chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_RECV}/${CONFBYNAV}
+   ExitCodeCheck $?
+
    SERVER_PY=${RTKBASE_WEB}/server.py
    #echo SERVER_PY=${SERVER_PY}
    patch -f ${SERVER_PY} ${BASEDIR}/${SERVER_PATCH}
@@ -683,7 +691,7 @@ have_full(){
    return ${HAVE_FULL}
 }
 
-BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${UNICORE_CONFIGURE} \
+BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${CONFBYNAV} ${UNICORE_CONFIGURE} \
               ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
               ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY} \
               ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER} ${CONFIG} ${RTKLIB}/*"

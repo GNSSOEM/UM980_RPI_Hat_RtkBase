@@ -169,6 +169,77 @@ detect_gnss() {
     detect_configure ${1}
 }
 
+configure_unicore(){
+    RECVPORT=${1}
+    RECVNAME=${2}
+    FIRMWARE=${3}
+
+    echo Receiver ${RECVNAME}\(${FIRMWARE}\) found on ${com_port}\(${com_port_settings%%:*}\)
+    RECVCONF=${rtkbase_path}/receiver_cfg/${RECVNAME}_RTCM3_OUT.txt
+    #echo RECVCONF=${RECVCONF}
+
+    if [[ -f "${RECVCONF}" ]]
+    then
+       ${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVCONF} QUIET
+       exitcode=$?
+       #echo exitcode=${exitcode}
+       SPEED=115200
+       if [[ ${exitcode} == 0 ]]
+       then
+          #now that the receiver is configured, we can set the right values inside settings.conf
+          sudo -u "${RTKBASE_USER}" sed -i s/^receiver_firmware=.*/receiver_firmware=\'${FIRMWARE}\'/ "${rtkbase_path}"/settings.conf
+          sudo -u "${RTKBASE_USER}" sed -i s/^com_port_settings=.*/com_port_settings=\'${SPEED}:8:n:1\'/ "${rtkbase_path}"/settings.conf
+          sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'Unicore_${RECVNAME}\'/ "${rtkbase_path}"/settings.conf
+          sudo -u "${RTKBASE_USER}" sed -i s/^receiver_format=.*/receiver_format=\'rtcm3\'/ "${rtkbase_path}"/settings.conf
+       fi
+       RECEIVER_CONF=${rtkbase_path}/receiver.conf
+       echo recv_port=${com_port}>${RECEIVER_CONF}
+       echo recv_speed=${SPEED}>>${RECEIVER_CONF}
+       echo recv_position=>>${RECEIVER_CONF}
+       chown ${RTKBASE_USER}:${RTKBASE_USER} ${RECEIVER_CONF}
+       return ${exitcode}
+    else
+       echo Confiuration file for ${RECVNAME} \(${RECVCONF}\) NOT FOUND.
+       return 1
+    fi
+}
+
+configure_bynav(){
+    RECVPORT=${1}
+    RECVNAME=${2}
+    FIRMWARE=${3}
+
+    echo Receiver ${RECVNAME}\(${FIRMWARE}\) found on ${com_port}\(${com_port_settings%%:*}\)
+    RECVCONF=${rtkbase_path}/receiver_cfg/Bynav_RTCM3_OUT.txt
+    #echo RECVCONF=${RECVCONF}
+
+    if [[ -f "${RECVCONF}" ]]
+    then
+       ${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVCONF} QUIET
+       exitcode=$?
+       #echo exitcode=${exitcode}
+       SPEED=115200
+       if [[ ${exitcode} == 0 ]]
+       then
+          #now that the receiver is configured, we can set the right values inside settings.conf
+          sudo -u "${RTKBASE_USER}" sed -i s/^receiver_firmware=.*/receiver_firmware=\'${FIRMWARE}\'/ "${rtkbase_path}"/settings.conf
+          sudo -u "${RTKBASE_USER}" sed -i s/^com_port_settings=.*/com_port_settings=\'${SPEED}:8:n:1\'/ "${rtkbase_path}"/settings.conf
+          sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'Unicore_${RECVNAME}\'/ "${rtkbase_path}"/settings.conf
+          sudo -u "${RTKBASE_USER}" sed -i s/^receiver_format=.*/receiver_format=\'rtcm3\'/ "${rtkbase_path}"/settings.conf
+       fi
+       RECEIVER_CONF=${rtkbase_path}/receiver.conf
+       echo recv_port=${com_port}>${RECEIVER_CONF}
+       echo recv_speed=${SPEED}>>${RECEIVER_CONF}
+       echo recv_position=>>${RECEIVER_CONF}
+       chown ${RTKBASE_USER}:${RTKBASE_USER} ${RECEIVER_CONF}
+       return ${exitcode}
+    else
+       echo Confiuration file for ${RECVNAME} \(${RECVCONF}\) NOT FOUND.
+       return 1
+    fi
+}
+
+
 configure_gnss(){
     echo '################################'
     echo 'CONFIGURE GNSS RECEIVER'
@@ -181,43 +252,40 @@ configure_gnss(){
         RECVPORT=/dev/${com_port}:${com_port_settings%%:*}
         RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} VERSION QUIET`
         #echo RECVVER=${RECVVER}
-        RECVNAME=`echo ${RECVVER}  | awk -F ';' '{print $2}'| awk -F ',' '{print $1}'`
-        #echo RECVNAME=${RECVNAME}
-        FIRMWARE=`echo ${RECVVER}  | awk -F ';' '{print $2}'| awk -F ',' '{print $2}'`
-        #echo FIRMWARE=${FIRMWARE}
+        RECVERROR=`echo ${RECVVER} | grep ERROR`
+        #echo RECVERROR=${RECVERROR}
 
-        if [[ ${RECVNAME} != "" ]]
+        RECVNAME=
+        FIRMWARE=
+        if [[ ${RECVERROR} == "" ]] && [[ "${RECVVER}" != "" ]]
         then
-          echo Receiver ${RECVNAME}\(${FIRMWARE}\) found on ${com_port}\(${com_port_settings%%:*}\)
-          RECVCONF=${rtkbase_path}/receiver_cfg/${RECVNAME}_RTCM3_OUT.txt
-          #echo RECVCONF=${RECVCONF}
-
-          if [[ -f "${RECVCONF}" ]]
-          then
-             ${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVCONF} QUIET
-             exitcode=$?
-             #echo exitcode=${exitcode}
-             if [[ ${exitcode} == 0 ]]
-             then
-                #now that the receiver is configured, we can set the right values inside settings.conf
-                sudo -u "${RTKBASE_USER}" sed -i s/^receiver_firmware=.*/receiver_firmware=\'${FIRMWARE}\'/ "${rtkbase_path}"/settings.conf
-                sudo -u "${RTKBASE_USER}" sed -i s/^com_port_settings=.*/com_port_settings=\'115200:8:n:1\'/ "${rtkbase_path}"/settings.conf
-                sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'Unicore_${RECVNAME}\'/ "${rtkbase_path}"/settings.conf
-                sudo -u "${RTKBASE_USER}" sed -i s/^receiver_format=.*/receiver_format=\'rtcm3\'/ "${rtkbase_path}"/settings.conf
-             fi
-             RECEIVER_CONF=${rtkbase_path}/receiver.conf
-             echo recv_port=${com_port}>${RECEIVER_CONF}
-             echo recv_speed=115200>>${RECEIVER_CONF}
-             echo recv_position=>>${RECEIVER_CONF}
-             chown ${RTKBASE_USER}:${RTKBASE_USER} ${RECEIVER_CONF}
-             return ${exitcode}
-          else
-             echo Confiuration file for ${RECVNAME} \(${RECVCONF}\) NOT FOUND.
-             return 1
-          fi
+           RECVNAME=`echo ${RECVVER} | awk -F ';' '{print $2}'| awk -F ',' '{print $1}'`
+           #echo RECVNAME=${RECVNAME}
+           FIRMWARE=`echo ${RECVVER} | awk -F ';' '{print $2}'| awk -F ',' '{print $2}'`
+           #echo FIRMWARE=${FIRMWARE}
+        fi
+        if [[ ${RECVNAME} != "" ]] && [[ ${FIRMWARE} != "" ]]
+        then
+           configure_unicore ${RECVPORT}  ${RECVNAME} ${FIRMWARE}
         else
-          echo 'No Gnss receiver has been set. We can'\''t configure '${RECVPORT}
-          return 1
+           RECVINFO=`${rtkbase_path}/${NMEACONF} ${RECVPORT} "LOG AUTHORIZATION" QUIET`
+           RECVNAME=
+           if [[ "${RECVINFO}" != "" ]]
+           then
+              #echo RECVINFO=${RECVINFO}
+              RECVNAME=`echo ${RECVINFO} | awk -F ';' '{print $2}'| awk -F ' ' '{print $2}'`
+           fi
+           RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} "LOG VERSION" QUIET`
+           #echo RECVVER=${RECVVER}
+           FIRMWARE=`echo ${RECVVER} | awk -F ',' '{print $2}'`
+           #echo FIRMWARE=${FIRMWARE}
+           if [[ ${RECVNAME} != "" ]] && [[ ${FIRMWARE} != "" ]]
+           then
+              configure_bynav ${RECVPORT}  ${RECVNAME} ${FIRMWARE}
+           else
+              echo 'No Gnss receiver has been set. We can'\''t configure '${RECVPORT}
+              return 1
+           fi
         fi
       else
         echo 'RtkBase not installed, use option --rtkbase-release'
