@@ -28,7 +28,7 @@ detect_speed() {
     for port_speed in 115200 921600 230400 460800 57600 38400 19200 9600; do
         echo 'DETECTION ON ' ${1} ' at ' ${port_speed}
         RECVPORT=/dev/${1}:${port_speed}
-        RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} VERSION QUIET`
+        RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} VERSION SILENT`
         if [[ "${RECVVER}" != "" ]]
         then
            #echo RECVVER=${RECVVER}
@@ -145,7 +145,7 @@ configure_gnss(){
         systemctl is-active --quiet str2str_tcp.service && sudo systemctl stop str2str_tcp.service
 
         RECVPORT=/dev/${com_port}:${com_port_settings%%:*}
-        RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} VERSION QUIET`
+        RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} VERSION SILENT`
         #echo RECVVER=${RECVVER}
         RECVNAME=`echo ${RECVVER}  | awk -F ';' '{print $2}'| awk -F ',' '{print $1}'`
         #echo RECVNAME=${RECVNAME}
