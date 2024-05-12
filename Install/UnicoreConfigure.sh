@@ -132,7 +132,7 @@ detect_gnss() {
     systemctl is-active --quiet str2str_tcp.service && sudo systemctl stop str2str_tcp.service
     detect_uart
     detect_usb
-    detect_configure
+    detect_configure ${1}
 }
 
 configure_gnss(){
