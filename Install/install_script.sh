@@ -31,6 +31,7 @@ RTKLIB=rtklib
 SERVICE_PATH=/etc/systemd/system
 PI=pi
 BANNER=/etc/ssh/sshd_config.d/rename_user.conf
+VERSION=version.txt
 
 lastcode=N
 exitcode=0
@@ -450,6 +451,13 @@ copy_rtkbase_install_file(){
   #echo chmod +x ${RTKBASE_PATH}/${RTKBASE_INSTALL}
   chmod +x ${RTKBASE_PATH}/${RTKBASE_INSTALL}
   ExitCodeCheck $?
+
+  if [[ "${BASEDIR}" != "${RTKBASE_PATH}" ]]
+  then
+     #echo mv ${BASEDIR}/${VERSION} ${RTKBASE_PATH}/
+     mv ${BASEDIR}/${VERSION} ${RTKBASE_PATH}/
+     ExitCodeCheck $?
+  fi
 }
 
 install_rtkbase_system_configure(){
@@ -694,7 +702,8 @@ have_full(){
 BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${CONFBYNAV} ${UNICORE_CONFIGURE} \
               ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
               ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY} \
-              ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER} ${CONFIG} ${RTKLIB}/*"
+              ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER} ${CONFIG} \
+              ${RTKLIB}/* ${VERSION}"
 FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
 FILES_DELETE="${SERVER_PATCH} ${STATUS_PATCH} ${CONFIG}"
 
