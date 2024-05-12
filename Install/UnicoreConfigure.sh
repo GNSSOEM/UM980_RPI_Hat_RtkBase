@@ -118,6 +118,9 @@ detect_uart() {
                detect_speed_Unicore ${port}
                #exit loop if a receiver is detected
                [[ ${#detected_gnss[*]} -eq 3 ]] && break
+
+               detect_speed_Bynav ${devname}
+               [[ ${#detected_gnss[*]} -eq 3 ]] && break
             fi
         done
       fi
@@ -163,7 +166,7 @@ detect_gnss() {
     systemctl is-active --quiet str2str_tcp.service && sudo systemctl stop str2str_tcp.service
     detect_uart
     detect_usb
-    detect_configure
+    detect_configure ${1}
 }
 
 configure_gnss(){
