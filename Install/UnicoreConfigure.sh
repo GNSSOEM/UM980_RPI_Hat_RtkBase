@@ -80,7 +80,6 @@ detect_uart() {
     echo 'UART GNSS RECEIVER DETECTION'
     echo '################################'
       if [[ ${#detected_gnss[*]} < 2 ]]; then
-        systemctl is-active --quiet str2str_tcp.service && sudo systemctl stop str2str_tcp.service && echo 'Stopping str2str_tcp service'
         for port in ttyAMA5 ttyAMA4 ttyAMA3 ttyAMA2 ttyAMA1 ttyAMA0 ttyS0 serial0; do
             if [[ -c /dev/${port} ]]
             then
@@ -128,8 +127,21 @@ detect_configure() {
       return 0
 }
 
+stoping_main() {
+   str2str_active=$(systemctl is-active str2str_tcp)
+   #echo str2str_active=${str2str_active}
+
+   if [ "${str2str_active}" = "active" ] || [ "${str2str_active}" = "activating" ]
+   then
+      #echo systemctl stop str2str_tcp \&\& sleep 2
+      systemctl stop str2str_tcp && sleep 2
+   fi
+   #systemctl status str2str_tcp.service
+   #ps -Af | grep rtkrcv
+}
+
 detect_gnss() {
-    systemctl is-active --quiet str2str_tcp.service && sudo systemctl stop str2str_tcp.service
+    stoping_main
     detect_uart
     detect_usb
     detect_configure ${1}
@@ -142,7 +154,7 @@ configure_gnss(){
       if [ -d "${rtkbase_path}" ]
       then
         source <( grep '=' "${rtkbase_path}"/settings.conf ) 
-        systemctl is-active --quiet str2str_tcp.service && sudo systemctl stop str2str_tcp.service
+        stoping_main
 
         RECVPORT=/dev/${com_port}:${com_port_settings%%:*}
         RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} VERSION SILENT`
@@ -154,12 +166,13 @@ configure_gnss(){
 
         if [[ ${RECVNAME} != "" ]]
         then
-          echo Receiver ${RECVNAME}\(${FIRMWARE}\) found on ${com_port}\(${com_port_settings%%:*}\)
+          echo Receiver ${RECVNAME}\(${FIRMWARE}\) found on ${RECVPORT}
           RECVCONF=${rtkbase_path}/receiver_cfg/${RECVNAME}_RTCM3_OUT.txt
           #echo RECVCONF=${RECVCONF}
 
           if [[ -f "${RECVCONF}" ]]
           then
+             #echo ${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVCONF} QUIET
              ${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVCONF} QUIET
              exitcode=$?
              #echo exitcode=${exitcode}
@@ -170,6 +183,8 @@ configure_gnss(){
                 sudo -u "${RTKBASE_USER}" sed -i s/^com_port_settings=.*/com_port_settings=\'115200:8:n:1\'/ "${rtkbase_path}"/settings.conf
                 sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'Unicore_${RECVNAME}\'/ "${rtkbase_path}"/settings.conf
                 sudo -u "${RTKBASE_USER}" sed -i s/^receiver_format=.*/receiver_format=\'rtcm3\'/ "${rtkbase_path}"/settings.conf
+             else
+                echo Confiuration FAILED for ${RECVNAME} on ${RECVPORT}
              fi
              RECEIVER_CONF=${rtkbase_path}/receiver.conf
              echo recv_port=${com_port}>${RECEIVER_CONF}
