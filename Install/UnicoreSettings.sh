@@ -23,7 +23,7 @@ rtcm_msg_full="1005,1006,1007,1013,1033,1019,1020,1042,1044,1045,1046,1077,1087,
 recvname=${1}
 if [[ ${recvname} == "" ]]
 then
-   recvfullname=Unicore
+   recvfullname=
 else
    recvfullname=Unicore_${recvname}
 fi
@@ -37,15 +37,19 @@ then
    #echo rtkbase_web_active=${rtkbase_web_active} str2str_active=${str2str_active}
 
    # stop previously running services
-   #[ "${rtkbase_web_active}" = "active" ] && echo rtkbase_web.service Active
+   if [ "${str2str_active}" = "active" ] || [ "${str2str_active}" = "activating" ]
+   then
+      #echo systemctl stop str2str_tcp \&\& sleep 2
+      systemctl stop str2str_tcp && sleep 2
+   fi
+   #[ "${rtkbase_web_active}" = "active" ] && echo systemctl stop rtkbase_web.service
    [ "${rtkbase_web_active}" = "active" ] && systemctl stop rtkbase_web.service
-   [ "${str2str_active}" = "active" ] && systemctl stop str2str_tcp
 fi
 
 sed="sudo -u "${RTKBASE_USER}" sed -i"
 #echo sed=${sed}
 ${sed} s/^position=.*/position=\'0\.00\ 0\.00\ 0\.00\'/ "${settings}"
-${sed} s/^com_port=.*/com_port=\'serial0\'/ "${settings}"
+${sed} s/^com_port=.*/com_port=\'\'/ "${settings}"
 ${sed} s/^com_port_settings=.*/com_port_settings=\'115200:8:n:1\'/ "${settings}"
 ${sed} s/^receiver=.*/receiver=\'${recvfullname}\'/ "${settings}"
 ${sed} s/^receiver_format=.*/receiver_format=\'rtcm3\'/ "${settings}"
@@ -66,8 +70,12 @@ ${sed} s/^rtcm_serial_msg=.*/rtcm_serial_msg=\'${rtcm_msg_full}\'/ "${settings}"
 if ! ischroot
 then
    # start previously running services
-   #[ "${rtkbase_web_active}" = "active" ] && echo rtkbase_web.service Active
+   #[ "${rtkbase_web_active}" = "active" ] && echo systemctl start rtkbase_web.service
    [ "${rtkbase_web_active}" = "active" ] && systemctl start rtkbase_web.service
-   [ "${str2str_active}" = "active" ] && systemctl start str2str_tcp
+   if [ "${str2str_active}" = "active" ] || [ "${str2str_active}" = "activating" ]
+   then
+      #echo systemctl start str2str_tcp.service
+      systemctl start str2str_tcp.service
+   fi
 fi
 exit 0

@@ -367,14 +367,18 @@ stop_rtkbase_services(){
       str2str_file=$(systemctl is-active str2str_file)
 
       # stop previously running services
-      [ "${rtkbase_web_active}" = "active" ] && systemctl stop rtkbase_web.service
-      [ "${str2str_active}" = "active" ] && systemctl stop str2str_tcp
       [ "${str2str_ntrip_A_active}" = "active" ] && systemctl stop str2str_ntrip_A
       [ "${str2str_ntrip_B_active}" = "active" ] && systemctl stop str2str_ntrip_B
       [ "${str2str_local_caster}" = "active" ] && systemctl stop str2str_local_ntrip_caster
       [ "${str2str_rtcm}" = "'active" ] && systemctl stop str2str_rtcm_svr
       [ "${str2str_serial}" = "active" ] && systemctl stop str2str_rtcm_serial
       [ "${str2str_file}" = "active" ] && systemctl stop str2str_file
+      if [ "${str2str_active}" = "active" ] || [ "${str2str_active}" = "activating" ]
+      then
+         #echo systemctl stop str2str_tcp \&\& sleep 2
+         systemctl stop str2str_tcp && sleep 2
+      fi
+      [ "${rtkbase_web_active}" = "active" ] && systemctl stop rtkbase_web.service
    fi
 }
 
