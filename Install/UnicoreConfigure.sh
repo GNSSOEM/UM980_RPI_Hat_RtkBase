@@ -81,6 +81,8 @@ detect_usb() {
          #This function try to detect a gnss receiver and write the port/format inside settings.conf
          #If the receiver is a U-Blox, it will add the TADJ=1 option on all ntrip/rtcm outputs.
          #If there are several receiver, the last one detected will be add to settings.conf.
+         BynavDevices="${rtkbase_path}"/BynavDevlist.txt
+         rm -rf "${BynavDevices}"
          for sysdevpath in $(find /sys/bus/usb/devices/usb*/ -name dev); do
              ID_SERIAL=''
              syspath="${sysdevpath%/dev}"
@@ -92,16 +94,27 @@ detect_usb() {
              if [[ -z "$ID_SERIAL" ]]; then continue; fi
              if [[ "$ID_SERIAL" =~ FTDI_FT230X_Basic_UART ]]
              then
+               #echo detect_speed_Unicore ${devname}
                detect_speed_Unicore ${devname}
                #echo '/dev/'"${detected_gnss[0]}" ' - ' "${detected_gnss[1]}"' - ' "${detected_gnss[2]}"
              fi
              if [[ "$ID_SERIAL" =~ 1a86_USB_Dual_Serial ]]
              then
-               detect_speed_Bynav ${devname}
-               #echo '/dev/'"${detected_gnss[0]}" ' - ' "${detected_gnss[1]}"' - ' "${detected_gnss[2]}"
+               echo ${devname} >> "${BynavDevices}"
              fi
              [[ ${#detected_gnss[*]} -eq 3 ]] && break
          done
+         if [[ -f  "${BynavDevices}" ]]
+         then
+            #cat ${BynavDevices}
+            for devname in `cat "${BynavDevices}" | sort`; do
+               #echo detect_speed_Bynav ${devname}
+               detect_speed_Bynav ${devname}
+               #echo '/dev/'"${detected_gnss[0]}" ' - ' "${detected_gnss[1]}"' - ' "${detected_gnss[2]}"
+               [[ ${#detected_gnss[*]} -eq 3 ]] && break
+            done
+            rm -rf "${BynavDevices}"
+         fi
       fi
 }
 
@@ -176,8 +189,8 @@ stoping_main() {
 
 detect_gnss() {
     stoping_main
-    detect_uart
     detect_usb
+    detect_uart
     detect_configure ${1}
 }
 
@@ -240,7 +253,7 @@ configure_bynav(){
           #now that the receiver is configured, we can set the right values inside settings.conf
           sudo -u "${RTKBASE_USER}" sed -i s/^receiver_firmware=.*/receiver_firmware=\'${FIRMWARE}\'/ "${rtkbase_path}"/settings.conf
           sudo -u "${RTKBASE_USER}" sed -i s/^com_port_settings=.*/com_port_settings=\'${SPEED}:8:n:1\'/ "${rtkbase_path}"/settings.conf
-          sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'Unicore_${RECVNAME}\'/ "${rtkbase_path}"/settings.conf
+          sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'Bynav_${RECVNAME}\'/ "${rtkbase_path}"/settings.conf
           sudo -u "${RTKBASE_USER}" sed -i s/^receiver_format=.*/receiver_format=\'rtcm3\'/ "${rtkbase_path}"/settings.conf
        else
           echo Confiuration FAILED for ${RECVNAME} on ${RECVPORT}
