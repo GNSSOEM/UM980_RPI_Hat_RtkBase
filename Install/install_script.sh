@@ -25,6 +25,7 @@ CONF982=UM982_${CONF_TAIL}
 SERVER_PATCH=server_py.patch
 STATUS_PATCH=status_js.patch
 BASE_PATCH=base_html.patch
+SETTING_PATCH=settings_js.patch
 SYSCONGIG=RtkbaseSystemConfigure.sh
 SYSSERVICE=RtkbaseSystemConfigure.service
 SYSPROXY=RtkbaseSystemConfigureProxy.sh
@@ -643,6 +644,13 @@ configure_for_unicore(){
    chmod 644 ${STATUS_JS}
    ExitCodeCheck $?
 
+   SETTING_JS=${RTKBASE_WEB}/static/settings.js
+   #echo SETTING_JS=${SETTING_JS}
+   patch -f ${SETTING_JS} ${BASEDIR}/${SETTING_PATCH}
+   ExitCodeCheck $?
+   chmod 644 ${SETTING_JS}
+   ExitCodeCheck $?
+
    BASE_HTML=${RTKBASE_WEB}/templates/base.html
    #echo BASE_HTML=${BASE_HTML}
    patch -f ${BASE_HTML} ${BASEDIR}/${BASE_PATCH}
@@ -763,9 +771,9 @@ BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${UNICORE_CONFIGURE} \
               ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
               ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY} \
               ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER} ${CONFIG} \
-              ${RTKLIB}/* ${VERSION} ${BASE_PATCH}"
+              ${RTKLIB}/* ${VERSION} ${SETTING_PATCH} ${BASE_PATCH}"
 FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
-FILES_DELETE="${SERVER_PATCH} ${STATUS_PATCH} ${BASE_PATCH} ${CONFIG}"
+FILES_DELETE="${SERVER_PATCH} ${STATUS_PATCH} ${SETTING_PATCH} ${BASE_PATCH} ${CONFIG}"
 
 check_phases(){
    if [[ ${1} == "-1" ]]

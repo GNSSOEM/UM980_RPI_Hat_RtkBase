@@ -1,0 +1,12 @@
+diff --git a/web_app/static/settings.js b/web_app/static/settings.js
+index dc59f1c..fde36fe 100644
+--- a/web_app/static/settings.js
++++ b/web_app/static/settings.js
+@@ -349,6 +349,7 @@ $(document).ready(function () {
+             detectApplyBtnElt.onclick = function (){
+                 document.querySelector('#com_port').value = response['port'].replace(/^\/dev\//, '');
+                 document.querySelector('#com_port_settings').value = response['port_speed'] + ':8:n:1';
++                document.querySelector('#receiver').value = response['gnss_type'];
+                 // NEW METHOD from https://stackoverflow.com/questions/35154348/trigger-form-submission-with-javascript
+                 document.getElementById("main").dispatchEvent(new SubmitEvent('submit', {cancelable: true}));
+                 if (response['then_configure']) {
