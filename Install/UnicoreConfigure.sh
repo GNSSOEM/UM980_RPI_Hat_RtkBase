@@ -131,7 +131,7 @@ detect_uart() {
                #exit loop if a receiver is detected
                [[ ${#detected_gnss[*]} -eq 3 ]] && break
 
-               detect_speed_Bynav ${devname}
+               detect_speed_Bynav ${port}
                [[ ${#detected_gnss[*]} -eq 3 ]] && break
             fi
         done
@@ -191,7 +191,9 @@ stoping_main() {
 detect_gnss() {
     stoping_main
     detect_usb
-    detect_uart
+    if [[ ${#detected_gnss[*]} < 2 ]]; then
+       detect_uart
+    fi
     detect_configure ${1}
 }
 
