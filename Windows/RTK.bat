@@ -46,49 +46,66 @@
 @Echo Check Receiver on %Recv%...
 @Set VerFile=versionRTK.tmp
 @NmeaConf.exe +%Recv% Version QUIET >%VerFile%
-@Rem Echo NmeaConf ErrorLevel=%ErrorLevel%
 @If ERRORLEVEL 1 @(
-    @Echo NOT connected to %Recv%
-    @Pause
-    @Exit
-)
-@find "UM982"  %VerFile% >NUL
-@If NOT ERRORLEVEL 1 @(
-    Echo Receiver is UM982
-    @Set Prefix=UM982
-) else @(
-    find "UM980"  %VerFile% >NUL
-    @If NOT ERRORLEVEL 1 @(
-        @Echo Receiver is UM980
-        @Set Prefix=UM980
-   ) else (
-        @Echo Receiver on %Recv% is Unknown
+    @Rem @Echo NmeaConf ErrorLevel=%ErrorLevel%
+    @NmeaConf.exe +%Recv% "Log Version" QUIET >%VerFile%
+    @If ERRORLEVEL 1 @(
+        @Rem @Echo NmeaConf ErrorLevel=%ErrorLevel%
+        @Echo NOT connected to %Recv%
         @Pause
         @Exit
-   )
+    ) Else @(
+        @find "BDVER" %VerFile% >NUL
+        @If NOT ERRORLEVEL 1 @(
+            @Set Receiver=Bynav
+            @Set Prefix=Bynav
+        ) else (
+            @Echo Receiver on %Recv% is Unknown
+            @Pause
+            @Exit
+       )
+    )
+) Else @(
+    @find "UM982"  %VerFile% >NUL
+    @If NOT ERRORLEVEL 1 @(
+        @Set Receiver=UM982
+        @Set Prefix=UM
+    ) else @(
+        find "UM980"  %VerFile% >NUL
+        @If NOT ERRORLEVEL 1 @(
+            @Set Receiver=UM980
+            @Set Prefix=UM
+        ) else (
+            @Echo Receiver on %Recv% is Unknown
+            @Pause
+            @Exit
+       )
+    )
 )
+@Echo Receiver is %Receiver%
 
 @Set Rtcm3=%RtcmIP%:%RtcmPort%/%RtcmMount%@%RtcmUser%:%RtcmPwd%
 @Echo Check RTCM3 server on %Rtcm3%...
 @NmeaConf.exe +%Rtcm3% - NOINFO
-@Rem Echo NmeaConf ErrorLevel=%ErrorLevel%
 @If ERRORLEVEL 1 @(
+    @Rem @Echo NmeaConf ErrorLevel=%ErrorLevel%
     @Echo NOT connected to %Rtcm3%
     @Pause
     @Exit
 )
 
-@Echo Configure %Prefix% on %Recv% as RTK...
+@Echo Configure %Receiver% on %Recv% as RTK...
 @Set CoordFile=coordRTK.tmp
-@NmeaConf.exe +%Recv% UM_RTK.txt QUIET
-@Rem Echo NmeaConf ErrorLevel=%ErrorLevel%
+@NmeaConf.exe +%Recv% %Prefix%_RTK.txt QUIET
 @If ERRORLEVEL 1 @(
-    @Echo %Prefix% NOT configured as RTK on %Recv%
+    @Rem @Echo NmeaConf ErrorLevel=%ErrorLevel%
+    @Echo %Receiver% NOT configured as RTK on %Recv%
 ) else @(
     @Echo Counting base coordinates at %Period% seconds...
     @Rem Echo CoordFile=%CoordFile%
     @Rtcm3Save.exe +%Recv% +%Rtcm3% - %Period% 2>%CoordFile%
     @If ERRORLEVEL 1 @(
+        @Rem @Echo Rtcm3Save ErrorLevel=%ErrorLevel%
         @Echo base coordinates NOT counting because ERROR
     ) else @(
         @Echo Base coordinates:
@@ -98,10 +115,11 @@
     )
 )
 
-@Echo Restore BASE configuration %Prefix% on %Recv%
+@Echo Restore BASE configuration %Receiver% on %Recv%
 @NmeaConf.exe +%Recv% RESET QUIET
 @If ERRORLEVEL 1 @(
-    @Echo %Prefix% NOT configured as base on %Recv%
+    @Rem @Echo NmeaConf ErrorLevel=%ErrorLevel%
+    @Echo %Receiver% NOT configured as base on %Recv%
     @Pause
     @Exit
 )
