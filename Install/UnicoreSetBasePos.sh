@@ -5,16 +5,19 @@ BASEDIR=`realpath $(dirname "$0")`
 OLDCONF=${BASEDIR}/receiver.conf
 BADPOSFILE=${BASEDIR}/GNSS_coordinate_error.flg
 #DEBUGLOG="${BASEDIR}/debug.log"
+ZEROPOS="0.00 0.00 0.00"
 com_port=${1}
 com_speed=${2}
 position=${3}
-#echo com_port="${com_port}"  com_speed=${com_speed} position="${position}"
+receiver=${4}
+#echo com_port="${com_port}" com_speed=${com_speed} position="${position}" receiver=${receiver}
 
 lastcode=N
 exitcode=0
 
 ExitCodeCheck(){
   lastcode=$1
+  #echo lastcode=${lastcode}
   if [[ $lastcode > $exitcode ]]
   then
      exitcode=${lastcode}
@@ -49,7 +52,7 @@ then
    then
       SETPOS=N
    else
-      if [[ "${position}" == "0.00 0.00 0.00" ]]
+      if [[ "${position}" == "${ZEROPOS}" ]]
       then
          TIMEPOS=Y
          SETPOS=N
@@ -78,7 +81,7 @@ then
       echo Unknown receiver port for change speed
       exit 1
    fi
-   #echo ${BASEDIR}/NmeaConf ${OLDDEV} "CONFIG ${RECVCOM} ${com_speed}" QUIET
+   #echo ${BASEDIR}/NmeaConf ${OLDDEV} \"CONFIG ${RECVCOM} ${com_speed}\" QUIET
    ${BASEDIR}/NmeaConf ${OLDDEV} "CONFIG ${RECVCOM} ${com_speed}" QUIET
    if [[ $? == 0 ]]
    then
@@ -102,11 +105,29 @@ CHECKPOS=N
 SAVEPOS=N
 if [[ ${SETPOS} == Y ]]
 then
-   #echo ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 ${position}" QUIET
-   ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 ${position}" QUIET >/dev/null
-   ExitCodeCheck $?
-   CHECKPOS=Y
-   SAVEPOS=Y
+   if [[ "${receiver}" == *Unicore* ]]
+   then
+      #echo ${BASEDIR}/NmeaConf ${DEVICE} \"MODE BASE 1 ${position}\" QUIET
+      ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 ${position}" QUIET
+      ExitCodeCheck $?
+      if [[ $lastcode == 0 ]]
+      then
+         CHECKPOS=Y
+         SAVEPOS=Y
+      fi
+   elif [[ "${receiver}" == *Bynav* ]]
+   then
+      #echo ${BASEDIR}/NmeaConf ${DEVICE} \"FIX POSITION ${position}\" QUIET
+      ${BASEDIR}/NmeaConf ${DEVICE} "FIX POSITION ${position}" QUIET
+      ExitCodeCheck $?
+      if [[ $lastcode == 0 ]]
+      then
+         recv_position="${position}"
+         #echo recv_position=${recv_position}
+         SAVECONF=Y
+         SAVEPOS=Y
+      fi
+   fi
 fi
 
 #echo CHECKPOS=${CHECKPOS} SAVEPOS=${SAVEPOS}
@@ -120,7 +141,8 @@ then
    #echo POSITION_INCORRECT=${POSITION_INCORRECT}
    if [[ ${POSITION_INCORRECT} == "0" ]]
    then
-      recv_position=${position}
+      recv_position="${position}"
+      #echo recv_position=${recv_position}
       BADPOS=N
    else
       BADPOS=Y
@@ -155,11 +177,21 @@ fi
 
 if [[ ${TIMEPOS} == Y ]]
 then
-   #echo ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 TIME 60 1" QUIET
-   ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 TIME 60 1" QUIET
-   ExitCodeCheck $?
-   recv_position="BAD"
+   if [[ "${receiver}" == *Unicore* ]]
+   then
+      #echo ${BASEDIR}/NmeaConf ${DEVICE} \"MODE BASE 1 TIME 60 1\" QUIET
+      ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 TIME 60 1" QUIET
+      ExitCodeCheck $?
+   elif [[ "${receiver}" == *Bynav* ]]
+   then
+      #echo ${BASEDIR}/NmeaConf ${DEVICE} \"FIX NONE\" QUIET
+      ${BASEDIR}/NmeaConf ${DEVICE} "FIX NONE" QUIET
+      ExitCodeCheck $?
+   fi
+   recv_position="${ZEROPOS}"
+   #echo recv_position=${recv_position}
    SAVEPOS=Y
+   SAVECONF=Y
 fi
 
 if [[ ${SAVEPOS} == Y ]]
@@ -167,6 +199,12 @@ then
    #echo ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
    ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
    ExitCodeCheck $?
+   if [[ "${receiver}" == *Bynav* ]]
+   then
+      #echo ${BASEDIR}/NmeaConf ${DEVICE} REBOOT QUIET
+      ${BASEDIR}/NmeaConf ${DEVICE} REBOOT QUIET
+      ExitCodeCheck $?
+   fi
 fi
 
 if [[ ${SAVECONF} == Y ]]
@@ -179,10 +217,18 @@ fi
 
 if [[ ${lastcode} == N ]]
 then
-   #echo ${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET
-   ${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET
-   ExitCodeCheck $?
+   if [[ "${receiver}" == *Unicore* ]]
+   then
+      #echo ${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET
+      ${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET
+      ExitCodeCheck $?
+   elif [[ "${receiver}" == *Bynav* ]]
+   then
+      #echo ${BASEDIR}/NmeaConf ${DEVICE} \"LOG REFSTATION\" QUIET
+      ${BASEDIR}/NmeaConf ${DEVICE} "LOG REFSTATION" QUIET
+      ExitCodeCheck $?
+   fi
 fi
 
-#echo exit $0 with code ${exitcode}
+#echo exit $0 with code ${exitcode} "("lastcode=${lastcode}")"
 exit ${exitcode}
