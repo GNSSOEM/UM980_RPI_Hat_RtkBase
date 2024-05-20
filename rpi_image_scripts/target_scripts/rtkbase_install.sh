@@ -38,6 +38,20 @@ then
     /usr/local/rtkbase/tune_power.sh >> /usr/local/rtkbase/install.log 2>&1
   fi
 
+elif test -f /boot/firmware/install.sh
+then
+  HOME=/usr/local/rtkbase
+  export HOME
+
+  cp /boot/firmware/install.sh ${HOME}
+  chmod +x /usr/local/rtkbase/install.sh
+  /usr/local/rtkbase/install.sh >> /usr/local/rtkbase/install.log 2>&1
+
+  if test -x /usr/local/rtkbase/tune_power.sh
+  then
+    /usr/local/rtkbase/tune_power.sh >> /usr/local/rtkbase/install.log 2>&1
+  fi
+
 else
 
   if test -x /usr/local/rtkbase/tune_power.sh
