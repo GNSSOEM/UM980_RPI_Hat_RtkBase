@@ -60,10 +60,10 @@ mkdir -p ${logdir}
     out_tcp)
     #echo receiver="${receiver}" position="${position}"
     # For Unicore reciever setup base position to receiver (if it's not zero)
-    if [[ ${receiver} == *Unicore* ]]
+    if [[ "${receiver}" == *Unicore* ]] || [[ "${receiver}" == *Bynav* ]]
     then
-       #echo ${BASEDIR}/UnicoreSetBasePos.sh ${com_port}:${com_port_settings%%:*} "${position}"
-       ${BASEDIR}/UnicoreSetBasePos.sh ${com_port} ${com_port_settings%%:*} "${position}"
+       #echo ${BASEDIR}/UnicoreSetBasePos.sh ${com_port}:${com_port_settings%%:*} "${position}" "${receiver}"
+       ${BASEDIR}/UnicoreSetBasePos.sh ${com_port} ${com_port_settings%%:*} "${position}" "${receiver}"
        exitcode=$?
        #echo UnicoreSetBasePos exitcode=${exitcode}
        if [[ ${exitcode} != 0 ]]

@@ -60,7 +60,7 @@ detect_Bynav() {
        then
           #echo Receiver ${RECVNAME} found on ${1} ${port_speed}
           detected_gnss[0]=${1}
-          detected_gnss[1]=ByNav_${RECVNAME}
+          detected_gnss[1]=Bynav_${RECVNAME}
           detected_gnss[2]=${2}
        fi
     fi
