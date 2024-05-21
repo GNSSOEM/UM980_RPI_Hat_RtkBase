@@ -43,7 +43,7 @@ then
   HOME=/usr/local/rtkbase
   export HOME
 
-  cp /boot/firmware/install.sh ${HOME}
+  mv /boot/firmware/install.sh ${HOME}
   chmod +x /usr/local/rtkbase/install.sh
   /usr/local/rtkbase/install.sh >> /usr/local/rtkbase/install.log 2>&1
 
