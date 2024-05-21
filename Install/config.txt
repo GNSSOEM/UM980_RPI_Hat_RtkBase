@@ -44,6 +44,8 @@ arm_boost=0
 # This line should be removed if the legacy DWC2 controller is required
 # (e.g. for USB device mode) or if USB support is not required.
 otg_mode=1
+dtoverlay=uart1
+dtparam=i2c_vc=on
 
 [all]
 
