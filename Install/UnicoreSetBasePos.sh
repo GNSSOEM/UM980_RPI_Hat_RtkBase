@@ -71,32 +71,55 @@ DEVICE=/dev/${com_port}:${com_speed}
 
 if [[ ${SETSPEED} == Y ]]
 then
-   if [[ "${com_port}" == ttyS[0-9] ]] || [[ "${com_port}" == ttyAMA[0-9] ]] || [[ "${com_port}" == serial[0-9] ]]
+   if [[ "${receiver}" == *Unicore* ]]
    then
-      RECVCOM=COM2
-   elif [[ "${com_port}" == ttyUSB[0-9] ]] || [[ "${com_port}" == ttyACM[0-9] ]]
+      if [[ "${com_port}" == ttyS[0-9] ]] || [[ "${com_port}" == ttyAMA[0-9] ]] || [[ "${com_port}" == serial[0-9] ]]
+      then
+         RECVCOM=COM2
+      elif [[ "${com_port}" == ttyUSB[0-9] ]] || [[ "${com_port}" == ttyACM[0-9] ]]
+      then
+         RECVCOM=COM1
+      fi
+   elif [[ "${receiver}" == *Bynav* ]]
    then
-      RECVCOM=COM1
-   else
+      RECVCOM=`${BASEDIR}/NmeaConf ${OLDDEV} TEST COM | grep COM`
+   fi
+
+   #echo RECVCOM=${RECVCOM}
+   if [[ "${RECVCOM}" == "" ]]
+   then
       echo Unknown receiver port for change speed
       exit 1
    fi
-   #echo ${BASEDIR}/NmeaConf ${OLDDEV} \"CONFIG ${RECVCOM} ${com_speed}\" QUIET
-   ${BASEDIR}/NmeaConf ${OLDDEV} "CONFIG ${RECVCOM} ${com_speed}" QUIET
-   if [[ $? == 0 ]]
+
+   if [[ "${receiver}" == *Unicore* ]]
+   then
+      #echo ${BASEDIR}/NmeaConf ${OLDDEV} \"CONFIG ${RECVCOM} ${com_speed}\" QUIET
+      ${BASEDIR}/NmeaConf ${OLDDEV} "CONFIG ${RECVCOM} ${com_speed}" QUIET
+   elif [[ "${receiver}" == *Bynav* ]]
+   then
+      #echo ${BASEDIR}/NmeaConf ${OLDDEV} \"SERIALCONFIG ${RECVCOM} ${com_speed}\" QUIET
+      ${BASEDIR}/NmeaConf ${OLDDEV} "SERIALCONFIG ${RECVCOM} ${com_speed}" QUIET
+   fi
+
+   lastcode=$?
+   #echo lastcode=${lastcode}
+   if [[ ${lastcode} == 0 ]] || [[ ${lastcode} == 3 ]]
    then
       #echo ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
       ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
-      if [[ $? == 0 ]]
+      ExitCodeCheck $?
+      if [[ ${lastcode} == 0 ]]
       then
          recv_speed=${com_speed}
          SAVECONF=Y
       else
-         #echo exit 2
+         echo receiver not answer after changing speed
          exit 2
       fi
    else
-      #echo exit 1
+      ExitCodeCheck ${lastcode}
+      echo speed changed incorrectly, not saved
       exit 1
    fi
 fi
