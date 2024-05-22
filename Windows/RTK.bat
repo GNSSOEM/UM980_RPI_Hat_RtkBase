@@ -116,7 +116,7 @@
 )
 
 @Echo Restore BASE configuration %Receiver% on %Recv%
-@NmeaConf.exe +%Recv% RESET QUIET
+@NmeaConf.exe +%Recv% %Prefix%_RESET.txt QUIET
 @If ERRORLEVEL 1 @(
     @Rem @Echo NmeaConf ErrorLevel=%ErrorLevel%
     @Echo %Receiver% NOT configured as base on %Recv%
