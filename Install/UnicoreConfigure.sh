@@ -26,7 +26,7 @@ _check_user() {
 
 detect_speed_Unicore() {
     for port_speed in 115200 921600 230400 460800 57600 38400 19200 9600; do
-        echo 'DETECTION ON ' ${1} ' at ' ${port_speed}
+        echo 'DETECTION Unicore ON ' ${1} ' at ' ${port_speed}
         RECVPORT=/dev/${1}:${port_speed}
         RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} VERSION SILENT`
         if [[ "${RECVVER}" != "" ]]
@@ -49,7 +49,7 @@ detect_speed_Unicore() {
 }
 
 detect_Bynav() {
-    echo 'DETECTION ON ' ${1} ' at ' ${2}
+    echo 'DETECTION Bynav ON ' ${1} ' at ' ${2}
     RECVPORT=/dev/${1}:${2}
     RECVINFO=`${rtkbase_path}/${NMEACONF} ${RECVPORT} "LOG AUTHORIZATION" QUIET`
     if [[ "${RECVINFO}" != "" ]]
@@ -96,6 +96,8 @@ detect_usb() {
              then
                #echo detect_speed_Unicore ${devname}
                detect_speed_Unicore ${devname}
+               #echo detect_speed_Bynav ${devname}
+               detect_speed_Bynav ${devname}
                #echo '/dev/'"${detected_gnss[0]}" ' - ' "${detected_gnss[1]}"' - ' "${detected_gnss[2]}"
              fi
              if [[ "$ID_SERIAL" =~ 1a86_USB_Dual_Serial ]]
