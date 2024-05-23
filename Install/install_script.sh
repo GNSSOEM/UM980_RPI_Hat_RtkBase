@@ -2,6 +2,7 @@
 RTKBASE_USER=rtkbase
 RTKBASE_PATH=/usr/local/${RTKBASE_USER}
 RTKBASE_GIT=${RTKBASE_PATH}/rtkbase
+RTKBASE_UPDATE=${RTKBASE_PATH}/update
 RTKBASE_TOOLS=${RTKBASE_GIT}/tools
 RTKBASE_WEB=${RTKBASE_GIT}/web_app
 RTKBASE_RECV=${RTKBASE_GIT}/receiver_cfg
@@ -15,6 +16,8 @@ RUN_CAST=run_cast.sh
 SET_BASE_POS=UnicoreSetBasePos.sh
 UNICORE_SETTIGNS=UnicoreSettings.sh
 UNICORE_CONFIGURE=UnicoreConfigure.sh
+SETTINGS_NOW=${RTKBASE_GIT}/settings.conf
+SETTINGS_SAVE=${RTKBASE_GIT}/settings.save
 NMEACONF=NmeaConf
 CONF_TAIL=RTCM3_OUT.txt
 CONF980=UM980_${CONF_TAIL}
@@ -23,6 +26,7 @@ CONFBYNAV=Bynav_${CONF_TAIL}
 SERVER_PATCH=server_py.patch
 STATUS_PATCH=status_js.patch
 SETTING_PATCH=settings_js.patch
+BASE_PATCH=base_html.patch
 SYSCONGIG=RtkbaseSystemConfigure.sh
 SYSSERVICE=RtkbaseSystemConfigure.service
 SYSPROXY=RtkbaseSystemConfigureProxy.sh
@@ -152,6 +156,33 @@ replace_config(){
   fi
 }
 
+check_version(){
+  if [ -f ${RTKBASE_PATH}/${VERSION} ]
+  then
+     echo '################################'
+     echo 'CHECK VERSION'
+     echo '################################'
+     OLD_VERSION=`cat ${RTKBASE_PATH}/${VERSION}`
+     NEW_VERSION=`cat ${BASEDIR}/${VERSION}`
+     #echo NEW_VERSION=${NEW_VERSION} OLD_VERSION=${OLD_VERSION}
+     if [ "${NEW_VERSION}" -lt "${OLD_VERSION}" ]
+     then
+        echo Already installed version'('${OLD_VERSION}')' is newer, than install.sh version'('${NEW_VERSION}')'. Exiting
+        #echo rm -f ${FILES_EXTRACT}
+        rm -f ${FILES_EXTRACT}
+        exit
+     else
+        echo Update from version ${OLD_VERSION} to version ${NEW_VERSION}
+        if [ -f ${SETTINGS_NOW} ]
+        then
+           #echo cp ${SETTINGS_NOW} ${SETTINGS_SAVE}
+           cp ${SETTINGS_NOW} ${SETTINGS_SAVE}
+           ExitCodeCheck $?
+        fi
+     fi
+  fi
+}
+
 check_boot_configiration(){
    echo '################################'
    if have_full
@@ -207,6 +238,8 @@ do_reboot(){
    if [[ ${NEEDREBOOT} == "Y" ]]
    then
       echo Please try again ${0} after reboot
+      #echo rm -f ${FILES_EXTRACT}
+      rm -f ${FILES_EXTRACT}
       reboot now
       exit
    fi
@@ -225,6 +258,8 @@ check_port(){
    if [[ ! -c "${RECVPORT}" ]]
    then
       echo port ${RECVPORT} not found. Setup port and try again
+      #echo rm -f ${FILES_EXTRACT}
+      rm -f ${FILES_EXTRACT}
       exit
    fi
 }
@@ -392,6 +427,13 @@ add_rtkbase_user(){
    then
       #echo mkdir ${RTKBASE_PATH}
       mkdir ${RTKBASE_PATH}
+      ExitCodeCheck $?
+   fi
+
+   if [[ ! -d "${RTKBASE_UPDATE}" ]]
+   then
+      #echo mkdir ${RTKBASE_UPDATE}
+      mkdir ${RTKBASE_UPDATE}
       ExitCodeCheck $?
    fi
 
@@ -617,6 +659,13 @@ configure_for_unicore(){
    chmod 644 ${SETTING_JS}
    ExitCodeCheck $?
 
+   BASE_HTML=${RTKBASE_WEB}/templates/base.html
+   #echo BASE_HTML=${BASE_HTML}
+   patch -f ${BASE_HTML} ${BASEDIR}/${BASE_PATCH}
+   ExitCodeCheck $?
+   chmod 644 ${BASE_HTML}
+   ExitCodeCheck $?
+
    SETTINGS_HTML=${RTKBASE_WEB}/templates/settings.html
    #echo SETTINGS_HTML=${SETTINGS_HTML}
    sudo -u ${RTKBASE_USER} sed -i s/\>File\ rotation.*\:\ \</\>File\ rotation\ time\ \(in\ hour\)\:\ \</ ${SETTINGS_HTML}
@@ -633,25 +682,40 @@ configure_for_unicore(){
 }
 
 configure_settings(){
-   echo '################################'
-   echo 'CONFIGURE SETTINGS'
-   echo '################################'
-
-   #echo BASEDIR=${BASEDIR} RTKBASE_PATH=${RTKBASE_PATH}
-   if [[ "${BASEDIR}" != "${RTKBASE_PATH}" ]]
+   if [ -f ${SETTINGS_SAVE} ]
    then
-      #echo mv ${BASEDIR}/${UNICORE_SETTIGNS} ${RTKBASE_PATH}/
-      mv ${BASEDIR}/${UNICORE_SETTIGNS} ${RTKBASE_PATH}/
+      echo '################################'
+      echo 'RESTORE SETTINGS'
+      echo '################################'
+
+      #echo cp ${SETTINGS_SAVE} ${SETTINGS_NOW}
+      mv ${SETTINGS_SAVE} ${SETTINGS_NOW}
       ExitCodeCheck $?
+
+      #echo rm -f ${BASEDIR}/${UNICORE_SETTIGNS}
+      rm -f ${BASEDIR}/${UNICORE_SETTIGNS}
+   else
+      echo '################################'
+      echo 'CONFIGURE SETTINGS'
+      echo '################################'
+
+      #echo BASEDIR=${BASEDIR} RTKBASE_PATH=${RTKBASE_PATH}
+      if [[ "${BASEDIR}" != "${RTKBASE_PATH}" ]]
+      then
+         #echo mv ${BASEDIR}/${UNICORE_SETTIGNS} ${RTKBASE_PATH}/
+         mv ${BASEDIR}/${UNICORE_SETTIGNS} ${RTKBASE_PATH}/
+         ExitCodeCheck $?
+      fi
+      #echo chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
+      chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
+      ExitCodeCheck $?
+      #echo ${RTKBASE_PATH}/${UNICORE_SETTIGNS} ${RECVNAME}
+      ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
+      ExitCodeCheck $?
+
+      #echo rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
+      rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
    fi
-   #echo chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
-   chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
-   ExitCodeCheck $?
-   #echo ${RTKBASE_PATH}/${UNICORE_SETTIGNS} ${RECVNAME}
-   ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
-   ExitCodeCheck $?
-   #echo rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
-   rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
 }
 
 configure_gnss(){
@@ -682,8 +746,8 @@ delete_garbage(){
 
       #echo rm -f ${FILES_DELETE}
       rm -f ${FILES_DELETE}
-      #have_full || [ $exitcode = 0 ] && have_receiver && echo rm -f ${BASENAME}
-      have_full || [ $exitcode = 0 ] && have_receiver && rm -f ${BASENAME}
+      #echo \[ $exitcode = 0 \] \&\& have_receiver \&\& echo rm -f ${BASENAME}
+      [ $exitcode = 0 ] && have_receiver && rm -f ${BASENAME}
    fi
 }
 
@@ -715,9 +779,9 @@ BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${CONFBYNAV} ${UNICORE_CONFIGURE
               ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
               ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY} \
               ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER} ${CONFIG} \
-              ${RTKLIB}/* ${VERSION} ${SETTING_PATCH}"
+              ${RTKLIB}/* ${VERSION} ${SETTING_PATCH} ${BASE_PATCH}"
 FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
-FILES_DELETE="${SERVER_PATCH} ${STATUS_PATCH} ${SETTING_PATCH} ${CONFIG}"
+FILES_DELETE="${SERVER_PATCH} ${STATUS_PATCH} ${SETTING_PATCH} ${BASE_PATCH} ${CONFIG}"
 
 check_phases(){
    if [[ ${1} == "-1" ]]
@@ -751,6 +815,7 @@ restart_as_root ${1}
 check_phases ${1}
 have_phase1 && export LANG=C
 unpack_files
+check_version
 have_phase1 && check_boot_configiration
 have_full && do_reboot
 have_receiver && check_port

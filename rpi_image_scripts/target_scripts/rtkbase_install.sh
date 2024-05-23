@@ -26,37 +26,46 @@ EOF
 cat <<"EOF" > /usr/local/rtkbase/setup_2nd_stage.sh
 #!/bin/sh
 
-if test -x /usr/local/rtkbase/install.sh
+HOME=/usr/local/rtkbase
+export HOME
+
+if test -x ${HOME}/install.sh
 then
-  HOME=/usr/local/rtkbase
-  export HOME
 
-  /usr/local/rtkbase/install.sh -2 >> /usr/local/rtkbase/install.log 2>&1
+  ${HOME}/install.sh -2 >> ${HOME}/install.log 2>&1
 
-  if test -x /usr/local/rtkbase/tune_power.sh
+  if test -x ${HOME}/tune_power.sh
   then
-    /usr/local/rtkbase/tune_power.sh >> /usr/local/rtkbase/install.log 2>&1
+    ${HOME}/tune_power.sh >> ${HOME}/install.log 2>&1
   fi
 
 elif test -f /boot/firmware/install.sh
 then
-  HOME=/usr/local/rtkbase
-  export HOME
 
-  mv /boot/firmware/install.sh ${HOME}
-  chmod +x /usr/local/rtkbase/install.sh
-  /usr/local/rtkbase/install.sh >> /usr/local/rtkbase/install.log 2>&1
+  mv /boot/firmware/install.sh ${HOME}/update
+  chmod +x ${HOME}/update/install.sh
+  ${HOME}/update/install.sh >> ${HOME}/install.log 2>&1
 
-  if test -x /usr/local/rtkbase/tune_power.sh
+  if test -x ${HOME}/tune_power.sh
   then
-    /usr/local/rtkbase/tune_power.sh >> /usr/local/rtkbase/install.log 2>&1
+    ${HOME}/tune_power.sh >> ${HOME}/install.log 2>&1
+  fi
+
+elif test -x ${HOME}/update/install.sh
+then
+
+  ${HOME}/update/install.sh -2 >> ${HOME}/install.log 2>&1
+
+  if test -x ${HOME}/tune_power.sh
+  then
+    ${HOME}/tune_power.sh >> ${HOME}/install.log 2>&1
   fi
 
 else
 
-  if test -x /usr/local/rtkbase/tune_power.sh
+  if test -x ${HOME}/tune_power.sh
   then
-    /usr/local/rtkbase/tune_power.sh
+    ${HOME}/tune_power.sh
   fi
 
 fi
