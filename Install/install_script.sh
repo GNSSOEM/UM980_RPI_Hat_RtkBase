@@ -2,6 +2,7 @@
 RTKBASE_USER=rtkbase
 RTKBASE_PATH=/usr/local/${RTKBASE_USER}
 RTKBASE_GIT=${RTKBASE_PATH}/rtkbase
+RTKBASE_UPDATE=${RTKBASE_PATH}/update
 RTKBASE_TOOLS=${RTKBASE_GIT}/tools
 RTKBASE_WEB=${RTKBASE_GIT}/web_app
 RTKBASE_RECV=${RTKBASE_GIT}/receiver_cfg
@@ -423,6 +424,13 @@ add_rtkbase_user(){
    then
       #echo mkdir ${RTKBASE_PATH}
       mkdir ${RTKBASE_PATH}
+      ExitCodeCheck $?
+   fi
+
+   if [[ ! -d "${RTKBASE_UPDATE}" ]]
+   then
+      #echo mkdir ${RTKBASE_UPDATE}
+      mkdir ${RTKBASE_UPDATE}
       ExitCodeCheck $?
    fi
 
