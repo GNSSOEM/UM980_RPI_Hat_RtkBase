@@ -15,6 +15,8 @@ RUN_CAST=run_cast.sh
 SET_BASE_POS=UnicoreSetBasePos.sh
 UNICORE_SETTIGNS=UnicoreSettings.sh
 UNICORE_CONFIGURE=UnicoreConfigure.sh
+SETTINGS_NOW=${RTKBASE_GIT}/settings.conf
+SETTINGS_SAVE=${RTKBASE_GIT}/settings.save
 NMEACONF=NmeaConf
 CONF_TAIL=RTCM3_OUT.txt
 CONF980=UM980_${CONF_TAIL}
@@ -167,6 +169,12 @@ check_version(){
         exit
      else
         echo Update from version ${OLD_VERSION} to version ${NEW_VERSION}
+        if [ -f ${SETTINGS_NOW} ]
+        then
+           #echo cp ${SETTINGS_NOW} ${SETTINGS_SAVE}
+           cp ${SETTINGS_NOW} ${SETTINGS_SAVE}
+           ExitCodeCheck $?
+        fi
      fi
   fi
 }
@@ -642,25 +650,40 @@ configure_for_unicore(){
 }
 
 configure_settings(){
-   echo '################################'
-   echo 'CONFIGURE SETTINGS'
-   echo '################################'
-
-   #echo BASEDIR=${BASEDIR} RTKBASE_PATH=${RTKBASE_PATH}
-   if [[ "${BASEDIR}" != "${RTKBASE_PATH}" ]]
+   if [ -f ${SETTINGS_SAVE} ]
    then
-      #echo mv ${BASEDIR}/${UNICORE_SETTIGNS} ${RTKBASE_PATH}/
-      mv ${BASEDIR}/${UNICORE_SETTIGNS} ${RTKBASE_PATH}/
+      echo '################################'
+      echo 'RESTORE SETTINGS'
+      echo '################################'
+
+      #echo cp ${SETTINGS_SAVE} ${SETTINGS_NOW}
+      mv ${SETTINGS_SAVE} ${SETTINGS_NOW}
       ExitCodeCheck $?
+
+      #echo rm -f ${BASEDIR}/${UNICORE_SETTIGNS}
+      rm -f ${BASEDIR}/${UNICORE_SETTIGNS}
+   else
+      echo '################################'
+      echo 'CONFIGURE SETTINGS'
+      echo '################################'
+
+      #echo BASEDIR=${BASEDIR} RTKBASE_PATH=${RTKBASE_PATH}
+      if [[ "${BASEDIR}" != "${RTKBASE_PATH}" ]]
+      then
+         #echo mv ${BASEDIR}/${UNICORE_SETTIGNS} ${RTKBASE_PATH}/
+         mv ${BASEDIR}/${UNICORE_SETTIGNS} ${RTKBASE_PATH}/
+         ExitCodeCheck $?
+      fi
+      #echo chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
+      chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
+      ExitCodeCheck $?
+      #echo ${RTKBASE_PATH}/${UNICORE_SETTIGNS} ${RECVNAME}
+      ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
+      ExitCodeCheck $?
+
+      #echo rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
+      rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
    fi
-   #echo chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
-   chmod +x ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
-   ExitCodeCheck $?
-   #echo ${RTKBASE_PATH}/${UNICORE_SETTIGNS} ${RECVNAME}
-   ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
-   ExitCodeCheck $?
-   #echo rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
-   rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
 }
 
 configure_gnss(){
