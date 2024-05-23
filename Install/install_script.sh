@@ -666,8 +666,8 @@ delete_garbage(){
 
       #echo rm -f ${FILES_DELETE}
       rm -f ${FILES_DELETE}
-      #have_full || [ $exitcode = 0 ] && have_receiver && echo rm -f ${BASENAME}
-      have_full || [ $exitcode = 0 ] && have_receiver && rm -f ${BASENAME}
+      #echo \[ $exitcode = 0 \] \&\& have_receiver \&\& echo rm -f ${BASENAME}
+      [ $exitcode = 0 ] && have_receiver && rm -f ${BASENAME}
    fi
 }
 
