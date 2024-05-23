@@ -226,6 +226,8 @@ do_reboot(){
    if [[ ${NEEDREBOOT} == "Y" ]]
    then
       echo Please try again ${0} after reboot
+      #echo rm -f ${FILES_EXTRACT}
+      rm -f ${FILES_EXTRACT}
       reboot now
       exit
    fi
@@ -244,6 +246,8 @@ check_port(){
    if [[ ! -c "${RECVPORT}" ]]
    then
       echo port ${RECVPORT} not found. Setup port and try again
+      #echo rm -f ${FILES_EXTRACT}
+      rm -f ${FILES_EXTRACT}
       exit
    fi
 }
