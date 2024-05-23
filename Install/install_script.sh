@@ -150,6 +150,27 @@ replace_config(){
   fi
 }
 
+check_version(){
+  if [ -f ${RTKBASE_PATH}/${VERSION} ]
+  then
+     echo '################################'
+     echo 'CHECK VERSION'
+     echo '################################'
+     OLD_VERSION=`cat ${RTKBASE_PATH}/${VERSION}`
+     NEW_VERSION=`cat ${BASEDIR}/${VERSION}`
+     #echo NEW_VERSION=${NEW_VERSION} OLD_VERSION=${OLD_VERSION}
+     if [ "${NEW_VERSION}" -lt "${OLD_VERSION}" ]
+     then
+        echo Already installed version'('${OLD_VERSION}')' is newer, than install.sh version'('${NEW_VERSION}')'. Exiting
+        #echo rm -f ${FILES_EXTRACT}
+        rm -f ${FILES_EXTRACT}
+        exit
+     else
+        echo Update from version ${OLD_VERSION} to version ${NEW_VERSION}
+     fi
+  fi
+}
+
 check_boot_configiration(){
    echo '################################'
    if have_full
@@ -735,6 +756,7 @@ restart_as_root ${1}
 check_phases ${1}
 have_phase1 && export LANG=C
 unpack_files
+check_version
 have_phase1 && check_boot_configiration
 have_full && do_reboot
 have_receiver && check_port
