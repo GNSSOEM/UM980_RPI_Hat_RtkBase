@@ -67,6 +67,8 @@ ${sed} s/^local_ntripc_msg=.*/local_ntripc_msg=\'${rtcm_msg}\'/ "${settings}"
 ${sed} s/^rtcm_svr_msg=.*/rtcm_svr_msg=\'${rtcm_msg_full}\'/ "${settings}"
 ${sed} s/^rtcm_serial_msg=.*/rtcm_serial_msg=\'${rtcm_msg_full}\'/ "${settings}"
 
+${sed} s/^archive_rotate=.*/archive_rotate=\'20\'/ "${settings}"
+
 if ! ischroot
 then
    # start previously running services
