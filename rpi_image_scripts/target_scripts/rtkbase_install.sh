@@ -69,6 +69,7 @@ EOF
 chmod +x /usr/local/rtkbase/setup_2nd_stage.sh
 
 hostname raspberrypi
+rm -f /usr/local/rtkbase/version.txt
 /usr/local/rtkbase/install.sh -1 2>&1
 
 apt clean
