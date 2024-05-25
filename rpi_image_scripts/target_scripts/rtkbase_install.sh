@@ -29,32 +29,27 @@ cat <<"EOF" > /usr/local/rtkbase/setup_2nd_stage.sh
 HOME=/usr/local/rtkbase
 export HOME
 
-if test -x ${HOME}/install.sh
-then
-
-  ${HOME}/install.sh -2 >> ${HOME}/install.log 2>&1
-
-  if test -x ${HOME}/tune_power.sh
-  then
-    ${HOME}/tune_power.sh >> ${HOME}/install.log 2>&1
-  fi
-
-elif test -f /boot/firmware/install.sh
+if test -f /boot/firmware/install.sh
 then
 
   mv /boot/firmware/install.sh ${HOME}/update
   chmod +x ${HOME}/update/install.sh
-  ${HOME}/update/install.sh >> ${HOME}/install.log 2>&1
+  ${HOME}/update/install.sh -u >> ${HOME}/install.log 2>&1
+
+  if test -x ${HOME}/update/install.sh
+  then
+     mv ${HOME}/update/install.sh ${HOME}/install.sh >> ${HOME}/install.log 2>&1
+  fi
 
   if test -x ${HOME}/tune_power.sh
   then
     ${HOME}/tune_power.sh >> ${HOME}/install.log 2>&1
   fi
 
-elif test -x ${HOME}/update/install.sh
+elif test -x ${HOME}/install.sh
 then
 
-  ${HOME}/update/install.sh -2 >> ${HOME}/install.log 2>&1
+  ${HOME}/install.sh -2 >> ${HOME}/install.log 2>&1
 
   if test -x ${HOME}/tune_power.sh
   then

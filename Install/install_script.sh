@@ -27,6 +27,7 @@ SERVER_PATCH=server_py.patch
 STATUS_PATCH=status_js.patch
 SETTING_PATCH=settings_js.patch
 BASE_PATCH=base_html.patch
+SETTING_PATCH=settings_js.patch
 SYSCONGIG=RtkbaseSystemConfigure.sh
 SYSSERVICE=RtkbaseSystemConfigure.service
 SYSPROXY=RtkbaseSystemConfigureProxy.sh
@@ -157,13 +158,16 @@ replace_config(){
 }
 
 check_version(){
+  NEW_VERSION=`cat ${BASEDIR}/${VERSION}`
+  ExitCodeCheck $?
   if [ -f ${RTKBASE_PATH}/${VERSION} ]
   then
      echo '################################'
      echo 'CHECK VERSION'
      echo '################################'
+     UPDATE=Y
      OLD_VERSION=`cat ${RTKBASE_PATH}/${VERSION}`
-     NEW_VERSION=`cat ${BASEDIR}/${VERSION}`
+     ExitCodeCheck $?
      #echo NEW_VERSION=${NEW_VERSION} OLD_VERSION=${OLD_VERSION}
      if [ "${NEW_VERSION}" -lt "${OLD_VERSION}" ]
      then
@@ -180,6 +184,9 @@ check_version(){
            ExitCodeCheck $?
         fi
      fi
+  else
+     OLD_VERSION=${NEW_VERSION}
+     UPDATE=N
   fi
 }
 
@@ -719,15 +726,20 @@ configure_settings(){
 }
 
 configure_gnss(){
-   #echo ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
-   ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -e
-   ExitCodeCheck $?
-   #echo ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
-   ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
-   ExitCodeCheck $?
-   if ! ischroot
+   if [[ "$UPDATE" != Y ]]
    then
-      systemctl is-active --quiet rtkbase_web.service && sudo systemctl restart rtkbase_web.service
+      #echo ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
+      ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -e
+      ExitCodeCheck $?
+
+      #echo ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
+      ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
+      ExitCodeCheck $?
+
+      if ! ischroot
+      then
+         systemctl is-active --quiet rtkbase_web.service && sudo systemctl restart rtkbase_web.service
+      fi
    fi
 }
 
@@ -790,20 +802,19 @@ check_phases(){
       HAVE_PHASE1=0
       HAVE_FULL=1
       FILES_EXTRACT="${BASE_EXTRACT}"
-   else
-      if [[ ${1} == "-2" ]]
-      then
-         HAVE_RECEIVER=0
-         HAVE_PHASE1=1
-         HAVE_FULL=1
-         FILES_EXTRACT=
-      else
-        if [[ ${1} != "" ]]
-        then
-           echo Invalid argument \"${1}\"
-           exit 1
-        fi
-      fi
+   elif [[ ${1} == "-2" ]]
+   then
+      HAVE_RECEIVER=0
+      HAVE_PHASE1=1
+      HAVE_FULL=1
+      FILES_EXTRACT=
+   elif [[ ${1} == "-u" ]]
+   then
+      FILES_EXTRACT="${BASE_EXTRACT}"
+   elif [[ ${1} != "" ]]
+   then
+      echo Invalid argument \"${1}\"
+      exit 1
    fi
 
    #echo HAVE_RECEIVER=${HAVE_RECEIVER} HAVE_PHASE1=${HAVE_PHASE1} HAVE_FULL=${HAVE_FULL}
