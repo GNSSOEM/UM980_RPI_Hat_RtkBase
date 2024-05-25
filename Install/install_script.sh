@@ -793,20 +793,19 @@ check_phases(){
       HAVE_PHASE1=0
       HAVE_FULL=1
       FILES_EXTRACT="${BASE_EXTRACT}"
-   else
-      if [[ ${1} == "-2" ]]
-      then
-         HAVE_RECEIVER=0
-         HAVE_PHASE1=1
-         HAVE_FULL=1
-         FILES_EXTRACT=
-      else
-        if [[ ${1} != "" ]]
-        then
-           echo Invalid argument \"${1}\"
-           exit 1
-        fi
-      fi
+   elif [[ ${1} == "-2" ]]
+   then
+      HAVE_RECEIVER=0
+      HAVE_PHASE1=1
+      HAVE_FULL=1
+      FILES_EXTRACT=
+   elif [[ ${1} == "-u" ]]
+   then
+      FILES_EXTRACT="${BASE_EXTRACT}"
+   elif [[ ${1} != "" ]]
+   then
+      echo Invalid argument \"${1}\"
+      exit 1
    fi
 
    #echo HAVE_RECEIVER=${HAVE_RECEIVER} HAVE_PHASE1=${HAVE_PHASE1} HAVE_FULL=${HAVE_FULL}
