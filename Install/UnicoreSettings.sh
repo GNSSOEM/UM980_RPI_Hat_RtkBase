@@ -57,9 +57,9 @@ ${sed} s/^antenna_info=.*/antenna_info=\'ELT0123\'/ "${settings}"
 
 ${sed} s/^svr_addr_a=.*/svr_addr_a=\'servers.onocoy.com\'/ "${settings}"
 ${sed} s/^svr_addr_b=.*/svr_addr_b=\'ntrip.rtkdirect.com\'/ "${settings}"
-${sed} s/^svr_port_b=.*/svr_port_b=\'\'/ "${settings}"
-${sed} s/^svr_pwd_b=.*/svr_pwd_b=\'TCP\'/ "${settings}"
-${sed} s/^mnt_name_b=.*/mnt_name_b=\'TCP\'/ "${settings}"
+#${sed} s/^svr_port_b=.*/svr_port_b=\'\'/ "${settings}"
+#${sed} s/^svr_pwd_b=.*/svr_pwd_b=\'TCP\'/ "${settings}"
+#${sed} s/^mnt_name_b=.*/mnt_name_b=\'TCP\'/ "${settings}"
 
 ${sed} s/^rtcm_msg_a=.*/rtcm_msg_a=\'${rtcm_msg}\'/ "${settings}"
 ${sed} s/^rtcm_msg_b=.*/rtcm_msg_b=\'${rtcm_msg}\'/ "${settings}"
