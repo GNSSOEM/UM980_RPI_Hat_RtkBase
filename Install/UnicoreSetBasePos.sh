@@ -83,11 +83,13 @@ then
    fi
    #echo ${BASEDIR}/NmeaConf ${OLDDEV} \"CONFIG ${RECVCOM} ${com_speed}\" QUIET
    ${BASEDIR}/NmeaConf ${OLDDEV} "CONFIG ${RECVCOM} ${com_speed}" QUIET
-   if [[ $? == 0 ]]
+   code=$?
+   if [[ $code == 0 ]] || [[ $code == 3 ]]
    then
       #echo ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
       ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
-      if [[ $? == 0 ]]
+      ExitCodeCheck $?
+      if [[ $lastcode == 0 ]]
       then
          recv_speed=${com_speed}
          SAVECONF=Y
@@ -96,7 +98,7 @@ then
          exit 2
       fi
    else
-      #echo exit 1
+      #echo code=$code exit 1
       exit 1
    fi
 fi
