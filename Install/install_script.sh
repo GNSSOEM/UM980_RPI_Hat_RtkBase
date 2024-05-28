@@ -453,6 +453,9 @@ add_rtkbase_user(){
       ExitCodeCheck $?
    fi
 
+   usermod -a -G plugdev,dialout ${RTKBASE_USER}
+   ExitCodeCheck $?
+
    RTKBASE_SUDOER=/etc/sudoers.d/${RTKBASE_USER}
    #echo RTKBASE_SUDOER=${RTKBASE_SUDOER}
    if [[ ! -f "${RTKBASE_SUDOER}" ]]
