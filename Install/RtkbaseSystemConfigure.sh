@@ -100,6 +100,8 @@ then
          #echo useradd --comment "Added by system" --create-home --password "${CRYPTO}" "${LOGIN}"
          useradd --comment "Added by RtkBaseSystemConfigure" --create-home --password "${CRYPTO}" "${LOGIN}"
          ExitCodeCheck $?
+         usermod -a -G plugdev,dialout "${LOGIN}"
+         ExitCodeCheck $?
          echo Added user ${LOGIN} with password -- code ${exitcode}
       else
          #echo useradd --comment "Added by system" --create-home --disabled-password "${LOGIN}"
