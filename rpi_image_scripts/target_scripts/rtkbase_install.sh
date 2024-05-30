@@ -31,38 +31,34 @@ export HOME
 
 if test -f /boot/firmware/install.sh
 then
-
   mv /boot/firmware/install.sh ${HOME}/update
   chmod +x ${HOME}/update/install.sh
-  ${HOME}/update/install.sh -u >> ${HOME}/install.log 2>&1
 
-  if test -x ${HOME}/update/install.sh
+  if test -x ${HOME}/install.sh
   then
+     ${HOME}/update/install.sh -1 >> ${HOME}/install.log 2>&1
      mv ${HOME}/update/install.sh ${HOME}/install.sh >> ${HOME}/install.log 2>&1
+  else
+     ${HOME}/update/install.sh -u >> ${HOME}/install.log 2>&1
   fi
 
-  if test -x ${HOME}/tune_power.sh
-  then
-    ${HOME}/tune_power.sh >> ${HOME}/install.log 2>&1
-  fi
+  LOG=Y
+fi
 
-elif test -x ${HOME}/install.sh
+if test -x ${HOME}/install.sh
 then
-
   ${HOME}/install.sh -2 >> ${HOME}/install.log 2>&1
+  LOG=Y
+fi
 
-  if test -x ${HOME}/tune_power.sh
+if test -x ${HOME}/tune_power.sh
+then
+  if test "${LOG}" = "Y"
   then
-    ${HOME}/tune_power.sh >> ${HOME}/install.log 2>&1
+     ${HOME}/tune_power.sh >> ${HOME}/install.log 2>&1
+  else
+     ${HOME}/tune_power.sh
   fi
-
-else
-
-  if test -x ${HOME}/tune_power.sh
-  then
-    ${HOME}/tune_power.sh
-  fi
-
 fi
 EOF
 
