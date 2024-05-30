@@ -1,4 +1,6 @@
 #!/bin/bash
+#ISVERSION=1.0.4
+
 RTKBASE_USER=rtkbase
 RTKBASE_PATH=/usr/local/${RTKBASE_USER}
 RTKBASE_GIT=${RTKBASE_PATH}/rtkbase
