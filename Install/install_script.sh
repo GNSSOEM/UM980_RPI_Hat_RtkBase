@@ -1,4 +1,6 @@
 #!/bin/bash
+NEW_VERSION=104
+
 RTKBASE_USER=rtkbase
 RTKBASE_PATH=/usr/local/${RTKBASE_USER}
 RTKBASE_GIT=${RTKBASE_PATH}/rtkbase
@@ -158,9 +160,13 @@ replace_config(){
 }
 
 check_version(){
-  NEW_VERSION=`cat ${BASEDIR}/${VERSION}`
-  ExitCodeCheck $?
-  if [ -f ${RTKBASE_PATH}/${VERSION} ]
+  if [ -f ${BASEDIR}/${VERSION} ]
+  then
+     NEW_VERSION=`cat ${BASEDIR}/${VERSION}`
+     ExitCodeCheck $?
+  fi
+  #echo BASEDIR=${BASEDIR} RTKBASE_PATH=${RTKBASE_PATH}
+  if [[ "${BASEDIR}" != "${RTKBASE_PATH}" ]] && [ -f ${RTKBASE_PATH}/${VERSION} ]
   then
      echo '################################'
      echo 'CHECK VERSION'
@@ -729,7 +735,7 @@ configure_settings(){
 }
 
 configure_gnss(){
-   if [[ "$UPDATE" != Y ]]
+   if [[ "${UPDATE}" != "Y" ]] || ! have_full
    then
       #echo ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
       ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -e
@@ -829,7 +835,7 @@ restart_as_root ${1}
 check_phases ${1}
 have_phase1 && export LANG=C
 unpack_files
-check_version
+have_phase1 && check_version
 have_phase1 && check_boot_configiration
 have_full && do_reboot
 have_receiver && check_port
