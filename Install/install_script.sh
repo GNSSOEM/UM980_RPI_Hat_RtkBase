@@ -594,6 +594,10 @@ rtkbase_install(){
    #echo ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -r -t -g
    ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -t -g
    ExitCodeCheck $?
+   if [ $lastcode != 0 ]
+   then
+      echo BUG: ${RTKBASE_INSTALL} finished with exitcode = $lascode
+   fi
    #echo rm -f ${RTKBASE_PATH}/${RTKBASE_INSTALL}
    rm -f ${RTKBASE_PATH}/${RTKBASE_INSTALL}
    #echo chown -R ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}
@@ -785,6 +789,13 @@ info_open(){
    fi
 }
 
+info_bug(){
+   if [ $exitcode != 0 ]
+   then
+      echo exitcode = $exitcode Check bugs in this output
+   fi
+}
+
 HAVE_RECEIVER=0
 HAVE_PHASE1=0
 HAVE_FULL=0
@@ -864,6 +875,7 @@ have_receiver && delete_garbage
 cd ${ORIGDIR}
 have_full || info_reboot
 have_receiver && info_open
+have_receiver || info_bug
 #echo exit $exitcode
 exit $exitcode
 
