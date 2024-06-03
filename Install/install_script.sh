@@ -285,6 +285,7 @@ install_additional_utilies(){
    install_packet_if_not_installed uuid
    install_packet_if_not_installed cpufrequtils
    install_packet_if_not_installed uhubctl
+   install_packet_if_not_installed ntpdate
 }
 
 delete_pi_user(){
