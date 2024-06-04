@@ -241,13 +241,25 @@ configure_bynav(){
     RECVPORT=${1}
     RECVNAME=${2}
     FIRMWARE=${3}
+    RECVDEV=${4}
+    RECVSPEED=${5}
 
     echo Receiver ${RECVNAME}\(${FIRMWARE}\) found on ${RECVPORT}
     RECVCONF=${rtkbase_path}/receiver_cfg/Bynav_RTCM3_OUT.txt
-    #echo RECVCONF=${RECVCONF}
+    #echo RECVCONF=${RECVCONF} RECVPORT=${RECVPORT} RECVSPEED=${RECVSPEED}
 
     if [[ -f "${RECVCONF}" ]]
     then
+       if [[ "${RECVSPEED}" != "115200" ]]
+       then
+          RECVCOM=`${rtkbase_path}/NmeaConf ${RECVPORT} TEST COM | grep COM`
+          #echo RECVCOM=${RECVCOM}
+          #echo ${rtkbase_path}/${NMEACONF} ${RECVPORT} \"SERIALCONFIG ${RECVCOM} 115200\" QUIET
+          ${rtkbase_path}/${NMEACONF} ${RECVPORT} "SERIALCONFIG ${RECVCOM} 115200" QUIET
+          RECVPORT=${RECVDEV}:115200
+          #echo NEW RECVPORT=${RECVPORT}
+       fi
+
        #echo ${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVCONF} QUIET
        ${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVCONF} QUIET
        exitcode=$?
@@ -285,7 +297,9 @@ configure_gnss(){
         source <( grep '=' "${rtkbase_path}"/settings.conf ) 
         stoping_main
 
-        RECVPORT=/dev/${com_port}:${com_port_settings%%:*}
+        RECVSPEED=${com_port_settings%%:*}
+        RECVDEV=/dev/${com_port}
+        RECVPORT=${RECVDEV}:${RECVSPEED}
         RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} VERSION SILENT`
         #echo RECVVER=${RECVVER}
         RECVERROR=`echo ${RECVVER} | grep ERROR`
@@ -317,7 +331,7 @@ configure_gnss(){
            #echo FIRMWARE=${FIRMWARE}
            if [[ ${RECVNAME} != "" ]] && [[ ${FIRMWARE} != "" ]]
            then
-              configure_bynav ${RECVPORT} ${RECVNAME} ${FIRMWARE}
+              configure_bynav ${RECVPORT} ${RECVNAME} ${FIRMWARE} ${RECVDEV} ${RECVSPEED}
            else
               echo 'No Gnss receiver has been set. We can'\''t configure '${RECVPORT}
               return 1
