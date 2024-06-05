@@ -1,5 +1,5 @@
 diff --git a/web_app/server.py b/web_app/server.py
-index 0b82d29..4bd23fb 100755
+index 0b82d29..3aaee9a 100755
 --- a/web_app/server.py
 +++ b/web_app/server.py
 @@ -112,7 +112,7 @@ services_list = [{"service_unit" : "str2str_tcp.service", "name" : "main"},
@@ -34,7 +34,28 @@ index 0b82d29..4bd23fb 100755
      if answer.returncode == 0 and "/dev/" in answer.stdout:
          #print("DEBUG ok stdout: ", answer.stdout)
          try:
-@@ -610,7 +611,7 @@ def configure_receiver(brand="u-blox", model="F9P"):
+@@ -596,6 +597,20 @@ def detect_receiver(json_msg):
+     #print('DEBUG result: ', result)
+     socketio.emit("gnss_detection_result", json.dumps(result), namespace="/test")
+ 
++@socketio.on("detection_apply", namespace="/test")
++def detection_apply(json_msg):
++    print("Detection applied")
++    #print("DEBUG json_msg: ", json_msg)
++    msg = json.loads(json_msg)
++    port = os.path.basename(msg["port"])
++
++    receiver_conf = os.path.join(rtkbase_path, "receiver.conf")
++    with open(receiver_conf, "w") as f:
++        f.write("recv_port=" + port +"\n")
++        f.write("recv_speed=" + msg["port_speed"] + "\n")
++        f.write("recv_position=\n")
++        f.close()
++
+ @socketio.on("configure_receiver", namespace="/test")
+ def configure_receiver(brand="u-blox", model="F9P"):
+     # only ZED-F9P could be configured automaticaly
+@@ -610,7 +625,7 @@ def configure_receiver(brand="u-blox", model="F9P"):
          restart_main = False
  
      print("configuring {} gnss receiver model {}".format(brand, model))
