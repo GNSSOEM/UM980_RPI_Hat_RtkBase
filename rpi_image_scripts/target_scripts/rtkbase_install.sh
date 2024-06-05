@@ -43,7 +43,15 @@ fi
 
 if test -x ${HOME}/update/install.sh
 then
-  sudo ntpdate -b -t 5 pool.ntp.org >>${HOME}/install.log 2>&1
+  for i in `seq 1 10`
+  do
+     if sudo ntpdate -b -t 5 pool.ntp.org >>${HOME}/install.log 2>&1
+     then
+        break
+     fi
+     sleep 3
+  done
+
   if test -x ${HOME}/install.sh
   then
      ${HOME}/update/install.sh -1 >>${HOME}/install.log 2>&1
@@ -52,6 +60,8 @@ then
      if test "${status}" = "0"
      then
         mv ${HOME}/update/install.sh ${HOME}/install.sh >>${HOME}/install.log 2>&1
+     else
+        NOSECOND=Y
      fi
   else
      ${HOME}/update/install.sh -u >>${HOME}/install.log 2>&1
@@ -62,10 +72,14 @@ then
   LOG=Y
 fi
 
-if test -x ${HOME}/install.sh
+#echo NOSECOND=${NOSECOND} LOG=${LOG} >>${HOME}/install.log 2>&1
+if test -z "${NOSECOND}"
 then
-  ${HOME}/install.sh -2 >>${HOME}/install.log 2>&1
-  LOG=Y
+   if test -x ${HOME}/install.sh
+   then
+      ${HOME}/install.sh -2 >>${HOME}/install.log 2>&1
+      LOG=Y
+   fi
 fi
 
 if test -x ${HOME}/tune_power.sh
