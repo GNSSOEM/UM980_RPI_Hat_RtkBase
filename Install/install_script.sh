@@ -775,8 +775,8 @@ delete_garbage(){
       #echo rm -f ${FILES_DELETE}
       rm -f ${FILES_DELETE}
       #echo \[ $exitcode = 0 \] \&\& have_receiver \&\& echo rm -f ${BASENAME}
-      [ $exitcode = 0 ] && have_receiver && rm -f ${BASENAME}
    fi
+   [ $exitcode = 0 ] && have_receiver && rm -f ${BASENAME}
 }
 
 info_open(){
@@ -832,6 +832,7 @@ check_phases(){
       HAVE_PHASE1=1
       HAVE_FULL=1
       FILES_EXTRACT=
+      FILES_DELETE=
    elif [[ ${1} == "-u" ]]
    then
       FILES_EXTRACT="${BASE_EXTRACT}"
@@ -872,7 +873,7 @@ have_receiver && configure_gnss
 have_receiver && start_rtkbase_services
 #echo cd ${BASEDIR}
 cd ${BASEDIR}
-have_receiver && delete_garbage
+delete_garbage
 cd ${ORIGDIR}
 have_full || info_reboot
 have_receiver && info_open
