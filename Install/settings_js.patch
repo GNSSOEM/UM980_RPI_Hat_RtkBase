@@ -1,9 +1,12 @@
 diff --git a/web_app/static/settings.js b/web_app/static/settings.js
-index dc59f1c..fde36fe 100644
+index dc59f1c..825c15e 100644
 --- a/web_app/static/settings.js
 +++ b/web_app/static/settings.js
-@@ -349,6 +349,7 @@ $(document).ready(function () {
+@@ -347,8 +347,10 @@ $(document).ready(function () {
+         if (response['result'] === 'success') {
+             detectBodyElt.innerHTML = '<b>' + response['gnss_type'] + '</b>' + ' detected on ' + '<b>' + response['port'] + '</b>' + '<br>' + '<br>' + 'Do you want to apply?';
              detectApplyBtnElt.onclick = function (){
++                socket.emit("detection_apply", msg);
                  document.querySelector('#com_port').value = response['port'].replace(/^\/dev\//, '');
                  document.querySelector('#com_port_settings').value = response['port_speed'] + ':8:n:1';
 +                document.querySelector('#receiver').value = response['gnss_type'];

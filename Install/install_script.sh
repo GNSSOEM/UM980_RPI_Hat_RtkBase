@@ -29,7 +29,8 @@ SERVER_PATCH=server_py.patch
 STATUS_PATCH=status_js.patch
 SETTING_PATCH=settings_js.patch
 BASE_PATCH=base_html.patch
-SETTING_PATCH=settings_js.patch
+SETTING_JS_PATCH=settings_js.patch
+SETTING_HTML_PATCH=settings_html.patch
 SYSCONGIG=RtkbaseSystemConfigure.sh
 SYSSERVICE=RtkbaseSystemConfigure.service
 SYSPROXY=RtkbaseSystemConfigureProxy.sh
@@ -686,7 +687,7 @@ configure_for_unicore(){
 
    SETTING_JS=${RTKBASE_WEB}/static/settings.js
    #echo SETTING_JS=${SETTING_JS}
-   patch -f ${SETTING_JS} ${BASEDIR}/${SETTING_PATCH}
+   patch -f ${SETTING_JS} ${BASEDIR}/${SETTING_JS_PATCH}
    ExitCodeCheck $?
    chmod 644 ${SETTING_JS}
    ExitCodeCheck $?
@@ -700,11 +701,10 @@ configure_for_unicore(){
 
    SETTINGS_HTML=${RTKBASE_WEB}/templates/settings.html
    #echo SETTINGS_HTML=${SETTINGS_HTML}
-   sudo -u ${RTKBASE_USER} sed -i s/\>File\ rotation.*\:\ \</\>File\ rotation\ time\ \(in\ hour\)\:\ \</ ${SETTINGS_HTML}
+   #echo patch -f ${SETTINGS_HTML} ${BASEDIR}/${SETTING_HTML_PATCH}
+   patch -f ${SETTINGS_HTML} ${BASEDIR}/${SETTING_HTML_PATCH}
    ExitCodeCheck $?
-   sudo -u ${RTKBASE_USER} sed -i s/\>File\ overlap.*\:\ \</\>File\ overlap\ time\ \(in\ seconds\)\:\ \</ ${SETTINGS_HTML}
-   ExitCodeCheck $?
-   sudo -u ${RTKBASE_USER} sed -i s/\>Archive\ dur.*\:\ \</\>Archive\ duration\ \(in\ days\)\:\ \</ ${SETTINGS_HTML}
+   chmod 644 ${SETTINGS_HTML}
    ExitCodeCheck $?
 
    if ! ischroot
@@ -784,8 +784,8 @@ delete_garbage(){
       #echo rm -f ${FILES_DELETE}
       rm -f ${FILES_DELETE}
       #echo \[ $exitcode = 0 \] \&\& have_receiver \&\& echo rm -f ${BASENAME}
-      [ $exitcode = 0 ] && have_receiver && rm -f ${BASENAME}
    fi
+   [ $exitcode = 0 ] && have_receiver && rm -f ${BASENAME}
 }
 
 info_open(){
@@ -823,9 +823,10 @@ BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${CONFBYNAV} ${UNICORE_CONFIGURE
               ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
               ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY} \
               ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER} ${CONFIG} \
-              ${RTKLIB}/* ${VERSION} ${SETTING_PATCH} ${BASE_PATCH}"
+              ${RTKLIB}/* ${VERSION} ${SETTING_JS_PATCH} ${BASE_PATCH} \
+              ${SETTING_HTML_PATCH}"
 FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
-FILES_DELETE="${SERVER_PATCH} ${STATUS_PATCH} ${SETTING_PATCH} ${BASE_PATCH} ${CONFIG}"
+FILES_DELETE="${SERVER_PATCH} ${STATUS_PATCH} ${SETTING_JS_PATCH} ${BASE_PATCH} ${SETTING_HTML_PATCH} ${CONFIG}"
 
 check_phases(){
    if [[ ${1} == "-1" ]]
@@ -840,6 +841,7 @@ check_phases(){
       HAVE_PHASE1=1
       HAVE_FULL=1
       FILES_EXTRACT=
+      FILES_DELETE=
    elif [[ ${1} == "-u" ]]
    then
       FILES_EXTRACT="${BASE_EXTRACT}"
@@ -880,7 +882,7 @@ have_receiver && configure_gnss
 have_receiver && start_rtkbase_services
 #echo cd ${BASEDIR}
 cd ${BASEDIR}
-have_receiver && delete_garbage
+delete_garbage
 cd ${ORIGDIR}
 have_full || info_reboot
 have_receiver && info_open
