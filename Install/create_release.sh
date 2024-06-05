@@ -13,7 +13,8 @@ tar --exclude-vcs \
     RtkbaseSystemConfigure.sh RtkbaseSystemConfigure.service \
     RtkbaseSystemConfigureProxy.sh server_py.patch \
     status_js.patch tune_power.sh config.txt rtklib/* \
-    version.txt settings_js.patch base_html.patch
+    version.txt settings_js.patch base_html.patch \
+    settings_html.patch
  
 cat install_script.sh $ARCHIVE_NAME > $BUNDLE_NAME
 chmod +x $BUNDLE_NAME
