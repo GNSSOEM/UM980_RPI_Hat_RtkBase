@@ -130,6 +130,21 @@ if [[ ${SETPOS} == Y ]]
 then
    if [[ "${receiver}" == *Unicore* ]]
    then
+      for i in `seq 1 30`
+      do
+         #echo UNICORE_MODE=\`${BASEDIR}/NmeaConf ${DEVICE} MODE\`
+         UNICORE_MODE=`${BASEDIR}/NmeaConf ${DEVICE} MODE`
+         ExitCodeCheck $?
+         IS_FINE=`echo ${UNICORE_MODE} | grep -c "1005"`
+         #echo UNICORE_MODE=${UNICORE_MODE}
+         #echo IS_FINE=${IS_FINE}
+         if [[ ${IS_FINE} != "0" ]]
+         then
+            echo 1005 found on $i iteration
+            break
+         fi
+         sleep 1
+      done
       #echo ${BASEDIR}/NmeaConf ${DEVICE} \"MODE BASE 1 ${position}\" QUIET
       ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 ${position}" QUIET
       ExitCodeCheck $?
