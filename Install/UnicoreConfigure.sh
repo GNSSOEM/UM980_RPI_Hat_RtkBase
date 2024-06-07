@@ -25,7 +25,7 @@ _check_user() {
 }
 
 detect_speed() {
-    for port_speed in 115200 921600 230400 460800 57600 38400 19200 9600; do
+    for port_speed in 115200 921600 230400 460800; do
         echo 'DETECTION ON ' ${1} ' at ' ${port_speed}
         RECVPORT=/dev/${1}:${port_speed}
         RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} VERSION SILENT`
