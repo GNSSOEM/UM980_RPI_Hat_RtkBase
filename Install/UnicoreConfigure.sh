@@ -143,8 +143,8 @@ stoping_main() {
 
 detect_gnss() {
     stoping_main
-    detect_uart
     detect_usb
+    detect_uart
     detect_configure ${1}
 }
 
