@@ -38,6 +38,12 @@ else
 fi
 #echo recv_port=${recv_port} recv_speed=${recv_speed} recv_position=${recv_position}
 
+if [[ ${com_speed} -lt 115200 ]]
+then
+   echo com_speed \(${com_speed}\) is low 115200
+   exit 3
+fi
+
 SETSPEED=Y
 SETPOS=Y
 TIMEPOS=N
