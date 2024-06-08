@@ -67,6 +67,7 @@ mkdir -p ${logdir}
        #${BASEDIR}/UnicoreSetBasePos.sh ${com_port} ${com_port_settings%%:*} "${position}" "${receiver}" >>${BASEDIR}/debug.log 2>&1
        exitcode=$?
        #echo UnicoreSetBasePos exitcode=${exitcode} >>${BASEDIR}/debug.log 2>&1
+       #echo ============================================== >>${BASEDIR}/debug.log 2>&1
        if [[ ${exitcode} != 0 ]]
        then
           echo run_cast exit with exitcode ${exitcode}

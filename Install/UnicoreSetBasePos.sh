@@ -83,6 +83,20 @@ then
    elif [[ "${receiver}" == *Bynav* ]]
    then
       RECVCOM=`${BASEDIR}/NmeaConf ${OLDDEV} TEST COM | grep COM`
+      if [[ "${RECVCOM}" == "" ]]
+      then
+          RECVCOM=`${BASEDIR}/NmeaConf ${DEVICE} TEST COM | grep COM`
+          if [[ "${RECVCOM}" != "" ]]
+          then
+             echo Receiver already on ${com_speed}
+             #echo ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
+             ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
+             ExitCodeCheck $?
+             recv_speed=${com_speed}
+             SAVECONF=Y
+             SETSPEED=N
+          fi
+      fi
    fi
 
    #echo RECVCOM=${RECVCOM}
@@ -91,36 +105,48 @@ then
       echo Unknown receiver port for change speed
       exit 1
    fi
+fi
 
-   if [[ "${receiver}" == *Unicore* ]]
-   then
-      #echo ${BASEDIR}/NmeaConf ${OLDDEV} \"CONFIG ${RECVCOM} ${com_speed}\" QUIET
-      ${BASEDIR}/NmeaConf ${OLDDEV} "CONFIG ${RECVCOM} ${com_speed}" QUIET
-   elif [[ "${receiver}" == *Bynav* ]]
-   then
-      #echo ${BASEDIR}/NmeaConf ${OLDDEV} \"SERIALCONFIG ${RECVCOM} ${com_speed}\" QUIET
-      ${BASEDIR}/NmeaConf ${OLDDEV} "SERIALCONFIG ${RECVCOM} ${com_speed}" QUIET
-   fi
-
-   lastcode=$?
-   #echo lastcode=${lastcode}
-   if [[ ${lastcode} == 0 ]] || [[ ${lastcode} == 3 ]]
-   then
-      #echo ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
-      ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
-      ExitCodeCheck $?
-      if [[ ${lastcode} == 0 ]]
+if [[ ${SETSPEED} == Y ]]
+then
+   for i in `seq 1 5`
+   do
+      if [[ "${receiver}" == *Unicore* ]]
       then
-         recv_speed=${com_speed}
-         SAVECONF=Y
-      else
-         echo receiver not answer after changing speed
-         exit 2
+         #echo ${BASEDIR}/NmeaConf ${OLDDEV} \"CONFIG ${RECVCOM} ${com_speed}\" QUIET
+         ${BASEDIR}/NmeaConf ${OLDDEV} "CONFIG ${RECVCOM} ${com_speed}" QUIET
+         lastcode=$?
+      elif [[ "${receiver}" == *Bynav* ]]
+      then
+         #echo ${BASEDIR}/NmeaConf ${OLDDEV} \"SERIALCONFIG ${RECVCOM} ${com_speed}\" QUIET
+         ${BASEDIR}/NmeaConf ${OLDDEV} "SERIALCONFIG ${RECVCOM} ${com_speed}" QUIET
+         lastcode=$?
       fi
-   else
-      ExitCodeCheck ${lastcode}
-      echo speed changed incorrectly, not saved
-      exit 1
+      #echo lastcode=${lastcode}
+      if [[ ${lastcode} == 0 ]] || [[ ${lastcode} == 3 ]]
+      then
+          #echo ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
+          ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
+          lastcode=$?
+          if [[ ${lastcode} == 0 ]]
+          then
+             echo Speed changed on $i iteration
+             SPEEDCHANGED=Y
+             recv_speed=${com_speed}
+             SAVECONF=Y
+             break
+          fi
+      else
+         ExitCodeCheck ${lastcode}
+         echo speed changed incorrectly, not saved
+         exit 1
+      fi
+   done
+
+   if [[ ${SPEEDCHANGED} != "Y" ]]
+   then
+      echo receiver not answer after changing speed
+      exit 2
    fi
 fi
 
