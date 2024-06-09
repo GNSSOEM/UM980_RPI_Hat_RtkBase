@@ -5,7 +5,7 @@
 Based on RtkBase
 
 ## Easy installation:
-+ Connect your ELT0229/ELT0219 to your raspberry pi/orange pi/....
++ Connect your Unicore or Bynav receiver to your raspberry pi/orange pi/....
 
 + Open a terminal and:
 
@@ -23,11 +23,11 @@ Based on RtkBase
 
 ## main feature, added to RtkBase
 
-+ Full configure for Unicore receiver and RPI
++ Use Unicore and Bynav receiver
++ Full configure for receiver and RPI
 + If mount and password are both TCP use TCP-client instead of NTRIP-server. It's need for rtkdirect.com
 + Setup base position to Unicore receiver
 + Timeout for PPP-solution is extended to 36 hours
-+ Add port 5017 for direct configure Unicore Receiver
 + Default settings is adopted to Unicore receiver, onocoy.com and rtkdirect.com
 + Windows RTK & HAS utilitis for precise resolving rtkbase position
 + Zeroconf configuration as rtkbase.local in the local network
