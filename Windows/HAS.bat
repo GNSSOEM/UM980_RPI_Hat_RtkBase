@@ -42,6 +42,16 @@
 @Set VerFile=versionHAS.tmp
 @NmeaConf.exe +%Recv% Version QUIET >%VerFile%
 @Rem Echo NmeaConf ErrorLevel=%ErrorLevel%
+@If ERRORLEVEL 5 @(
+    @Echo NOT connected to %Recv%
+    @Pause
+    @Exit
+)
+@If ERRORLEVEL 4 @(
+    @Echo Receiver is NOT Unicore
+    @Pause
+    @Exit
+)
 @If ERRORLEVEL 1 @(
     @Echo NOT connected to %Recv%
     @Pause
