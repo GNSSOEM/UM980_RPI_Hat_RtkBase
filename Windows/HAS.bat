@@ -48,7 +48,7 @@
     @Exit
 )
 @If ERRORLEVEL 4 @(
-    @Echo Receiver is NOT Unicore
+    @Echo This receiver does not support HAS
     @Pause
     @Exit
 )
