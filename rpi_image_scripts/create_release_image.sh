@@ -38,6 +38,7 @@ unshare -m -i ./mount_and_run_scripts.sh \
    "${RESIZETOSIZE}" \
    COPY install.sh \
    COPY WinRtkBaseConfigure.exe \
+   COPY WinRtkBaseUtils.exe \
    RUN \
       target_scripts/update_upgrade.sh \
       target_scripts/place_configure_util.sh \
