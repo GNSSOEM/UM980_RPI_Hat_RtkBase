@@ -1,6 +1,6 @@
 # UM980_RPI_Hat_RtkBase
 
-### RTK Base for RPI HAT ELT0229/ELT0219 on Unicore UM980/UM982
+### Raspbian compatible RtkBase software for Unicore UM98x and Bynav M2x
 
 Based on RtkBase
 
@@ -23,17 +23,18 @@ Based on RtkBase
 
 ## main feature, added to RtkBase
 
-+ Use Unicore and Bynav receiver
-+ Full configure for receiver and RPI
-+ If mount and password are both TCP use TCP-client instead of NTRIP-server. It's need for rtkdirect.com
-+ Setup base position to Unicore receiver
++ Use Unicore or Bynav receiver
++ Full configure for receiver and Raspberry Pi
++ If mount and password are both TCP use TCP-client instead of NTRIP-server
++ Setup base position to receiver
 + Timeout for PPP-solution is extended to 36 hours
-+ Default settings is adopted to Unicore receiver, onocoy.com and rtkdirect.com
++ Default settings is adopted to Unicore or Bynav receiver, onocoy.com and rtkdirect.com
 + Windows RTK & HAS utilitis for precise resolving rtkbase position
 + Zeroconf configuration as rtkbase.local in the local network
-+ Then change speed in main settings, speed of receiver will be changing too
++ Then speed changed in main settings, speed of receiver will be changing too
 + Configuring WIFi via an Windows application  (not only on first boot)
 + Adding users via an Windows application  (not only on first boot)
++ Ñomplete documentation with lots of pictures
 
 ## License:
 UM980_RPI_Hat_RtkBase is licensed under AGPL 3 (see [LICENSE](./LICENSE) file).
