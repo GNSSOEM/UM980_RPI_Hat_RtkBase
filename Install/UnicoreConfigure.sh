@@ -126,7 +126,7 @@ detect_uart() {
     echo 'UART GNSS RECEIVER DETECTION'
     echo '################################'
       if [[ ${#detected_gnss[*]} < 2 ]]; then
-        for port in ttyAMA5 ttyAMA4 ttyAMA3 ttyAMA2 ttyAMA1 ttyAMA0 ttyS0 serial0; do
+        for port in ttyAMA5 ttyAMA4 ttyAMA3 ttyAMA2 ttyAMA1 ttyAMA0 ttyS0 ttyS5 serial0; do
             if [[ -c /dev/${port} ]]
             then
                detect_speed_Unicore ${port}
