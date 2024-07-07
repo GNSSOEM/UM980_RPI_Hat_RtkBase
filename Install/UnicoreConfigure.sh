@@ -296,6 +296,11 @@ configure_gnss(){
       then
         source <( grep '=' "${rtkbase_path}"/settings.conf ) 
         stoping_main
+        if [[ "${com_port}" == "" ]]
+        then
+           echo 'GNSS receiver is not specified. We can'\''t configure.'
+           return 1
+        fi
 
         RECVSPEED=${com_port_settings%%:*}
         RECVDEV=/dev/${com_port}
@@ -329,7 +334,7 @@ configure_gnss(){
            #echo RECVVER=${RECVVER}
            FIRMWARE=`echo ${RECVVER} | awk -F ',' '{print $2}'`
            #echo FIRMWARE=${FIRMWARE}
-           if [[ ${RECVNAME} != "" ]] && [[ ${FIRMWARE} != "" ]]
+           if [[ "${RECVNAME}" != "" ]] && [[ "${FIRMWARE}" != "" ]]
            then
               configure_bynav ${RECVPORT} ${RECVNAME} ${FIRMWARE} ${RECVDEV} ${RECVSPEED}
            else
