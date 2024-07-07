@@ -599,7 +599,8 @@ rtkbase_install(){
    ExitCodeCheck $?
    if [ $lastcode != 0 ]
    then
-      echo BUG: ${RTKBASE_INSTALL} finished with exitcode = $lascode
+      echo BUG: ${RTKBASE_INSTALL} finished with exitcode = $lastcode
+      #ls -la ${RTKBASE_PATH}/${RTKBASE_INSTALL}
    fi
    #echo rm -f ${RTKBASE_PATH}/${RTKBASE_INSTALL}
    rm -f ${RTKBASE_PATH}/${RTKBASE_INSTALL}
