@@ -1,8 +1,8 @@
 diff --git a/web_app/server.py b/web_app/server.py
-index 0b82d29..3aaee9a 100755
+index 3dff915..539f366 100755
 --- a/web_app/server.py
 +++ b/web_app/server.py
-@@ -112,7 +112,7 @@ services_list = [{"service_unit" : "str2str_tcp.service", "name" : "main"},
+@@ -108,7 +108,7 @@ services_list = [{"service_unit" : "str2str_tcp.service", "name" : "main"},
                   ]
  
  #Delay before rtkrcv will stop if no user is on status.html page
@@ -10,8 +10,8 @@ index 0b82d29..3aaee9a 100755
 +rtkcv_standby_delay = 129600
  connected_clients = 0
  
- class User(UserMixin):
-@@ -195,9 +195,10 @@ def repaint_services_button(services_list):
+ class StandaloneApplication(gunicorn.app.base.BaseApplication):
+@@ -206,9 +206,10 @@ def repaint_services_button(services_list):
      """ 
      for service in services_list:
          if service.get("status") == "running":
@@ -25,16 +25,16 @@ index 0b82d29..3aaee9a 100755
          elif service.get("result") == "exit-code":
              service["btn_color"] = "warning"
          elif service.get("status") == "auto-restart":
-@@ -578,7 +579,7 @@ def deleteLog(json_msg):
+@@ -607,7 +608,7 @@ def deleteLog(json_msg):
  def detect_receiver(json_msg):
      print("Detecting gnss receiver")
      #print("DEBUG json_msg: ", json_msg)
--    answer = subprocess.run([os.path.join(rtkbase_path, "tools", "install.sh"), "--user", rtkbaseconfig.get("general", "user"), "--detect-gnss", "--no-write-port"], encoding="UTF-8", stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-+    answer = subprocess.run([os.path.join(rtkbase_path, "tools", "UnicoreConfigure.sh"), "--user", rtkbaseconfig.get("general", "user"), "--detect-gnss", "--no-write-port"], encoding="UTF-8", stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+-    answer = subprocess.run([os.path.join(rtkbase_path, "tools", "install.sh"), "--user", rtkbaseconfig.get("general", "user"), "--detect-gnss", "--no-write-port"], encoding="UTF-8", stderr=subprocess.PIPE, stdout=subprocess.PIPE, check=False)
++    answer = subprocess.run([os.path.join(rtkbase_path, "tools", "UnicoreConfigure.sh"), "--user", rtkbaseconfig.get("general", "user"), "--detect-gnss", "--no-write-port"], encoding="UTF-8", stderr=subprocess.PIPE, stdout=subprocess.PIPE, check=False)
      if answer.returncode == 0 and "/dev/" in answer.stdout:
          #print("DEBUG ok stdout: ", answer.stdout)
          try:
-@@ -596,6 +597,20 @@ def detect_receiver(json_msg):
+@@ -625,6 +626,20 @@ def detect_receiver(json_msg):
      #print('DEBUG result: ', result)
      socketio.emit("gnss_detection_result", json.dumps(result), namespace="/test")
  
@@ -53,14 +53,14 @@ index 0b82d29..3aaee9a 100755
 +        f.close()
 +
  @socketio.on("configure_receiver", namespace="/test")
- def configure_receiver(brand="u-blox", model="F9P"):
-     # only ZED-F9P could be configured automaticaly
-@@ -610,7 +625,7 @@ def configure_receiver(brand="u-blox", model="F9P"):
+ def configure_receiver(brand="", model=""):
+     # only some receiver could be configured automaticaly
+@@ -639,7 +654,7 @@ def configure_receiver(brand="", model=""):
          restart_main = False
  
      print("configuring {} gnss receiver model {}".format(brand, model))
--    answer = subprocess.run([os.path.join(rtkbase_path, "tools", "install.sh"), "--user", rtkbaseconfig.get("general", "user"), "--configure-gnss"], encoding="UTF-8", stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-+    answer = subprocess.run([os.path.join(rtkbase_path, "tools", "UnicoreConfigure.sh"), "--user", rtkbaseconfig.get("general", "user"), "--configure-gnss"], encoding="UTF-8", stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+-    answer = subprocess.run([os.path.join(rtkbase_path, "tools", "install.sh"), "--user", rtkbaseconfig.get("general", "user"), "--configure-gnss"], encoding="UTF-8", stderr=subprocess.PIPE, stdout=subprocess.PIPE, check=False)
++    answer = subprocess.run([os.path.join(rtkbase_path, "tools", "UnicoreConfigure.sh"), "--user", rtkbaseconfig.get("general", "user"), "--configure-gnss"], encoding="UTF-8", stderr=subprocess.PIPE, stdout=subprocess.PIPE, check=False)
      #print("DEBUG - stdout: ", answer.stdout)
      #print("DEBUG - returncode: ", answer.returncode)
  
