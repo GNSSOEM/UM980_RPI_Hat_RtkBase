@@ -30,7 +30,7 @@ STATUS_PATCH=status_js.patch
 SETTING_PATCH=settings_js.patch
 BASE_PATCH=base_html.patch
 SETTING_JS_PATCH=settings_js.patch
-SETTING_HTML_PATCH=settings_html.patch
+#SETTING_HTML_PATCH=settings_html.patch
 SYSCONGIG=RtkbaseSystemConfigure.sh
 SYSSERVICE=RtkbaseSystemConfigure.service
 SYSPROXY=RtkbaseSystemConfigureProxy.sh
@@ -700,13 +700,13 @@ configure_for_unicore(){
    chmod 644 ${BASE_HTML}
    ExitCodeCheck $?
 
-   SETTINGS_HTML=${RTKBASE_WEB}/templates/settings.html
+   #SETTINGS_HTML=${RTKBASE_WEB}/templates/settings.html
    #echo SETTINGS_HTML=${SETTINGS_HTML}
    #echo patch -f ${SETTINGS_HTML} ${BASEDIR}/${SETTING_HTML_PATCH}
-   patch -f ${SETTINGS_HTML} ${BASEDIR}/${SETTING_HTML_PATCH}
-   ExitCodeCheck $?
-   chmod 644 ${SETTINGS_HTML}
-   ExitCodeCheck $?
+   #patch -f ${SETTINGS_HTML} ${BASEDIR}/${SETTING_HTML_PATCH}
+   #ExitCodeCheck $?
+   #chmod 644 ${SETTINGS_HTML}
+   #ExitCodeCheck $?
 
    if ! ischroot
    then
@@ -824,10 +824,9 @@ BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${CONFBYNAV} ${UNICORE_CONFIGURE
               ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
               ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY} \
               ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER} ${CONFIG} \
-              ${RTKLIB}/* ${VERSION} ${SETTING_JS_PATCH} ${BASE_PATCH} \
-              ${SETTING_HTML_PATCH}"
+              ${RTKLIB}/* ${VERSION} ${SETTING_JS_PATCH} ${BASE_PATCH}"
 FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
-FILES_DELETE="${SERVER_PATCH} ${STATUS_PATCH} ${SETTING_JS_PATCH} ${BASE_PATCH} ${SETTING_HTML_PATCH} ${CONFIG}"
+FILES_DELETE="${SERVER_PATCH} ${STATUS_PATCH} ${SETTING_JS_PATCH} ${BASE_PATCH} ${CONFIG}"
 
 check_phases(){
    if [[ ${1} == "-1" ]]
