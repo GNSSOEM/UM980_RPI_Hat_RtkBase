@@ -449,20 +449,6 @@ add_rtkbase_user(){
    echo 'ADD RTKBASE USER'
    echo '################################'
 
-   if [[ ! -d "${RTKBASE_PATH}" ]]
-   then
-      #echo mkdir ${RTKBASE_PATH}
-      mkdir ${RTKBASE_PATH}
-      ExitCodeCheck $?
-   fi
-
-   if [[ ! -d "${RTKBASE_UPDATE}" ]]
-   then
-      #echo mkdir ${RTKBASE_UPDATE}
-      mkdir ${RTKBASE_UPDATE}
-      ExitCodeCheck $?
-   fi
-
    HAVEUSER=`cat /etc/passwd | grep ${RTKBASE_USER}`
    #echo HAVEUSER=${HAVEUSER}
    if [[ ${HAVEUSER} == "" ]]
@@ -481,6 +467,20 @@ add_rtkbase_user(){
    then
       #echo echo "rtkbase ALL=NOPASSWD: ALL" \> ${RTKBASE_SUDOER}
       echo "rtkbase ALL=NOPASSWD: ALL" > ${RTKBASE_SUDOER}
+   fi
+
+   if [[ ! -d "${RTKBASE_PATH}" ]]
+   then
+      #echo mkdir ${RTKBASE_PATH}
+      mkdir ${RTKBASE_PATH}
+      ExitCodeCheck $?
+   fi
+
+   if [[ ! -d "${RTKBASE_UPDATE}" ]]
+   then
+      #echo mkdir ${RTKBASE_UPDATE}
+      mkdir ${RTKBASE_UPDATE}
+      ExitCodeCheck $?
    fi
 }
 
