@@ -185,10 +185,20 @@ detect_configure() {
 
           if [[ -f "${rtkbase_path}/settings.conf" ]]  && grep -qE "^com_port=.*" "${rtkbase_path}"/settings.conf #check if settings.conf exists
           then
+            if [[ "${detected_gnss[1]}" =~ u-blox ]]; then
+               recvformat=ubx
+            elif [[ "${detected_gnss[1]}" =~ Septentrio ]]; then
+               recvformat=sbf
+            else
+               recvformat=rtcm3
+            fi
+            #echo detected_gnss[1]=${detected_gnss[1]} recvformat=${recvformat}
+
             #change the com port value/settings inside settings.conf
             sudo -u "${RTKBASE_USER}" sed -i s/^com_port=.*/com_port=\'${detected_gnss[0]}\'/ "${rtkbase_path}"/settings.conf
             sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'${detected_gnss[1]}\'/ "${rtkbase_path}"/settings.conf
             sudo -u "${RTKBASE_USER}" sed -i s/^com_port_settings=.*/com_port_settings=\'${detected_gnss[2]}:8:n:1\'/ "${rtkbase_path}"/settings.conf
+            sudo -u "${RTKBASE_USER}" sed -i s/^receiver_format=.*/receiver_format=\'${recvformat}\'/ "${rtkbase_path}"/settings.conf
 
             RECEIVER_CONF=${rtkbase_path}/receiver.conf
             echo recv_port=${detected_gnss[0]}>${RECEIVER_CONF}

@@ -1,8 +1,8 @@
 diff --git a/web_app/static/settings.js b/web_app/static/settings.js
-index dc59f1c..825c15e 100644
+index c63e6e3..f51313a 100644
 --- a/web_app/static/settings.js
 +++ b/web_app/static/settings.js
-@@ -347,8 +347,10 @@ $(document).ready(function () {
+@@ -347,8 +347,19 @@ $(document).ready(function () {
          if (response['result'] === 'success') {
              detectBodyElt.innerHTML = '<b>' + response['gnss_type'] + '</b>' + ' detected on ' + '<b>' + response['port'] + '</b>' + '<br>' + '<br>' + 'Do you want to apply?';
              detectApplyBtnElt.onclick = function (){
@@ -10,6 +10,15 @@ index dc59f1c..825c15e 100644
                  document.querySelector('#com_port').value = response['port'].replace(/^\/dev\//, '');
                  document.querySelector('#com_port_settings').value = response['port_speed'] + ':8:n:1';
 +                document.querySelector('#receiver').value = response['gnss_type'];
++                var recvformat;
++                if (response['gnss_type'].search(/u-blox/) != -1) {
++                   recvformat = "ubx"
++                } else if (response['gnss_type'].search(/Septentrio/) != -1) {
++                   recvformat = "sbf"
++                } else {
++                   recvformat = "rtcm3"
++                }
++                document.querySelector('#receiver_format').value = recvformat;
                  // NEW METHOD from https://stackoverflow.com/questions/35154348/trigger-form-submission-with-javascript
                  document.getElementById("main").dispatchEvent(new SubmitEvent('submit', {cancelable: true}));
                  if (response['then_configure']) {
