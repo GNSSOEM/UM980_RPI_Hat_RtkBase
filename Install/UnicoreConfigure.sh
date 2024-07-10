@@ -73,6 +73,24 @@ detect_speed_Bynav() {
     done
 }
 
+detect_Ublox() {
+    echo 'DETECTION Ublox ON ' ${1} ' at ' ${2}
+    ubxVer=$(python3 "${rtkbase_path}"/tools/ubxtool -f /dev/$1 -s $2 -p MON-VER -w 5 2>/dev/null)
+    if [[ "${ubxVer}" =~ 'ZED-F9P' ]]; then
+       #echo Receiver ${ubxVer} found on ${1} ${port_speed}
+       detected_gnss[0]=${1}
+       detected_gnss[1]=u-blox_ZED-F9P
+       detected_gnss[2]=${2}
+    fi
+}
+
+detect_speed_Ublox() {
+    for port_speed in 38400 115200 921600 230400 460800; do
+        detect_Ublox ${1} ${port_speed}
+        [[ ${#detected_gnss[*]} -eq 3 ]] && break
+    done
+}
+
 detect_usb() {
     echo '################################'
     echo 'USB GNSS RECEIVER DETECTION'
@@ -92,17 +110,25 @@ detect_usb() {
              eval "$(udevadm info -q property --export -p "${syspath}")"
              #echo devname=${devname} ID_SERIAL=${ID_SERIAL}
              if [[ -z "$ID_SERIAL" ]]; then continue; fi
-             if [[ "$ID_SERIAL" =~ FTDI_FT230X_Basic_UART ]]
-             then
-               #echo detect_speed_Unicore ${devname}
-               detect_speed_Unicore ${devname}
-               #echo detect_speed_Bynav ${devname}
-               detect_speed_Bynav ${devname}
-               #echo '/dev/'"${detected_gnss[0]}" ' - ' "${detected_gnss[1]}"' - ' "${detected_gnss[2]}"
-             fi
-             if [[ "$ID_SERIAL" =~ 1a86_USB_Dual_Serial ]]
-             then
-               echo ${devname} >> "${BynavDevices}"
+             if [[ "$ID_SERIAL" =~ (u-blox|skytraq) ]]; then
+                detected_gnss[0]=$devname
+                detected_gnss[1]=$ID_SERIAL
+                #echo '/dev/'"${detected_gnss[0]}" ' - ' "${detected_gnss[1]}"
+                # If /dev/ttyGNSS is a symlink of the detected serial port, we've found the gnss receiver, break the loop.
+                # This test is useful with gnss receiver offering several serial ports (like mosaic X5). The Udev rule should symlink the right one with ttyGNSS
+                [[ '/dev/ttyGNSS' -ef '/dev/'"${detected_gnss[0]}" ]] && break
+             elif [[ "$ID_SERIAL" =~ Septentrio ]]; then
+                detected_gnss[0]=$devname
+                detected_gnss[1]=`echo  $ID_SERIAL | sed s/^Septentrio_Septentrio_/Septentrio_/`
+                [[ '/dev/ttyGNSS' -ef '/dev/'"${detected_gnss[0]}" ]] && break
+             elif [[ "$ID_SERIAL" =~ FTDI_FT230X_Basic_UART ]]; then
+                #echo detect_speed_Unicore ${devname}
+                detect_speed_Unicore ${devname}
+                #echo detect_speed_Bynav ${devname}
+                detect_speed_Bynav ${devname}
+                #echo '/dev/'"${detected_gnss[0]}" ' - ' "${detected_gnss[1]}"' - ' "${detected_gnss[2]}"
+             elif [[ "$ID_SERIAL" =~ 1a86_USB_Dual_Serial ]]; then
+                echo ${devname} >> "${BynavDevices}"
              fi
              [[ ${#detected_gnss[*]} -eq 3 ]] && break
          done
@@ -134,6 +160,9 @@ detect_uart() {
                [[ ${#detected_gnss[*]} -eq 3 ]] && break
 
                detect_speed_Bynav ${port}
+               [[ ${#detected_gnss[*]} -eq 3 ]] && break
+
+               detect_speed_Ublox ${port}
                [[ ${#detected_gnss[*]} -eq 3 ]] && break
             fi
         done
@@ -407,5 +436,3 @@ main() {
 main "$@"
 #echo 'cumulative_exit: ' $cumulative_exit
 exit $cumulative_exit
-
-__ARCHIVE__
