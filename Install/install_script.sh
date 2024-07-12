@@ -418,30 +418,42 @@ stop_rtkbase_services(){
      echo '################################'
      echo 'STOP RTKBASE SERVICES'
      echo '################################'
-      #store service status before upgrade
-      rtkbase_web_active=$(systemctl is-active rtkbase_web.service)
-      str2str_active=$(systemctl is-active str2str_tcp)
-      str2str_ntrip_A_active=$(systemctl is-active str2str_ntrip_A)
-      str2str_ntrip_B_active=$(systemctl is-active str2str_ntrip_B)
-      str2str_local_caster=$(systemctl is-active str2str_local_ntrip_caster)
-      str2str_rtcm=$(systemctl is-active str2str_rtcm_svr)
-      str2str_serial=$(systemctl is-active str2str_rtcm_serial)
-      str2str_file=$(systemctl is-active str2str_file)
-
-      # stop previously running services
-      [ "${str2str_ntrip_A_active}" = "active" ] && systemctl stop str2str_ntrip_A
-      [ "${str2str_ntrip_B_active}" = "active" ] && systemctl stop str2str_ntrip_B
-      [ "${str2str_local_caster}" = "active" ] && systemctl stop str2str_local_ntrip_caster
-      [ "${str2str_rtcm}" = "'active" ] && systemctl stop str2str_rtcm_svr
-      [ "${str2str_serial}" = "active" ] && systemctl stop str2str_rtcm_serial
-      [ "${str2str_file}" = "active" ] && systemctl stop str2str_file
-      if [ "${str2str_active}" = "active" ] || [ "${str2str_active}" = "activating" ]
-      then
-         #echo systemctl stop str2str_tcp \&\& sleep 2
-         systemctl stop str2str_tcp && sleep 2
-      fi
-      [ "${rtkbase_web_active}" = "active" ] && systemctl stop rtkbase_web.service
-   fi
+     for service_name in str2str_ntrip_A.service \
+                         str2str_ntrip_B.service \
+                         str2str_local_ntrip_caster \
+                         str2str_rtcm_svr.service \
+                         str2str_rtcm_client.service \
+                         str2str_rtcm_udp_svr.service \
+                         str2str_rtcm_udp_client.service \
+                         str2str_rtcm_serial.service \
+                         str2str_file.service \
+                         str2str_tcp.service \
+                         rtkrcv_raw2nmea.service \
+                         rtkbase_web.service \
+                         rtkbase_archive.service \
+                         rtkbase_archive.timer \
+                         modem_check.service \
+                         modem_check.timer \
+                         rtkbase_gnss_web_proxy.service
+     do
+         service_active=$(systemctl is-active "${service_name}")
+         if [ "${service_active}" != "inactive" ]
+         then
+            #echo ${service_name} is ${service_active}
+            #echo systemctl stop "${service_name}"
+            systemctl stop "${service_name}"
+            if [ "${service_name}" = "str2str_tcp.service" ]
+            then
+               need_sleep=Y
+            fi
+         fi
+     done
+     if [ "${need_sleep}" = "Y" ]
+     then
+        #echo sleep 2
+        sleep 2
+     fi
+  fi
 }
 
 add_rtkbase_user(){
