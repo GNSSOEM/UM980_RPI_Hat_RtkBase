@@ -485,6 +485,10 @@ add_rtkbase_user(){
       #echo mkdir ${RTKBASE_PATH}
       mkdir ${RTKBASE_PATH}
       ExitCodeCheck $?
+   else
+      #echo chmod 755 ${RTKBASE_PATH}
+      chmod 755 ${RTKBASE_PATH}
+      ExitCodeCheck $?
    fi
 
    if [[ ! -d "${RTKBASE_UPDATE}" ]]
@@ -616,8 +620,8 @@ rtkbase_install(){
    #echo rm -f ${RTKBASE_PATH}/${RTKBASE_INSTALL}
    rm -f ${RTKBASE_PATH}/${RTKBASE_INSTALL}
    #echo chown -R ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}
-   chown -R ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}
-   ExitCodeCheck $?
+   #chown -R ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}
+   #ExitCodeCheck $?
 }
 
 configure_for_unicore(){
