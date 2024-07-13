@@ -712,7 +712,7 @@ configure_for_unicore(){
    #echo RUNCAST_SH=${RUNCAST_SH}
    patch -f ${RUNCAST_SH} ${BASEDIR}/${RUNCAST_PATCH}
    ExitCodeCheck $?
-   chmod 644 ${RUNCAST_SH}
+   chmod 755 ${RUNCAST_SH}
    ExitCodeCheck $?
 
    if ! ischroot
