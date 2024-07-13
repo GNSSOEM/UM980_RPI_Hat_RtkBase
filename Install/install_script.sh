@@ -686,12 +686,16 @@ configure_for_unicore(){
    ExitCodeCheck $?
    chmod 644 ${SERVER_PY}
    ExitCodeCheck $?
+   rm -f ${BASEDIR}/${SERVER_PATCH}
+   ExitCodeCheck $?
 
    STATUS_JS=${RTKBASE_WEB}/static/status.js
    #echo STATUS_JS=${STATUS_JS}
    patch -f ${STATUS_JS} ${BASEDIR}/${STATUS_PATCH}
    ExitCodeCheck $?
    chmod 644 ${STATUS_JS}
+   ExitCodeCheck $?
+   rm -f ${BASEDIR}/${STATUS_PATCH}
    ExitCodeCheck $?
 
    SETTING_JS=${RTKBASE_WEB}/static/settings.js
@@ -700,6 +704,8 @@ configure_for_unicore(){
    ExitCodeCheck $?
    chmod 644 ${SETTING_JS}
    ExitCodeCheck $?
+   rm -f ${BASEDIR}/${SETTING_JS_PATCH}
+   ExitCodeCheck $?
 
    BASE_HTML=${RTKBASE_WEB}/templates/base.html
    #echo BASE_HTML=${BASE_HTML}
@@ -707,12 +713,16 @@ configure_for_unicore(){
    ExitCodeCheck $?
    chmod 644 ${BASE_HTML}
    ExitCodeCheck $?
+   rm -f ${BASEDIR}/${BASE_PATCH}
+   ExitCodeCheck $?
 
    RUNCAST_SH=${RTKBASE_GIT}/run_cast.sh
    #echo RUNCAST_SH=${RUNCAST_SH}
    patch -f ${RUNCAST_SH} ${BASEDIR}/${RUNCAST_PATCH}
    ExitCodeCheck $?
    chmod 755 ${RUNCAST_SH}
+   ExitCodeCheck $?
+   rm -f ${BASEDIR}/${RUNCAST_PATCH}
    ExitCodeCheck $?
 
    if ! ischroot
@@ -833,7 +843,7 @@ BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${CONFBYNAV} ${UNICORE_CONFIGURE
               ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER} ${CONFIG} \
               ${RTKLIB}/* ${VERSION} ${SETTING_JS_PATCH} ${BASE_PATCH}"
 FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
-FILES_DELETE="${RUNCAST_PATCH} ${SERVER_PATCH} ${STATUS_PATCH} ${SETTING_JS_PATCH} ${BASE_PATCH} ${CONFIG}"
+FILES_DELETE="${CONFIG}"
 
 check_phases(){
    if [[ ${1} == "-1" ]]
