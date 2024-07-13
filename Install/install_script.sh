@@ -14,7 +14,6 @@ ORIGDIR=`pwd`
 #echo BASEDIR=${BASEDIR} BASENAME=${BASENAME}
 RECVPORT=/dev/serial0
 RTKBASE_INSTALL=rtkbase_install.sh
-RUN_CAST=run_cast.sh
 SET_BASE_POS=UnicoreSetBasePos.sh
 UNICORE_SETTIGNS=UnicoreSettings.sh
 UNICORE_CONFIGURE=UnicoreConfigure.sh
@@ -29,6 +28,7 @@ SERVER_PATCH=server_py.patch
 STATUS_PATCH=status_js.patch
 SETTING_PATCH=settings_js.patch
 BASE_PATCH=base_html.patch
+RUNCAST_PATCH=run_cast_sh.patch
 SETTING_JS_PATCH=settings_js.patch
 #SETTING_HTML_PATCH=settings_html.patch
 SYSCONGIG=RtkbaseSystemConfigure.sh
@@ -626,13 +626,6 @@ configure_for_unicore(){
    echo 'CONFIGURE FOR UNICORE'
    echo '################################'
 
-   #echo cp ${BASEDIR}/${RUN_CAST} ${RTKBASE_GIT}/
-   mv ${BASEDIR}/${RUN_CAST} ${RTKBASE_GIT}/
-   ExitCodeCheck $?
-   #echo chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}/${RUN_CAST}
-   chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}/${RUN_CAST}
-   ExitCodeCheck $?
-
    #echo mv ${BASEDIR}/${SET_BASE_POS} ${RTKBASE_GIT}/
    mv ${BASEDIR}/${SET_BASE_POS} ${RTKBASE_GIT}/
    ExitCodeCheck $?
@@ -712,6 +705,12 @@ configure_for_unicore(){
    chmod 644 ${BASE_HTML}
    ExitCodeCheck $?
 
+   RUNCAST_SH=${RTKBASE_GIT}/run_cast.sh
+   #echo RUNCAST_SH=${RUNCAST_SH}
+   patch -f ${RUNCAST_SH} ${BASEDIR}/${RUNCAST_PATCH}
+   ExitCodeCheck $?
+   chmod 644 ${RUNCAST_SH}
+   ExitCodeCheck $?
    #SETTINGS_HTML=${RTKBASE_WEB}/templates/settings.html
    #echo SETTINGS_HTML=${SETTINGS_HTML}
    #echo patch -f ${SETTINGS_HTML} ${BASEDIR}/${SETTING_HTML_PATCH}
@@ -833,12 +832,12 @@ have_full(){
 }
 
 BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${CONFBYNAV} ${UNICORE_CONFIGURE} \
-              ${RUN_CAST} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
+              ${RUNCAST_PATCH} ${SET_BASE_POS} ${UNICORE_SETTIGNS} \
               ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY} \
               ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER} ${CONFIG} \
               ${RTKLIB}/* ${VERSION} ${SETTING_JS_PATCH} ${BASE_PATCH}"
 FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
-FILES_DELETE="${SERVER_PATCH} ${STATUS_PATCH} ${SETTING_JS_PATCH} ${BASE_PATCH} ${CONFIG}"
+FILES_DELETE="${RUNCAST_PATCH} ${SERVER_PATCH} ${STATUS_PATCH} ${SETTING_JS_PATCH} ${BASE_PATCH} ${CONFIG}"
 
 check_phases(){
    if [[ ${1} == "-1" ]]
