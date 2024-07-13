@@ -30,7 +30,6 @@ SETTING_PATCH=settings_js.patch
 BASE_PATCH=base_html.patch
 RUNCAST_PATCH=run_cast_sh.patch
 SETTING_JS_PATCH=settings_js.patch
-#SETTING_HTML_PATCH=settings_html.patch
 SYSCONGIG=RtkbaseSystemConfigure.sh
 SYSSERVICE=RtkbaseSystemConfigure.service
 SYSPROXY=RtkbaseSystemConfigureProxy.sh
@@ -711,13 +710,6 @@ configure_for_unicore(){
    ExitCodeCheck $?
    chmod 644 ${RUNCAST_SH}
    ExitCodeCheck $?
-   #SETTINGS_HTML=${RTKBASE_WEB}/templates/settings.html
-   #echo SETTINGS_HTML=${SETTINGS_HTML}
-   #echo patch -f ${SETTINGS_HTML} ${BASEDIR}/${SETTING_HTML_PATCH}
-   #patch -f ${SETTINGS_HTML} ${BASEDIR}/${SETTING_HTML_PATCH}
-   #ExitCodeCheck $?
-   #chmod 644 ${SETTINGS_HTML}
-   #ExitCodeCheck $?
 
    if ! ischroot
    then
