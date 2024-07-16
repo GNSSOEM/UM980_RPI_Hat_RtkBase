@@ -485,11 +485,14 @@ add_rtkbase_user(){
       #echo mkdir ${RTKBASE_PATH}
       mkdir ${RTKBASE_PATH}
       ExitCodeCheck $?
-   else
-      #echo chmod 755 ${RTKBASE_PATH}
-      chmod 755 ${RTKBASE_PATH}
-      ExitCodeCheck $?
    fi
+
+   #echo chown rtkbase:rtkbase ${RTKBASE_PATH}
+   chown rtkbase:rtkbase ${RTKBASE_PATH}
+   ExitCodeCheck $?
+   #echo chmod 755 ${RTKBASE_PATH}
+   chmod 755 ${RTKBASE_PATH}
+   ExitCodeCheck $?
 
    if [[ ! -d "${RTKBASE_UPDATE}" ]]
    then
