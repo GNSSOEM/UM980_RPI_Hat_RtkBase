@@ -51,9 +51,22 @@
     @NmeaConf.exe +%Recv% "Log Version" QUIET >%VerFile%
     @If ERRORLEVEL 1 @(
         @Rem @Echo NmeaConf ErrorLevel=%ErrorLevel%
-        @Echo NOT connected to %Recv%
-        @Pause
-        @Exit
+        @NmeaConf.exe +%Recv% SEPTENTRIO_TEST.txt QUIET >%VerFile%
+        @If ERRORLEVEL 1 @(
+            @Echo NOT connected to %Recv%
+            @Pause
+            @Exit
+       ) Else @(
+            find "mosaic" %VerFile% >NUL
+            @If NOT ERRORLEVEL 1 @(
+                @Set Receiver=Septentrio
+                @Set Prefix=Septentrio
+            ) else (
+                @Echo Receiver on %Recv% is Unknown
+                @Pause
+                @Exit
+           )
+       )
     ) Else @(
         @find "BDVER" %VerFile% >NUL
         @If NOT ERRORLEVEL 1 @(
@@ -96,7 +109,7 @@
 
 @Echo Configure %Receiver% on %Recv% as RTK...
 @Set CoordFile=coordRTK.tmp
-@NmeaConf.exe +%Recv% %Prefix%_RTK.txt QUIET
+@NmeaConf.exe +%Recv% %Prefix%_RTK.txt NOMSG
 @If ERRORLEVEL 1 @(
     @Rem @Echo NmeaConf ErrorLevel=%ErrorLevel%
     @Echo %Receiver% NOT configured as RTK on %Recv%
@@ -116,7 +129,7 @@
 )
 
 @Echo Restore BASE configuration %Receiver% on %Recv%
-@NmeaConf.exe +%Recv% %Prefix%_RESET.txt QUIET
+@NmeaConf.exe +%Recv% %Prefix%_RESET.txt NOMSG
 @If ERRORLEVEL 1 @(
     @Rem @Echo NmeaConf ErrorLevel=%ErrorLevel%
     @Echo %Receiver% NOT configured as base on %Recv%
