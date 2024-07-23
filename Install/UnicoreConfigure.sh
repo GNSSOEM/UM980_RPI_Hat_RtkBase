@@ -24,27 +24,32 @@ _check_user() {
   fi
 }
 
+detect_Unicore() {
+    echo 'DETECTION Unicore ON ' ${1} ' at ' ${2}
+    RECVPORT=/dev/${1}:${2}
+    RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} VERSION SILENT`
+    if [[ "${RECVVER}" != "" ]]
+    then
+       #echo RECVVER=${RECVVER}
+       RECVNAME=`echo ${RECVVER}  | awk -F ';' '{print $2}'| awk -F ',' '{print $1}'`
+       #echo RECVNAME=${RECVNAME}
+       if [[ ${RECVNAME} != "" ]]
+       then
+          #FIRMWARE=`echo ${RECVVER}  | awk -F ';' '{print $2}'| awk -F ',' '{print $2}'`
+          #echo FIRMWARE=${FIRMWARE}
+          #echo Receiver ${RECVNAME}\(${FIRMWARE}\) found on ${1} ${port_speed}
+          detected_gnss[0]=${1}
+          detected_gnss[1]=Unicore_${RECVNAME}
+          detected_gnss[2]=${port_speed}
+       fi
+    fi
+}
+
+
 detect_speed_Unicore() {
     for port_speed in 115200 921600 230400 460800; do
-        echo 'DETECTION Unicore ON ' ${1} ' at ' ${port_speed}
-        RECVPORT=/dev/${1}:${port_speed}
-        RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} VERSION SILENT`
-        if [[ "${RECVVER}" != "" ]]
-        then
-           #echo RECVVER=${RECVVER}
-           RECVNAME=`echo ${RECVVER}  | awk -F ';' '{print $2}'| awk -F ',' '{print $1}'`
-           #echo RECVNAME=${RECVNAME}
-           if [[ ${RECVNAME} != "" ]]
-           then
-              #FIRMWARE=`echo ${RECVVER}  | awk -F ';' '{print $2}'| awk -F ',' '{print $2}'`
-              #echo FIRMWARE=${FIRMWARE}
-              #echo Receiver ${RECVNAME}\(${FIRMWARE}\) found on ${1} ${port_speed}
-              detected_gnss[0]=${1}
-              detected_gnss[1]=Unicore_${RECVNAME}
-              detected_gnss[2]=${port_speed}
-              break
-           fi
-        fi
+        detect_Unicore ${1} ${port_speed}
+        [[ ${#detected_gnss[*]} -eq 3 ]] && break
     done
 }
 
@@ -124,6 +129,7 @@ detect_usb() {
              elif [[ "$ID_SERIAL" =~ FTDI_FT230X_Basic_UART ]]; then
                 #echo detect_speed_Unicore ${devname}
                 detect_speed_Unicore ${devname}
+                [[ ${#detected_gnss[*]} -eq 3 ]] && break
                 #echo detect_speed_Bynav ${devname}
                 detect_speed_Bynav ${devname}
                 #echo '/dev/'"${detected_gnss[0]}" ' - ' "${detected_gnss[1]}"' - ' "${detected_gnss[2]}"
