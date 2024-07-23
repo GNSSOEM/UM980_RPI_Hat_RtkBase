@@ -96,6 +96,31 @@ detect_speed_Ublox() {
     done
 }
 
+detect_Septentrio() {
+    echo 'DETECTION Septentrio ON ' ${1} ' at ' ${2}
+    RECVPORT=/dev/${1}:${2}
+    RECVINFO=`${rtkbase_path}/${NMEACONF} ${RECVPORT} "lstInternalFile,Identification" QUIET | grep "hwplatform product"`
+    if [[ "${RECVINFO}" != "" ]]
+    then
+       #echo RECVINFO=${RECVINFO}
+       RECVNAME=`echo ${RECVINFO} | awk -F '"' '{print $2}'`
+       if [[ ${RECVNAME} != "" ]]
+       then
+          echo Receiver ${RECVNAME} found on ${1} ${port_speed}
+          detected_gnss[0]=${1}
+          detected_gnss[1]=Septentrio_${RECVNAME}
+          detected_gnss[2]=${2}
+       fi
+    fi
+}
+
+detect_speed_Septentrio() {
+    for port_speed in 115200 921600 230400 460800; do
+        detect_Septentrio ${1} ${port_speed}
+        [[ ${#detected_gnss[*]} -eq 3 ]] && break
+    done
+}
+
 detect_usb() {
     echo '################################'
     echo 'USB GNSS RECEIVER DETECTION'
@@ -123,9 +148,13 @@ detect_usb() {
                 # This test is useful with gnss receiver offering several serial ports (like mosaic X5). The Udev rule should symlink the right one with ttyGNSS
                 [[ '/dev/ttyGNSS' -ef '/dev/'"${detected_gnss[0]}" ]] && break
              elif [[ "$ID_SERIAL" =~ Septentrio ]]; then
-                detected_gnss[0]=$devname
-                detected_gnss[1]=`echo  $ID_SERIAL | sed s/^Septentrio_Septentrio_/Septentrio_/`
-                [[ '/dev/ttyGNSS' -ef '/dev/'"${detected_gnss[0]}" ]] && break
+                if [[ '/dev/ttyGNSS' -ef '/dev/'"${devname}" ]]; then
+                   detect_Septentrio ${devname} 115200
+                   [[ ${#detected_gnss[*]} -eq 3 ]] && break
+                   detected_gnss[0]=${devname}
+                   detected_gnss[1]=`echo  $ID_SERIAL | sed s/^Septentrio_Septentrio_/Septentrio_/`
+                   break
+                fi
              elif [[ "$ID_SERIAL" =~ FTDI_FT230X_Basic_UART ]]; then
                 #echo detect_speed_Unicore ${devname}
                 detect_speed_Unicore ${devname}
@@ -169,6 +198,9 @@ detect_uart() {
                [[ ${#detected_gnss[*]} -eq 3 ]] && break
 
                detect_speed_Ublox ${port}
+               [[ ${#detected_gnss[*]} -eq 3 ]] && break
+
+               detect_speed_Septentrio ${port}
                [[ ${#detected_gnss[*]} -eq 3 ]] && break
             fi
         done
