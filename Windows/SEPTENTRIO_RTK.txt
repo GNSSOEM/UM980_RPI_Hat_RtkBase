@@ -1,4 +1,5 @@
 SSSSSSSSSS
+SSSSSSSSSS
 exeCopyConfigFile, RxDefault, Current
 setSmoothingInterval, all, 60, 10
 setCN0Mask, all, 33
