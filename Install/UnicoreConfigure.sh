@@ -302,8 +302,26 @@ clear_TADJ() {
 
 configure_unicore(){
     RECVPORT=${1}
-    RECVNAME=${2}
-    FIRMWARE=${3}
+
+    RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} VERSION SILENT`
+    exitcode=$?
+    #echo RECVVER=${RECVVER}
+    RECVERROR=`echo ${RECVVER} | grep ERROR`
+    #echo RECVERROR=${RECVERROR}
+
+    RECVNAME=
+    FIRMWARE=
+    if [[ ${RECVERROR} == "" ]] && [[ "${RECVVER}" != "" ]]
+    then
+       RECVNAME=`echo ${RECVVER} | awk -F ';' '{print $2}'| awk -F ',' '{print $1}'`
+       #echo RECVNAME=${RECVNAME}
+       FIRMWARE=`echo ${RECVVER} | awk -F ';' '{print $2}'| awk -F ',' '{print $2}'`
+       #echo FIRMWARE=${FIRMWARE}
+    fi
+    if [[ ${RECVNAME} == "" ]] || [[ ${FIRMWARE} == "" ]]; then
+       echo Receiver Unicore not found on ${RECVPORT}
+       return 1
+    fi
 
     echo Receiver ${RECVNAME}\(${FIRMWARE}\) found on ${RECVPORT}
     RECVCONF=${rtkbase_path}/receiver_cfg/${RECVNAME}_RTCM3_OUT.txt
@@ -322,7 +340,6 @@ configure_unicore(){
           sudo -u "${RTKBASE_USER}" sed -i s/^receiver_firmware=.*/receiver_firmware=\'${FIRMWARE}\'/ "${rtkbase_path}"/settings.conf
           sudo -u "${RTKBASE_USER}" sed -i s/^com_port_settings=.*/com_port_settings=\'${SPEED}:8:n:1\'/ "${rtkbase_path}"/settings.conf
           sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'Unicore_${RECVNAME}\'/ "${rtkbase_path}"/settings.conf
-          sudo -u "${RTKBASE_USER}" sed -i s/^receiver_format=.*/receiver_format=\'rtcm3\'/ "${rtkbase_path}"/settings.conf
           clear_TADJ
        else
           echo Confiuration FAILED for ${RECVNAME} on ${RECVPORT}
@@ -341,10 +358,26 @@ configure_unicore(){
 
 configure_bynav(){
     RECVPORT=${1}
-    RECVNAME=${2}
-    FIRMWARE=${3}
-    RECVDEV=${4}
-    RECVSPEED=${5}
+    RECVDEV=${2}
+    RECVSPEED=${3}
+
+    RECVINFO=`${rtkbase_path}/${NMEACONF} ${RECVPORT} "LOG AUTHORIZATION" QUIET`
+    exitcode=$?
+
+    RECVNAME=
+    if [[ "${RECVINFO}" != "" ]]
+    then
+       #echo RECVINFO=${RECVINFO}
+       RECVNAME=`echo ${RECVINFO} | awk -F ';' '{print $2}'| awk -F ' ' '{print $2}'`
+    fi
+    RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} "LOG VERSION" QUIET`
+    #echo RECVVER=${RECVVER}
+    FIRMWARE=`echo ${RECVVER} | awk -F ',' '{print $2}'`
+    #echo FIRMWARE=${FIRMWARE}
+    if [[ "${RECVNAME}" == "" ]] || [[ "${FIRMWARE}" == "" ]]; then
+       echo Receiver Bynav not found on ${RECVPORT}
+       return 1
+    fi
 
     echo Receiver ${RECVNAME}\(${FIRMWARE}\) found on ${RECVPORT}
     RECVCONF=${rtkbase_path}/receiver_cfg/Bynav_RTCM3_OUT.txt
@@ -373,7 +406,6 @@ configure_bynav(){
           sudo -u "${RTKBASE_USER}" sed -i s/^receiver_firmware=.*/receiver_firmware=\'${FIRMWARE}\'/ "${rtkbase_path}"/settings.conf
           sudo -u "${RTKBASE_USER}" sed -i s/^com_port_settings=.*/com_port_settings=\'${SPEED}:8:n:1\'/ "${rtkbase_path}"/settings.conf
           sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'Bynav_${RECVNAME}\'/ "${rtkbase_path}"/settings.conf
-          sudo -u "${RTKBASE_USER}" sed -i s/^receiver_format=.*/receiver_format=\'rtcm3\'/ "${rtkbase_path}"/settings.conf
           clear_TADJ
        else
           echo Confiuration FAILED for ${RECVNAME} on ${RECVPORT}
@@ -390,6 +422,126 @@ configure_bynav(){
     fi
 }
 
+configure_septentrio_SBF(){
+    RECVPORT=${1}
+    RECVSPEED=${2}
+    #echo RECVPORT=${RECVPORT} RECVSPEED=${RECVSPEED}
+
+    if [[ $(python3 "${rtkbase_path}"/tools/sept_tool.py --port ${RECVPORT} --baudrate ${RECVSPEED} --command get_model --retry 5) =~ 'mosaic-X5' ]]
+    then
+      echo get mosaic-X5 firmware release
+      firmware="$(python3 "${rtkbase_path}"/tools/sept_tool.py --port ${RECVPORT} --baudrate ${RECVSPEED} --command get_firmware --retry 5)" || firmware='?'
+      echo 'Mosaic-X5 Firmware: ' "${firmware}"
+      #configure the mosaic-X5 for RTKBase
+      echo 'Resetting the mosaic-X5 settings....'
+      python3 "${rtkbase_path}"/tools/sept_tool.py --port ${RECVPORT} --baudrate ${RECVSPEED} --command reset --retry 5
+      sleep_time=30 ; echo 'Waiting '$sleep_time's for mosaic-X5 reboot' ; sleep $sleep_time
+      echo 'Sending settings....'
+      python3 "${rtkbase_path}"/tools/sept_tool.py --port ${RECVPORT} --baudrate ${RECVSPEED} --command send_config_file "${rtkbase_path}"/receiver_cfg/Septentrio_Mosaic-X5.cfg --store --retry 5
+      if [[ $? -eq  0 ]]
+      then
+        echo 'Septentrio Mosaic-X5 successfuly configured'
+        systemctl list-unit-files rtkbase_gnss_web_proxy.service &>/dev/null                                                          && \
+        systemctl enable --now rtkbase_gnss_web_proxy.service                                                                         && \
+        sudo -u "${RTKBASE_USER}" sed -i s/^receiver_firmware=.*/receiver_firmware=\'${firmware}\'/ "${rtkbase_path}"/settings.conf   && \
+        sudo -u "${RTKBASE_USER}" sed -i s/^com_port_settings=.*/com_port_settings=\'115200:8:n:1\'/ "${rtkbase_path}"/settings.conf  && \
+        sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'Septentrio_Mosaic-X5\'/ "${rtkbase_path}"/settings.conf            && \
+        clear_TADJ
+        return $?
+      else
+        echo 'Failed to configure the Septentrio receiver on '${RECVPORT}
+        return 1
+      fi
+    else
+       echo 'No SBF Gnss receiver has been set. We can'\''t configure '${RECVPORT}
+       return 1
+    fi
+}
+
+configure_septentrio_RTCM3() {
+    RECVPORT=${1}
+    #echo RECVPORT=${RECVPORT}
+
+    TEMPFILE=${rtkbase_path}/Septentrio.tmp
+    RECVTEST=${rtkbase_path}/receiver_cfg/Septentrio_TEST.txt
+    ${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVTEST} QUIET >${TEMPFILE}
+    exitcode=$?
+    RECVERROR=`cat ${TEMPFILE} | grep ERROR`
+    #echo RECVERROR=${RECVERROR}
+
+    RECVNAME=
+    FIRMWARE=
+    if [[ ${RECVERROR} == "" ]]; then
+       RECVNAME=`cat ${TEMPFILE} | grep "hwplatform product" | awk -F '"' '{print $2}'`
+       #echo RECVNAME=${RECVNAME}
+       FIRMWARE=`cat ${TEMPFILE} | grep "firmware version" | awk -F '"' '{print $2}'`
+       #echo FIRMWARE=${FIRMWARE}
+    fi
+    if [[ ${RECVNAME} == "" ]] || [[ ${FIRMWARE} == "" ]]; then
+       echo Receiver Septentrio not found on ${RECVPORT}
+       return 1
+    fi
+
+    echo Receiver ${RECVNAME}\(${FIRMWARE}\) found on ${RECVPORT}
+    RECVCONF=${rtkbase_path}/receiver_cfg/Septentrio_RTCM3_OUT.txt
+    #echo RECVCONF=${RECVCONF}
+
+    if [[ -f "${RECVCONF}" ]]
+    then
+       #echo ${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVCONF} NOMSG
+       ${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVCONF} NOMSG
+       exitcode=$?
+       #echo exitcode=${exitcode}
+       SPEED=115200
+       if [[ ${exitcode} == 0 ]]
+       then
+          #now that the receiver is configured, we can set the right values inside settings.conf
+          sudo -u "${RTKBASE_USER}" sed -i s/^receiver_firmware=.*/receiver_firmware=\'${FIRMWARE}\'/ "${rtkbase_path}"/settings.conf
+          sudo -u "${RTKBASE_USER}" sed -i s/^com_port_settings=.*/com_port_settings=\'${SPEED}:8:n:1\'/ "${rtkbase_path}"/settings.conf
+          sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'Septentrio_${RECVNAME}\'/ "${rtkbase_path}"/settings.conf
+          clear_TADJ
+       else
+          echo Confiuration FAILED for ${RECVNAME} on ${RECVPORT}
+       fi
+       RECEIVER_CONF=${rtkbase_path}/receiver.conf
+       echo recv_port=${com_port}>${RECEIVER_CONF}
+       echo recv_speed=${SPEED}>>${RECEIVER_CONF}
+       echo recv_position=>>${RECEIVER_CONF}
+       chown ${RTKBASE_USER}:${RTKBASE_USER} ${RECEIVER_CONF}
+       exitcode=$?
+       return ${exitcode}
+    else
+       echo Confiuration file for ${RECVNAME} \(${RECVCONF}\) NOT FOUND.
+       return 1
+    fi
+}
+
+configure_ublox_UBX(){
+    RECVPORT=${1}
+    RECVSPEED=${2}
+    #echo RECVPORT=${RECVPORT} RECVSPEED=${RECVSPEED}
+
+    if [[ $(python3 "${rtkbase_path}"/tools/ubxtool -f ${RECVDEV} -s ${RECVSPEED} -p MON-VER) =~ 'ZED-F9P' ]]
+    then
+       echo get F9P firmware release
+       firmware=$(python3 "${rtkbase_path}"/tools/ubxtool -f ${RECVDEV} -s ${RECVSPEED} -p MON-VER | grep 'FWVER' | awk '{print $NF}')
+       echo 'F9P Firmware: ' "${firmware}"
+       #configure the F9P for RTKBase
+       "${rtkbase_path}"/tools/set_zed-f9p.sh ${RECVDEV} ${RECVSPEED} "${rtkbase_path}"/receiver_cfg/U-Blox_ZED-F9P_rtkbase.cfg && \
+       echo 'U-Blox F9P Successfuly configured'                                                                                                   && \
+       #now that the receiver is configured, we can set the right values inside settings.conf
+       sudo -u "${RTKBASE_USER}" sed -i s/^receiver_firmware=.*/receiver_firmware=\'${firmware}\'/ "${rtkbase_path}"/settings.conf                && \
+       sudo -u "${RTKBASE_USER}" sed -i s/^com_port_settings=.*/com_port_settings=\'115200:8:n:1\'/ "${rtkbase_path}"/settings.conf               && \
+       sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'U-blox_ZED-F9P\'/ "${rtkbase_path}"/settings.conf                               && \
+       add_TADJ                                                                                                                                   && \
+       #remove SBAS Rtcm message (1107) as it is disabled in the F9P configuration.
+       sudo -u "${RTKBASE_USER}" sed -i -r '/^rtcm_/s/1107(\([0-9]+\))?,//' "${rtkbase_path}"/settings.conf                                       && \
+       return $?
+    else
+       echo 'No UBX Gnss receiver hasn''t been set. We can'\''t configure '${RECVPORT}
+       return 1
+    fi
+}
 
 configure_gnss(){
     echo '################################'
@@ -399,8 +551,7 @@ configure_gnss(){
       then
         source <( grep -v '^#' "${rtkbase_path}"/settings.conf | grep '=' )
         stoping_main
-        if [[ "${com_port}" == "" ]]
-        then
+        if [[ "${com_port}" == "" ]]; then
            echo 'GNSS receiver is not specified. We can'\''t configure.'
            return 1
         fi
@@ -408,88 +559,28 @@ configure_gnss(){
         RECVSPEED=${com_port_settings%%:*}
         RECVDEV=/dev/${com_port}
         RECVPORT=${RECVDEV}:${RECVSPEED}
-        RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} VERSION SILENT`
-        #echo RECVVER=${RECVVER}
-        RECVERROR=`echo ${RECVVER} | grep ERROR`
-        #echo RECVERROR=${RECVERROR}
 
-        RECVNAME=
-        FIRMWARE=
-        if [[ ${RECVERROR} == "" ]] && [[ "${RECVVER}" != "" ]]
-        then
-           RECVNAME=`echo ${RECVVER} | awk -F ';' '{print $2}'| awk -F ',' '{print $1}'`
-           #echo RECVNAME=${RECVNAME}
-           FIRMWARE=`echo ${RECVVER} | awk -F ';' '{print $2}'| awk -F ',' '{print $2}'`
-           #echo FIRMWARE=${FIRMWARE}
-        fi
-        if [[ ${RECVNAME} != "" ]] && [[ ${FIRMWARE} != "" ]]
-        then
-           configure_unicore ${RECVPORT} ${RECVNAME} ${FIRMWARE}
-        else
-           RECVINFO=`${rtkbase_path}/${NMEACONF} ${RECVPORT} "LOG AUTHORIZATION" QUIET`
-           RECVNAME=
-           if [[ "${RECVINFO}" != "" ]]
-           then
-              #echo RECVINFO=${RECVINFO}
-              RECVNAME=`echo ${RECVINFO} | awk -F ';' '{print $2}'| awk -F ' ' '{print $2}'`
-           fi
-           RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} "LOG VERSION" QUIET`
-           #echo RECVVER=${RECVVER}
-           FIRMWARE=`echo ${RECVVER} | awk -F ',' '{print $2}'`
-           #echo FIRMWARE=${FIRMWARE}
-           if [[ "${RECVNAME}" != "" ]] && [[ "${FIRMWARE}" != "" ]]
-           then
-              configure_bynav ${RECVPORT} ${RECVNAME} ${FIRMWARE} ${RECVDEV} ${RECVSPEED}
-           elif [[ $(python3 "${rtkbase_path}"/tools/sept_tool.py --port /dev/ttyGNSS_CTRL --baudrate ${com_port_settings%%:*} --command get_model --retry 5) =~ 'mosaic-X5' ]]
-           then
-             echo get mosaic-X5 firmware release
-             firmware="$(python3 "${rtkbase_path}"/tools/sept_tool.py --port /dev/ttyGNSS_CTRL --baudrate ${com_port_settings%%:*} --command get_firmware --retry 5)" || firmware='?'
-             echo 'Mosaic-X5 Firmware: ' "${firmware}"
-             sudo -u "${RTKBASE_USER}" sed -i s/^receiver_firmware=.*/receiver_firmware=\'${firmware}\'/ "${rtkbase_path}"/settings.conf
-             #configure the mosaic-X5 for RTKBase
-             echo 'Resetting the mosaic-X5 settings....'
-             python3 "${rtkbase_path}"/tools/sept_tool.py --port /dev/ttyGNSS_CTRL --baudrate ${com_port_settings%%:*} --command reset --retry 5
-             sleep_time=30 ; echo 'Waiting '$sleep_time's for mosaic-X5 reboot' ; sleep $sleep_time
-             echo 'Sending settings....'
-             python3 "${rtkbase_path}"/tools/sept_tool.py --port /dev/ttyGNSS_CTRL --baudrate ${com_port_settings%%:*} --command send_config_file "${rtkbase_path}"/receiver_cfg/Septentrio_Mosaic-X5.cfg --store --retry 5
-             if [[ $? -eq  0 ]]
-             then
-               echo 'Septentrio Mosaic-X5 successfuly configured'
-               systemctl list-unit-files rtkbase_gnss_web_proxy.service &>/dev/null                                                          && \
-               systemctl enable --now rtkbase_gnss_web_proxy.service                                                                         && \
-               clear_TADJ                                                                                                                    && \
-               sudo -u "${RTKBASE_USER}" sed -i s/^com_port_settings=.*/com_port_settings=\'115200:8:n:1\'/ "${rtkbase_path}"/settings.conf  && \
-               sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'Septentrio_Mosaic-X5\'/ "${rtkbase_path}"/settings.conf            && \
-               sudo -u "${RTKBASE_USER}" sed -i s/^receiver_format=.*/receiver_format=\'sbf\'/ "${rtkbase_path}"/settings.conf
-               return $?
-             else
-               echo 'Failed to configure the Septentrio receiver'
-               return 1
-             fi
-           elif [[ $(python3 "${rtkbase_path}"/tools/ubxtool -f /dev/"${com_port}" -s ${com_port_settings%%:*} -p MON-VER) =~ 'ZED-F9P' ]]
-           then
-              echo get F9P firmware release
-              firmware=$(python3 "${rtkbase_path}"/tools/ubxtool -f /dev/"${com_port}" -s ${com_port_settings%%:*} -p MON-VER | grep 'FWVER' | awk '{print $NF}')
-              echo 'F9P Firmware: ' "${firmware}"
-              sudo -u "${RTKBASE_USER}" sed -i s/^receiver_firmware=.*/receiver_firmware=\'${firmware}\'/ "${rtkbase_path}"/settings.conf
-              #configure the F9P for RTKBase
-              "${rtkbase_path}"/tools/set_zed-f9p.sh /dev/${com_port} ${com_port_settings%%:*} "${rtkbase_path}"/receiver_cfg/U-Blox_ZED-F9P_rtkbase.cfg && \
-              echo 'U-Blox F9P Successfuly configured'                                                                                                   && \
-              #now that the receiver is configured, we can set the right values inside settings.conf
-              sudo -u "${RTKBASE_USER}" sed -i s/^com_port_settings=.*/com_port_settings=\'115200:8:n:1\'/ "${rtkbase_path}"/settings.conf               && \
-              sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'U-blox_ZED-F9P\'/ "${rtkbase_path}"/settings.conf                               && \
-              sudo -u "${RTKBASE_USER}" sed -i s/^receiver_format=.*/receiver_format=\'ubx\'/ "${rtkbase_path}"/settings.conf                            && \
-              add_TADJ                                                                                                                                   && \
-              #remove SBAS Rtcm message (1107) as it is disabled in the F9P configuration.
-              sudo -u "${RTKBASE_USER}" sed -i -r '/^rtcm_/s/1107(\([0-9]+\))?,//' "${rtkbase_path}"/settings.conf                                       && \
-              return $?
+        if [[ ${receiver_format} == "sbf" ]]; then
+           configure_septentrio_SBF /dev/ttyGNSS_CTRL ${RECVSPEED}
+        elif [[ ${receiver_format} == "ubx" ]]; then
+           configure_ublox_UBX ${RECVPORT} ${RECVSPEED}
+        elif [[ ${receiver_format} == "rtcm3" ]]; then
+           if [[ ${receiver} =~ "Unicore" ]]; then
+              configure_unicore ${RECVPORT}
+           elif [[ ${receiver} =~ "Bynav" ]]; then
+              configure_bynav ${RECVPORT} ${RECVDEV} ${RECVSPEED}
+           elif [[ ${receiver} =~ "Septentrio" ]]; then
+              configure_septentrio_RTCM3 ${RECVPORT}
            else
-              echo 'No Gnss receiver has been set. We can'\''t configure '${RECVPORT}
+              echo 'Unknown RTCM3 Gnss receiver has'\''t  been set. We can'\''t configure '${RECVPORT}
               return 1
            fi
+        else
+           echo 'We can'\''t configure '${receiver_format}' receiver on'${RECVPORT}
+           return 1
         fi
       else #if [ -d "${rtkbase_path}" ]
-        echo 'RtkBase not installed, use option --rtkbase-release'
+        echo 'RtkBase not installed!!'
         return 1
       fi
 }
