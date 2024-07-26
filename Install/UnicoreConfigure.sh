@@ -99,7 +99,8 @@ detect_speed_Ublox() {
 detect_Septentrio() {
     echo 'DETECTION Septentrio ON ' ${1} ' at ' ${2}
     RECVPORT=/dev/${1}:${2}
-    RECVINFO=`${rtkbase_path}/${NMEACONF} ${RECVPORT} "lstInternalFile,Identification" QUIET | grep "hwplatform product"`
+    RECVTEST=${rtkbase_path}/receiver_cfg/Septentrio_TEST.txt
+    RECVINFO=`${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVTEST} QUIET | grep "hwplatform product"`
     if [[ "${RECVINFO}" != "" ]]
     then
        #echo RECVINFO=${RECVINFO}
