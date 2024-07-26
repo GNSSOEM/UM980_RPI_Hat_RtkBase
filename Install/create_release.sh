@@ -14,7 +14,8 @@ tar --exclude-vcs \
     RtkbaseSystemConfigureProxy.sh server_py.patch \
     status_js.patch tune_power.sh config.txt rtklib/* \
     version.txt settings_js.patch base_html.patch \
-    Bynav_RTCM3_OUT.txt
+    Bynav_RTCM3_OUT.txt Septentrio_TEST.txt \
+    Septentrio_RTCM3_OUT.txt
  
 cat install_script.sh $ARCHIVE_NAME > $BUNDLE_NAME
 chmod +x $BUNDLE_NAME
