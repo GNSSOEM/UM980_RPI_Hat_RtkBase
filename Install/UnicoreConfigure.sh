@@ -501,6 +501,9 @@ configure_septentrio_RTCM3() {
           sudo -u "${RTKBASE_USER}" sed -i s/^com_port_settings=.*/com_port_settings=\'${SPEED}:8:n:1\'/ "${rtkbase_path}"/settings.conf
           sudo -u "${RTKBASE_USER}" sed -i s/^receiver=.*/receiver=\'Septentrio_${RECVNAME}\'/ "${rtkbase_path}"/settings.conf
           clear_TADJ
+          systemctl list-unit-files rtkbase_gnss_web_proxy.service &>/dev/null
+          systemctl enable --now rtkbase_gnss_web_proxy.service
+          echo Septentrio ${RECVNAME}\(${FIRMWARE}\) successfuly configured
        else
           echo Confiuration FAILED for ${RECVNAME} on ${RECVPORT}
        fi
