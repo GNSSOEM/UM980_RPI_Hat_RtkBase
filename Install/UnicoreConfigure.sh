@@ -37,7 +37,7 @@ detect_Unicore() {
        then
           #FIRMWARE=`echo ${RECVVER}  | awk -F ';' '{print $2}'| awk -F ',' '{print $2}'`
           #echo FIRMWARE=${FIRMWARE}
-          #echo Receiver ${RECVNAME}\(${FIRMWARE}\) found on ${1} ${port_speed}
+          #echo Receiver ${RECVNAME}\(${FIRMWARE}\) found on ${1} ${2}
           detected_gnss[0]=${1}
           detected_gnss[1]=Unicore_${RECVNAME}
           detected_gnss[2]=${port_speed}
@@ -63,7 +63,7 @@ detect_Bynav() {
        RECVNAME=`echo ${RECVINFO} | awk -F ';' '{print $2}'| awk -F ' ' '{print $2}'`
        if [[ ${RECVNAME} != "" ]]
        then
-          #echo Receiver ${RECVNAME} found on ${1} ${port_speed}
+          #echo Receiver ${RECVNAME} found on ${1} ${2}
           detected_gnss[0]=${1}
           detected_gnss[1]=Bynav_${RECVNAME}
           detected_gnss[2]=${2}
@@ -106,7 +106,7 @@ detect_Septentrio() {
        RECVNAME=`echo ${RECVINFO} | awk -F '"' '{print $2}'`
        if [[ ${RECVNAME} != "" ]]
        then
-          echo Receiver ${RECVNAME} found on ${1} ${port_speed}
+          echo Receiver ${RECVNAME} found on ${1} ${2}
           detected_gnss[0]=${1}
           detected_gnss[1]=Septentrio_${RECVNAME}
           detected_gnss[2]=${2}
