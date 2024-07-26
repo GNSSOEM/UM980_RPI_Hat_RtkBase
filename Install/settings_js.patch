@@ -13,8 +13,8 @@ index c63e6e3..f51313a 100644
 +                var recvformat;
 +                if (response['gnss_type'].search(/u-blox/) != -1) {
 +                   recvformat = "ubx"
-+                } else if (response['gnss_type'].search(/Septentrio/) != -1) {
-+                   recvformat = "sbf"
++                // } else if (response['gnss_type'].search(/Septentrio/) != -1) {
++                //   recvformat = "sbf"
 +                } else {
 +                   recvformat = "rtcm3"
 +                }

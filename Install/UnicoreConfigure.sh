@@ -226,8 +226,8 @@ detect_configure() {
           then
             if [[ "${detected_gnss[1]}" =~ u-blox ]]; then
                recvformat=ubx
-            elif [[ "${detected_gnss[1]}" =~ Septentrio ]]; then
-               recvformat=sbf
+            #elif [[ "${detected_gnss[1]}" =~ Septentrio ]]; then
+            #   recvformat=sbf
             else
                recvformat=rtcm3
             fi
