@@ -77,7 +77,7 @@ DEVICE=/dev/${com_port}:${com_speed}
 
 if [[ ${SETSPEED} == Y ]]
 then
-   if [[ "${receiver}" == *Unicore* ]]
+   if [[ "${receiver}" =~ Unicore ]]
    then
       if [[ "${com_port}" == ttyS[0-9] ]] || [[ "${com_port}" == ttyAMA[0-9] ]] || [[ "${com_port}" == serial[0-9] ]]
       then
@@ -86,7 +86,7 @@ then
       then
          RECVCOM=COM1
       fi
-   elif [[ "${receiver}" == *Bynav* ]]
+   elif [[ "${receiver}" =~ Bynav ]]
    then
       RECVCOM=`${BASEDIR}/NmeaConf ${OLDDEV} TEST COM | grep COM`
       if [[ "${RECVCOM}" == "" ]]
@@ -117,12 +117,12 @@ if [[ ${SETSPEED} == Y ]]
 then
    for i in `seq 1 5`
    do
-      if [[ "${receiver}" == *Unicore* ]]
+      if [[ "${receiver}" =~ Unicore ]]
       then
          #echo ${BASEDIR}/NmeaConf ${OLDDEV} \"CONFIG ${RECVCOM} ${com_speed}\" QUIET
          ${BASEDIR}/NmeaConf ${OLDDEV} "CONFIG ${RECVCOM} ${com_speed}" QUIET
          lastcode=$?
-      elif [[ "${receiver}" == *Bynav* ]]
+      elif [[ "${receiver}" =~ Bynav ]]
       then
          #echo ${BASEDIR}/NmeaConf ${OLDDEV} \"SERIALCONFIG ${RECVCOM} ${com_speed}\" QUIET
          ${BASEDIR}/NmeaConf ${OLDDEV} "SERIALCONFIG ${RECVCOM} ${com_speed}" QUIET
@@ -160,7 +160,7 @@ CHECKPOS=N
 SAVEPOS=N
 if [[ ${SETPOS} == Y ]]
 then
-   if [[ "${receiver}" == *Unicore* ]]
+   if [[ "${receiver}" =~ Unicore ]]
    then
       for i in `seq 1 30`
       do
@@ -185,7 +185,7 @@ then
          CHECKPOS=Y
          SAVEPOS=Y
       fi
-   elif [[ "${receiver}" == *Bynav* ]]
+   elif [[ "${receiver}" =~ Bynav ]]
    then
       #echo ${BASEDIR}/NmeaConf ${DEVICE} \"FIX POSITION ${position}\" QUIET
       ${BASEDIR}/NmeaConf ${DEVICE} "FIX POSITION ${position}" QUIET
@@ -247,12 +247,12 @@ fi
 
 if [[ ${TIMEPOS} == Y ]]
 then
-   if [[ "${receiver}" == *Unicore* ]]
+   if [[ "${receiver}" =~ Unicore ]]
    then
       #echo ${BASEDIR}/NmeaConf ${DEVICE} \"MODE BASE 1 TIME 60 1\" QUIET
       ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 TIME 60 1" QUIET
       ExitCodeCheck $?
-   elif [[ "${receiver}" == *Bynav* ]]
+   elif [[ "${receiver}" =~ Bynav ]]
    then
       #echo ${BASEDIR}/NmeaConf ${DEVICE} \"FIX NONE\" QUIET
       ${BASEDIR}/NmeaConf ${DEVICE} "FIX NONE" QUIET
@@ -269,7 +269,7 @@ then
    #echo ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
    ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
    ExitCodeCheck $?
-   if [[ "${receiver}" == *Bynav* ]]
+   if [[ "${receiver}" =~ Bynav ]]
    then
       #echo ${BASEDIR}/NmeaConf ${DEVICE} REBOOT QUIET
       ${BASEDIR}/NmeaConf ${DEVICE} REBOOT QUIET
@@ -287,12 +287,12 @@ fi
 
 if [[ ${lastcode} == N ]]
 then
-   if [[ "${receiver}" == *Unicore* ]]
+   if [[ "${receiver}" =~ Unicore ]]
    then
       #echo ${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET
       ${BASEDIR}/NmeaConf ${DEVICE} MODE QUIET
       ExitCodeCheck $?
-   elif [[ "${receiver}" == *Bynav* ]]
+   elif [[ "${receiver}" =~ Bynav ]]
    then
       #echo ${BASEDIR}/NmeaConf ${DEVICE} \"LOG REFSTATION\" QUIET
       ${BASEDIR}/NmeaConf ${DEVICE} "LOG REFSTATION" QUIET

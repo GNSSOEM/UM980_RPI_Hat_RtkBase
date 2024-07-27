@@ -1,5 +1,5 @@
 diff --git a/run_cast.sh b/run_cast.sh
-index db7a656..8716140 100755
+index db7a656..09f5097 100755
 --- a/run_cast.sh
 +++ b/run_cast.sh
 @@ -8,16 +8,26 @@ BASEDIR="$(dirname "$0")"
@@ -58,7 +58,7 @@ index db7a656..8716140 100755
      out_tcp)
 +    #echo receiver="${receiver}" position="${position}"
 +    # For Unicore reciever setup base position to receiver (if it's not zero)
-+    if [[ "${receiver}" == *Unicore* ]] || [[ "${receiver}" == *Bynav* ]]
++    if [[ "${receiver}" =~ Unicore* ]] || [[ "${receiver}" =~ Bynav ]]
 +    then
 +       #echo ${BASEDIR}/UnicoreSetBasePos.sh ${com_port}:${com_port_settings%%:*} "${position}" "${receiver}"
 +       ${BASEDIR}/UnicoreSetBasePos.sh ${com_port} ${com_port_settings%%:*} "${position}" "${receiver}"
