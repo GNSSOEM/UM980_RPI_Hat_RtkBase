@@ -1,5 +1,5 @@
 diff --git a/web_app/server.py b/web_app/server.py
-index 3dff915..539f366 100755
+index 3dff915..652ea8a 100755
 --- a/web_app/server.py
 +++ b/web_app/server.py
 @@ -108,7 +108,7 @@ services_list = [{"service_unit" : "str2str_tcp.service", "name" : "main"},
@@ -11,21 +11,28 @@ index 3dff915..539f366 100755
  connected_clients = 0
  
  class StandaloneApplication(gunicorn.app.base.BaseApplication):
-@@ -206,9 +206,10 @@ def repaint_services_button(services_list):
+@@ -205,12 +205,15 @@ def repaint_services_button(services_list):
+         result = exit-code => red button (danger)
      """ 
      for service in services_list:
-         if service.get("status") == "running":
+-        if service.get("status") == "running":
 -            service["btn_color"] = "success"
 -        #elif service.get("status") == "dead":
 -        #    service["btn_color"] = "danger"
++        if service.get("status") == "start":
++            service["btn_color"] = "info"
++        elif service.get("status") == "running":
 +            if service == services_list[0] and os.path.exists(os.path.join(rtkbase_path, "GNSS_coordinate_error.flg")):
 +                service["btn_color"] = "warning"
 +            else:
 +                service["btn_color"] = "success"
          elif service.get("result") == "exit-code":
-             service["btn_color"] = "warning"
+-            service["btn_color"] = "warning"
++            service["btn_color"] = "danger"
          elif service.get("status") == "auto-restart":
-@@ -607,7 +608,7 @@ def deleteLog(json_msg):
+             service["btn_color"] = "warning"
+ 
+@@ -607,7 +610,7 @@ def deleteLog(json_msg):
  def detect_receiver(json_msg):
      print("Detecting gnss receiver")
      #print("DEBUG json_msg: ", json_msg)
@@ -34,7 +41,7 @@ index 3dff915..539f366 100755
      if answer.returncode == 0 and "/dev/" in answer.stdout:
          #print("DEBUG ok stdout: ", answer.stdout)
          try:
-@@ -625,6 +626,20 @@ def detect_receiver(json_msg):
+@@ -625,6 +628,20 @@ def detect_receiver(json_msg):
      #print('DEBUG result: ', result)
      socketio.emit("gnss_detection_result", json.dumps(result), namespace="/test")
  
@@ -55,7 +62,7 @@ index 3dff915..539f366 100755
  @socketio.on("configure_receiver", namespace="/test")
  def configure_receiver(brand="", model=""):
      # only some receiver could be configured automaticaly
-@@ -639,7 +654,7 @@ def configure_receiver(brand="", model=""):
+@@ -639,7 +656,7 @@ def configure_receiver(brand="", model=""):
          restart_main = False
  
      print("configuring {} gnss receiver model {}".format(brand, model))
@@ -64,3 +71,11 @@ index 3dff915..539f366 100755
      #print("DEBUG - stdout: ", answer.stdout)
      #print("DEBUG - returncode: ", answer.returncode)
  
+@@ -884,6 +901,7 @@ def switchService(json_msg):
+             if json_msg["name"] == service["name"] and json_msg["active"] == True:
+                 print("Trying to start service {}".format(service["name"]))
+                 service["unit"].start()
++                service["btn_color"] = "info"
+             elif json_msg["name"] == service["name"] and json_msg["active"] == False:
+                 print("Trying to stop service {}".format(service["name"]))
+                 service["unit"].stop()
