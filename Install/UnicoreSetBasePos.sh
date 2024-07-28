@@ -196,6 +196,33 @@ then
          #echo recv_position=${recv_position}
          SAVECONF=Y
          SAVEPOS=Y
+         BADPOS=N
+      fi
+   elif [[ "${receiver}" =~ Septentrio ]]
+   then
+      commapos=`echo ${position} | sed "s/ \{2,99\}/ /g" | sed "s/^ //" | sed "s/ $//" | sed "s/ /,/g"`
+      #echo commapos=${commapos}
+      #echo ${BASEDIR}/NmeaConf ${DEVICE} \"setPVTMode, , , Geodetic1, ${commapos}\" QUIET
+      ${BASEDIR}/NmeaConf ${DEVICE} "setStaticPosGeodetic , Geodetic1, ${commapos}" QUIET
+      lastcode=$?
+      if [[ $lastcode == 0 ]]
+      then
+         #echo ${BASEDIR}/NmeaConf ${DEVICE} \"setPVTMode, , , Geodetic1\" QUIET
+         ${BASEDIR}/NmeaConf ${DEVICE} "setPVTMode, , , Geodetic1" QUIET
+         ExitCodeCheck $?
+         if [[ $lastcode == 0 ]]
+         then
+            recv_position="${position}"
+            #echo recv_position=${recv_position}
+            SAVECONF=Y
+            SAVEPOS=Y
+            BADPOS=N
+         fi
+      fi
+      if [[ ${SAVEPOS} != Y ]]
+      then
+         BADPOS=Y
+         TIMEPOS=Y
       fi
    fi
 fi
@@ -242,7 +269,7 @@ then
       fi
    fi
    #echo ls -la ${BADPOSFILE}
-   #ls -la ${BADPOSFILE} >>${DEBUGLOG} 2>&1
+   #ls -la ${BADPOSFILE}
 fi
 
 if [[ ${TIMEPOS} == Y ]]
@@ -257,6 +284,11 @@ then
       #echo ${BASEDIR}/NmeaConf ${DEVICE} \"FIX NONE\" QUIET
       ${BASEDIR}/NmeaConf ${DEVICE} "FIX NONE" QUIET
       ExitCodeCheck $?
+   elif [[ "${receiver}" =~ Septentrio ]]
+   then
+      #echo ${BASEDIR}/NmeaConf ${DEVICE} \"setPVTMode, , , auto\" QUIET
+      ${BASEDIR}/NmeaConf ${DEVICE} "setPVTMode, , , auto" QUIET
+      ExitCodeCheck $?
    fi
    recv_position="${ZEROPOS}"
    #echo recv_position=${recv_position}
@@ -266,14 +298,21 @@ fi
 
 if [[ ${SAVEPOS} == Y ]]
 then
-   #echo ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
-   ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
-   ExitCodeCheck $?
-   if [[ "${receiver}" =~ Bynav ]]
+   if [[ "${receiver}" =~ Septentrio ]]
    then
-      #echo ${BASEDIR}/NmeaConf ${DEVICE} REBOOT QUIET
-      ${BASEDIR}/NmeaConf ${DEVICE} REBOOT QUIET
+      #echo ${BASEDIR}/NmeaConf ${DEVICE} \"exeCopyConfigFile, Current, Boot\" QUIET
+      ${BASEDIR}/NmeaConf ${DEVICE} "exeCopyConfigFile, Current, Boot" QUIET
       ExitCodeCheck $?
+   else
+      #echo ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
+      ${BASEDIR}/NmeaConf ${DEVICE} saveconfig QUIET
+      ExitCodeCheck $?
+      if [[ "${receiver}" =~ Bynav ]]
+      then
+         #echo ${BASEDIR}/NmeaConf ${DEVICE} REBOOT QUIET
+         ${BASEDIR}/NmeaConf ${DEVICE} REBOOT QUIET
+         ExitCodeCheck $?
+      fi
    fi
 fi
 
@@ -296,6 +335,11 @@ then
    then
       #echo ${BASEDIR}/NmeaConf ${DEVICE} \"LOG REFSTATION\" QUIET
       ${BASEDIR}/NmeaConf ${DEVICE} "LOG REFSTATION" QUIET
+      ExitCodeCheck $?
+   elif [[ "${receiver}" =~ Septentrio ]]
+   then
+      #echo ${BASEDIR}/NmeaConf ${DEVICE} getPVTMode QUIET
+      ${BASEDIR}/NmeaConf ${DEVICE} getPVTMode QUIET
       ExitCodeCheck $?
    fi
 fi

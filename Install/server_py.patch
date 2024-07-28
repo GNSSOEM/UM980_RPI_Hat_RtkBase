@@ -71,11 +71,3 @@ index 3dff915..652ea8a 100755
      #print("DEBUG - stdout: ", answer.stdout)
      #print("DEBUG - returncode: ", answer.returncode)
  
-@@ -884,6 +901,7 @@ def switchService(json_msg):
-             if json_msg["name"] == service["name"] and json_msg["active"] == True:
-                 print("Trying to start service {}".format(service["name"]))
-                 service["unit"].start()
-+                service["btn_color"] = "info"
-             elif json_msg["name"] == service["name"] and json_msg["active"] == False:
-                 print("Trying to stop service {}".format(service["name"]))
-                 service["unit"].stop()

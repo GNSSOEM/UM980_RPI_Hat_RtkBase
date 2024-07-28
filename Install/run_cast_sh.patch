@@ -58,7 +58,7 @@ index db7a656..09f5097 100755
      out_tcp)
 +    #echo receiver="${receiver}" position="${position}"
 +    # For Unicore reciever setup base position to receiver (if it's not zero)
-+    if [[ "${receiver}" =~ Unicore* ]] || [[ "${receiver}" =~ Bynav ]]
++    if [[ "${receiver}" =~ Unicore* ]] || [[ "${receiver}" =~ Bynav ]] || [[ "${receiver}" =~ Septentrio ]]
 +    then
 +       #echo ${BASEDIR}/UnicoreSetBasePos.sh ${com_port}:${com_port_settings%%:*} "${position}" "${receiver}"
 +       ${BASEDIR}/UnicoreSetBasePos.sh ${com_port} ${com_port_settings%%:*} "${position}" "${receiver}"
