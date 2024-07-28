@@ -189,7 +189,7 @@ then
    then
       #echo ${BASEDIR}/NmeaConf ${DEVICE} \"FIX POSITION ${position}\" QUIET
       ${BASEDIR}/NmeaConf ${DEVICE} "FIX POSITION ${position}" QUIET
-      ExitCodeCheck $?
+      lastcode=$?
       if [[ $lastcode == 0 ]]
       then
          recv_position="${position}"
@@ -197,6 +197,9 @@ then
          SAVECONF=Y
          SAVEPOS=Y
          BADPOS=N
+      else
+         BADPOS=Y
+         TIMEPOS=Y
       fi
    elif [[ "${receiver}" =~ Septentrio ]]
    then
