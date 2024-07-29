@@ -15,7 +15,7 @@ tar --exclude-vcs \
     status_js.patch tune_power.sh config.txt rtklib/* \
     version.txt settings_js.patch base_html.patch \
     Bynav_RTCM3_OUT.txt Septentrio_TEST.txt \
-    Septentrio_RTCM3_OUT.txt
+    Septentrio_RTCM3_OUT.txt settings_html.patch
  
 cat install_script.sh $ARCHIVE_NAME > $BUNDLE_NAME
 chmod +x $BUNDLE_NAME

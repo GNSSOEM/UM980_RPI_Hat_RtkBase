@@ -32,6 +32,7 @@ SETTING_PATCH=settings_js.patch
 BASE_PATCH=base_html.patch
 RUNCAST_PATCH=run_cast_sh.patch
 SETTING_JS_PATCH=settings_js.patch
+SETTING_HTML_PATCH=settings_html.patch
 SYSCONGIG=RtkbaseSystemConfigure.sh
 SYSSERVICE=RtkbaseSystemConfigure.service
 SYSPROXY=RtkbaseSystemConfigureProxy.sh
@@ -726,6 +727,15 @@ configure_for_unicore(){
    rm -f ${BASEDIR}/${SETTING_JS_PATCH}
    ExitCodeCheck $?
 
+   SETTING_HTML=${RTKBASE_WEB}/templates/settings.html
+   #echo SETTING_HTML=${SETTING_HTML}
+   patch -f ${SETTING_HTML} ${BASEDIR}/${SETTING_HTML_PATCH}
+   ExitCodeCheck $?
+   chmod 644 ${SETTING_HTML}
+   ExitCodeCheck $?
+   rm -f ${BASEDIR}/${SETTING_HTML_PATCH}
+   ExitCodeCheck $?
+
    BASE_HTML=${RTKBASE_WEB}/templates/base.html
    #echo BASE_HTML=${BASE_HTML}
    patch -f ${BASE_HTML} ${BASEDIR}/${BASE_PATCH}
@@ -861,7 +871,7 @@ BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${CONFBYNAV} ${UNICORE_CONFIGURE
               ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY} \
               ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER} ${CONFIG} \
               ${RTKLIB}/* ${VERSION} ${SETTING_JS_PATCH} ${BASE_PATCH} \
-              ${CONFSEPTENTRIO} ${TESTSEPTENTRIO}"
+              ${CONFSEPTENTRIO} ${TESTSEPTENTRIO} ${SETTING_HTML_PATCH}"
 FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
 FILES_DELETE="${CONFIG}"
 

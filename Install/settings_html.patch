@@ -1,0 +1,13 @@
+diff --git a/web_app/templates/settings.html b/web_app/templates/settings.html
+index c8f257b..25d28a3 100644
+--- a/web_app/templates/settings.html
++++ b/web_app/templates/settings.html
+@@ -529,7 +529,7 @@
+     <div class="col-sm-8">
+       <span>{{ main_settings[3].receiver }} - {{ main_settings[4].receiver_firmware }}
+         {% if 'septentrio' in main_settings[3].receiver.lower() %}
+-         - <a href="{{ main_settings[10] }}"><button id="ext_web_site" class="btn btn-secondary" type="button">Mosaic Web server</button></a>
++         - <a href="{{ main_settings[10] }}" target="_blank"><button id="ext_web_site" class="btn btn-secondary" type="button">Mosaic Web server</button></a>
+         {% endif %}
+       </span>
+     </div>
