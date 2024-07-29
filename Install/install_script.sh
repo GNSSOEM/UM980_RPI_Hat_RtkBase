@@ -1,5 +1,5 @@
 #!/bin/bash
-NEW_VERSION=152
+NEW_VERSION=153
 
 RTKBASE_USER=rtkbase
 RTKBASE_PATH=/usr/local/${RTKBASE_USER}
