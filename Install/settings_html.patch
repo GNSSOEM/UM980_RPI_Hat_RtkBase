@@ -1,7 +1,16 @@
 diff --git a/web_app/templates/settings.html b/web_app/templates/settings.html
-index c8f257b..25d28a3 100644
+index c8f257b..84daef4 100644
 --- a/web_app/templates/settings.html
 +++ b/web_app/templates/settings.html
+@@ -35,7 +35,7 @@
+         <div class="form-group row">
+         <label for="position" class="col-sm-3 col-form-label">Base coordinates: </label>
+         <div class="col-sm-9">
+-            <input id="position" type="text" name="position" class="form-control" aria-describedby="positionHelp" placeholder="latitude longitude elevation" value="{{ main_settings[0].position }}" pattern="-?\d{1,3}\.\d+[\s]-?\d{1,3}\.\d+[\s][\-+]?\d+\.\d{2,6}" required>
++            <input id="position" type="text" name="position" class="form-control" aria-describedby="positionHelp" placeholder="latitude longitude elevation" value="{{ main_settings[0].position }}" pattern="-?\d{1,3}\.\d+[\s]-?\d{1,3}\.\d+[\s][\-+]?\d+\.\d{2,4}" required>
+             <small class="form-text text-muted" id="positionHelp">Antenna's coordinates: latitude (decimal degree) longitude (decimal degree) elevation (meter)</small>
+         </div>
+     </div>
 @@ -529,7 +529,7 @@
      <div class="col-sm-8">
        <span>{{ main_settings[3].receiver }} - {{ main_settings[4].receiver_firmware }}
