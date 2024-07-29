@@ -188,8 +188,8 @@ check_version(){
         echo Update from version ${OLD_VERSION} to version ${NEW_VERSION}
         if [ -f ${SETTINGS_NOW} ]
         then
-           #echo cp ${SETTINGS_NOW} ${SETTINGS_SAVE}
-           cp ${SETTINGS_NOW} ${SETTINGS_SAVE}
+           #echo sudo -u "${RTKBASE_USER}" cp ${SETTINGS_NOW} ${SETTINGS_SAVE}
+           sudo -u "${RTKBASE_USER}" cp ${SETTINGS_NOW} ${SETTINGS_SAVE}
            ExitCodeCheck $?
         fi
      fi
@@ -767,12 +767,9 @@ configure_settings(){
       echo 'RESTORE SETTINGS'
       echo '################################'
 
-      #echo cp ${SETTINGS_SAVE} ${SETTINGS_NOW}
-      mv ${SETTINGS_SAVE} ${SETTINGS_NOW}
+      #echo sudo -u "${RTKBASE_USER}" mv ${SETTINGS_SAVE} ${SETTINGS_NOW}
+      sudo -u "${RTKBASE_USER}" mv ${SETTINGS_SAVE} ${SETTINGS_NOW}
       ExitCodeCheck $?
-
-      #echo rm -f ${BASEDIR}/${UNICORE_SETTIGNS}
-      rm -f ${BASEDIR}/${UNICORE_SETTIGNS}
    else
       echo '################################'
       echo 'CONFIGURE SETTINGS'
@@ -791,10 +788,9 @@ configure_settings(){
       #echo ${RTKBASE_PATH}/${UNICORE_SETTIGNS} ${RECVNAME}
       ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
       ExitCodeCheck $?
-
-      #echo rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
-      rm -f ${RTKBASE_PATH}/${UNICORE_SETTIGNS}
    fi
+   #echo rm -f ${BASEDIR}/${UNICORE_SETTIGNS}
+   rm -f ${BASEDIR}/${UNICORE_SETTIGNS}
 }
 
 configure_gnss(){
@@ -819,6 +815,16 @@ start_rtkbase_services(){
   #echo ${RTKBASE_TOOLS}/insall.sh -u ${RTKBASE_USER} -s
   ${RTKBASE_TOOLS}/install.sh -u ${RTKBASE_USER} -s
   ExitCodeCheck $?
+
+  GNSS_WEB_PROXY=rtkbase_gnss_web_proxy.service
+  webproxy_enabled=$(systemctl is-enabled "${GNSS_WEB_PROXY}")
+  webproxy_active=$(systemctl is-active "${GNSS_WEB_PROXY}")
+  #echo webproxy_enabled=${webproxy_enabled} webproxy_active=${webproxy_active}
+  if [[ "${webproxy_enabled}" == "enabled" ]] && [[ "${webproxy_active}" == "inactive" ]]
+  then
+     #echo systemctl start "${GNSS_WEB_PROXY}"
+     systemctl start "${GNSS_WEB_PROXY}"
+  fi
 }
 
 delete_garbage(){
