@@ -1,5 +1,5 @@
 diff --git a/web_app/server.py b/web_app/server.py
-index 3dff915..652ea8a 100755
+index 3dff915..c7bb502 100755
 --- a/web_app/server.py
 +++ b/web_app/server.py
 @@ -108,7 +108,7 @@ services_list = [{"service_unit" : "str2str_tcp.service", "name" : "main"},
@@ -32,7 +32,19 @@ index 3dff915..652ea8a 100755
          elif service.get("status") == "auto-restart":
              service["btn_color"] = "warning"
  
-@@ -607,7 +610,7 @@ def deleteLog(json_msg):
+@@ -502,8 +505,10 @@ def diagnostic():
+     """
+     getServicesStatus()
+     rtkbase_web_service = {'service_unit' : 'rtkbase_web.service', 'name' : 'RTKBase Web Server', 'active' : True}
++    rtkbase_gnss_web_proxy_service = {'service_unit' : 'rtkbase_gnss_web_proxy.service', 'name' : 'RTKBase Reverse Proxy for Gnss receiver Web Server'}
++    rtkbase_gnss_web_proxy_service["active"] = ServiceController(rtkbase_gnss_web_proxy_service["service_unit"]).isActive()
+     logs = []
+-    for service in services_list + [rtkbase_web_service]:
++    for service in services_list + [rtkbase_web_service, rtkbase_gnss_web_proxy_service]:
+         sysctl_status = subprocess.run(['systemctl', 'status', service['service_unit']],
+                                 stdout=subprocess.PIPE,
+                                 universal_newlines=True,
+@@ -607,7 +612,7 @@ def deleteLog(json_msg):
  def detect_receiver(json_msg):
      print("Detecting gnss receiver")
      #print("DEBUG json_msg: ", json_msg)
@@ -41,7 +53,7 @@ index 3dff915..652ea8a 100755
      if answer.returncode == 0 and "/dev/" in answer.stdout:
          #print("DEBUG ok stdout: ", answer.stdout)
          try:
-@@ -625,6 +628,20 @@ def detect_receiver(json_msg):
+@@ -625,6 +630,20 @@ def detect_receiver(json_msg):
      #print('DEBUG result: ', result)
      socketio.emit("gnss_detection_result", json.dumps(result), namespace="/test")
  
@@ -62,7 +74,7 @@ index 3dff915..652ea8a 100755
  @socketio.on("configure_receiver", namespace="/test")
  def configure_receiver(brand="", model=""):
      # only some receiver could be configured automaticaly
-@@ -639,7 +656,7 @@ def configure_receiver(brand="", model=""):
+@@ -639,7 +658,7 @@ def configure_receiver(brand="", model=""):
          restart_main = False
  
      print("configuring {} gnss receiver model {}".format(brand, model))
