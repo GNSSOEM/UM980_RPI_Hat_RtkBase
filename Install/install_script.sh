@@ -33,6 +33,7 @@ BASE_PATCH=base_html.patch
 RUNCAST_PATCH=run_cast_sh.patch
 SETTING_JS_PATCH=settings_js.patch
 SETTING_HTML_PATCH=settings_html.patch
+PPP_CONF_PATH=ppp_conf.patch
 SYSCONGIG=RtkbaseSystemConfigure.sh
 SYSSERVICE=RtkbaseSystemConfigure.service
 SYSPROXY=RtkbaseSystemConfigureProxy.sh
@@ -754,6 +755,15 @@ configure_for_unicore(){
    rm -f ${BASEDIR}/${RUNCAST_PATCH}
    ExitCodeCheck $?
 
+   PPP_CONF=${RTKBASE_WEB}/rtklib_configs/rtkbase_ppp-static_default.conf
+   #echo PPP_CONF=${PPP_CONF}
+   patch -f ${PPP_CONF} ${BASEDIR}/${PPP_CONF_PATH}
+   ExitCodeCheck $?
+   chmod 755 ${PPP_CONF}
+   ExitCodeCheck $?
+   rm -f ${BASEDIR}/${PPP_CONF_PATH}
+   ExitCodeCheck $?
+
    if ! ischroot
    then
       systemctl is-active --quiet rtkbase_web.service && sudo systemctl restart rtkbase_web.service
@@ -877,7 +887,8 @@ BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${CONFBYNAV} ${UNICORE_CONFIGURE
               ${RTKBASE_INSTALL} ${SYSCONGIG} ${SYSSERVICE} ${SYSPROXY} \
               ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER} ${CONFIG} \
               ${RTKLIB}/* ${VERSION} ${SETTING_JS_PATCH} ${BASE_PATCH} \
-              ${CONFSEPTENTRIO} ${TESTSEPTENTRIO} ${SETTING_HTML_PATCH}"
+              ${CONFSEPTENTRIO} ${TESTSEPTENTRIO} ${SETTING_HTML_PATCH} \
+              ${PPP_CONF_PATH}"
 FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
 FILES_DELETE="${CONFIG}"
 

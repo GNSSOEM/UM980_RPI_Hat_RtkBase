@@ -1,0 +1,21 @@
+diff --git a/web_app/rtklib_configs/rtkbase_ppp-static_default.conf b/web_app/rtklib_configs/rtkbase_ppp-static_default.conf
+index 508caab..3662abe 100644
+--- a/web_app/rtklib_configs/rtkbase_ppp-static_default.conf
++++ b/web_app/rtklib_configs/rtkbase_ppp-static_default.conf
+@@ -4,11 +4,11 @@ pos1-posmode       =ppp-static     # (0:single,1:dgps,2:kinematic,3:static,4:sta
+ pos1-frequency     =l1+l2+l5   # (1:l1,2:l1+l2,3:l1+l2+l5,4:l1+l2+l5+l6,2:l1+l2+e5b)
+ pos1-soltype       =forward    # (0:forward,1:backward,2:combined)
+ pos1-elmask        =15         # (deg)
+-pos1-snrmask_r     =off        # (0:off,1:on)
+-pos1-snrmask_b     =off        # (0:off,1:on)
+-pos1-snrmask_L1    =0,0,0,0,0,0,0,0,0
+-pos1-snrmask_L2    =0,0,0,0,0,0,0,0,0
+-pos1-snrmask_L5    =0,0,0,0,0,0,0,0,0
++pos1-snrmask_r     =on         # (0:off,1:on)
++pos1-snrmask_b     =on         # (0:off,1:on)
++pos1-snrmask_L1    =33,33,33,33,33,33,33,33,33
++pos1-snrmask_L2    =33,33,33,33,33,33,33,33,33
++pos1-snrmask_L5    =33,33,33,33,33,33,33,33,33
+ pos1-dynamics      =on         # (0:off,1:on)
+ pos1-tidecorr      =off        # (0:off,1:on,2:otl)
+ pos1-ionoopt       =dual-freq  # (0:off,1:brdc,2:sbas,3:dual-freq,4:est-stec,5:ionex-tec,6:qzs-brdc,7:qzs-lex,8:stec)
