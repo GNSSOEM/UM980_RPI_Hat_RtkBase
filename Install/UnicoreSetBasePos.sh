@@ -166,7 +166,6 @@ then
       do
          #echo UNICORE_MODE=\`${BASEDIR}/NmeaConf ${DEVICE} MODE\`
          UNICORE_MODE=`${BASEDIR}/NmeaConf ${DEVICE} MODE`
-         ExitCodeCheck $?
          IS_FINE=`echo ${UNICORE_MODE} | grep -c "1005"`
          #echo UNICORE_MODE=${UNICORE_MODE}
          #echo IS_FINE=${IS_FINE}
@@ -179,11 +178,14 @@ then
       done
       #echo ${BASEDIR}/NmeaConf ${DEVICE} \"MODE BASE 1 ${position}\" QUIET
       ${BASEDIR}/NmeaConf ${DEVICE} "MODE BASE 1 ${position}" QUIET
-      ExitCodeCheck $?
+      lastcode=$?
       if [[ $lastcode == 0 ]]
       then
          CHECKPOS=Y
          SAVEPOS=Y
+      else
+         BADPOS=Y
+         TIMEPOS=Y
       fi
    elif [[ "${receiver}" =~ Bynav ]]
    then
