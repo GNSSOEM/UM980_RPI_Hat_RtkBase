@@ -305,7 +305,6 @@ configure_unicore(){
     RECVPORT=${1}
 
     RECVVER=`${rtkbase_path}/${NMEACONF} ${RECVPORT} VERSION SILENT`
-    exitcode=$?
     #echo RECVVER=${RECVVER}
     RECVERROR=`echo ${RECVVER} | grep ERROR`
     #echo RECVERROR=${RECVERROR}
@@ -363,7 +362,6 @@ configure_bynav(){
     RECVSPEED=${3}
 
     RECVINFO=`${rtkbase_path}/${NMEACONF} ${RECVPORT} "LOG AUTHORIZATION" QUIET`
-    exitcode=$?
 
     RECVNAME=
     if [[ "${RECVINFO}" != "" ]]
@@ -466,7 +464,6 @@ configure_septentrio_RTCM3() {
     TEMPFILE=/run/Septentrio.tmp
     RECVTEST=${rtkbase_path}/receiver_cfg/Septentrio_TEST.txt
     ${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVTEST} QUIET >${TEMPFILE}
-    exitcode=$?
     RECVERROR=`cat ${TEMPFILE} | grep ERROR`
     #echo RECVERROR=${RECVERROR}
 
@@ -512,7 +509,6 @@ configure_septentrio_RTCM3() {
        echo recv_speed=${SPEED}>>${RECEIVER_CONF}
        echo recv_position=>>${RECEIVER_CONF}
        chown ${RTKBASE_USER}:${RTKBASE_USER} ${RECEIVER_CONF}
-       exitcode=$?
        return ${exitcode}
     else
        echo Confiuration file for ${RECVNAME} \(${RECVCONF}\) NOT FOUND.
