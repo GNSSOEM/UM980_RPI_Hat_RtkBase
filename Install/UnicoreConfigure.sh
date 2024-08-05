@@ -463,7 +463,7 @@ configure_septentrio_RTCM3() {
     RECVPORT=${1}
     #echo RECVPORT=${RECVPORT}
 
-    TEMPFILE=${rtkbase_path}/Septentrio.tmp
+    TEMPFILE=/run/Septentrio.tmp
     RECVTEST=${rtkbase_path}/receiver_cfg/Septentrio_TEST.txt
     ${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVTEST} QUIET >${TEMPFILE}
     exitcode=$?
