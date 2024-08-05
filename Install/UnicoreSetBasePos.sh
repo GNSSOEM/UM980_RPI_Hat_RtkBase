@@ -12,6 +12,11 @@ position=${3}
 receiver=${4}
 #echo com_port="${com_port}" com_speed=${com_speed} position="${position}" receiver=${receiver}
 
+if [[ ! -c /dev/${com_port} ]]; then
+   echo /dev/${com_port} NOT EXISTS!
+   exit 1
+fi
+
 lastcode=N
 exitcode=0
 
