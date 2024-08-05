@@ -806,6 +806,14 @@ configure_settings(){
 configure_gnss(){
    if [[ "${UPDATE}" != "Y" ]] || ! have_full
    then
+      UP_TIME=`cat /proc/uptime | sed "s/\..*$//"`
+      LIMIT_TIME=40
+      LEFT_TIME=`expr ${LIMIT_TIME} - ${UP_TIME}`
+      #echo UP_TIME=${UP_TIME} LIMIT_TIME=${LIMIT_TIME} LEFT_TIME=${LEFT_TIME}
+      if [[ ${LEFT_TIME} -gt 0 ]]; then
+         #echo sleep ${LEFT_TIME}
+         sleep ${LEFT_TIME}
+      fi
       #echo ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
       ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -e
       ExitCodeCheck $?
