@@ -108,8 +108,15 @@ then
              SETSPEED=N
           fi
       fi
+   elif [[ "${receiver}" =~ Septentrio ]]
+   then
+       SAVECONF=Y
+       SETSPEED=N
    fi
+fi
 
+if [[ ${SETSPEED} == Y ]]
+then
    #echo RECVCOM=${RECVCOM}
    if [[ "${RECVCOM}" == "" ]]
    then
