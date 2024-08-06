@@ -84,10 +84,12 @@ if [[ ${SETSPEED} == Y ]]
 then
    if [[ "${receiver}" =~ Unicore ]]
    then
-      if [[ "${com_port}" == ttyS[0-9] ]] || [[ "${com_port}" == ttyAMA[0-9] ]] || [[ "${com_port}" == serial[0-9] ]]
+      real_port=`realpath /dev/${com_port} | sed s#^.*/##`
+      #echo real_port=${real_port}
+      if [[ "${real_port}" == ttyS[0-9] ]] || [[ "${real_port}" == ttyAMA[0-9] ]]
       then
          RECVCOM=COM2
-      elif [[ "${com_port}" == ttyUSB[0-9] ]] || [[ "${com_port}" == ttyACM[0-9] ]]
+      elif [[ "${real_port}" == ttyUSB[0-9] ]] || [[ "${real_port}" == ttyACM[0-9] ]]
       then
          RECVCOM=COM1
       fi
