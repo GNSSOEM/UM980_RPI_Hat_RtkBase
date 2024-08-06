@@ -1,6 +1,6 @@
 # UM980_RPI_Hat_RtkBase
 
-### Raspbian compatible RtkBase software for Unicore UM98x and Bynav M2x
+### Raspbian compatible RtkBase software for Unicore UM98x, Bynav M2x and Spetentrio Mosaic X5
 
 Based on RtkBase
 
@@ -23,16 +23,16 @@ Based on RtkBase
 
 ## main feature, added to RtkBase
 
-+ Use Unicore or Bynav receiver
++ Use Unicore, Bynav or Septentrio receiver
 + Full configure for receiver and Raspberry Pi
 + If mount and password are both TCP use TCP-client instead of NTRIP-server
 + Setup base position to receiver
 + Timeout for PPP-solution is extended to 36 hours
-+ Default settings is adopted to Unicore or Bynav receiver, onocoy.com and rtkdirect.com
++ Default settings is adopted to Unicore, Bynav or Septentrio receiver, onocoy.com and rtkdirect.com
 + Windows RTK & HAS utilitis for precise resolving rtkbase position
 + Zeroconf configuration as rtkbase.local in the local network
 + Then speed changed in main settings, speed of receiver will be changing too
-+ Configuring WIFi via an Windows application  (not only on first boot)
++ Configuring WiFi via an Windows application  (not only on first boot)
 + Adding users via an Windows application  (not only on first boot)
 + Ñomplete documentation with lots of pictures
 
