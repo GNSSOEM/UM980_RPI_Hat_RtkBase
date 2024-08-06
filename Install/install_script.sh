@@ -39,6 +39,7 @@ SYSSERVICE=RtkbaseSystemConfigure.service
 SYSPROXY=RtkbaseSystemConfigureProxy.sh
 TUNE_POWER=tune_power.sh
 CONFIG=config.txt
+CONFIG_ORIG=config.original
 RTKLIB=rtklib
 SERVICE_PATH=/etc/systemd/system
 PI=pi
@@ -150,14 +151,25 @@ replace_config(){
         #echo IS_DIFF=${IS_DIFF}
         if [[ "${IS_DIFF}" != "" ]]
         then
-           #echo cp ${BOOTCONFIG} ${BOOTCONFIG}.old
-           cp ${BOOTCONFIG} ${BOOTCONFIG}.old
-           ExitCodeCheck $?
-           #echo mv ${NEWCONFIG} ${BOOTCONFIG}
-           mv ${NEWCONFIG} ${BOOTCONFIG}
-           ExitCodeCheck $?
-           NEEDREBOOT=Y
-           echo ${BOOTCONFIG} replaced. Old version in the ${BOOTCONFIG}.old
+           #echo diff -q ${CONFIG_ORIG} ${BOOTCONFIG}
+           IS_ORIG=`diff -q ${CONFIG_ORIG} ${BOOTCONFIG}`
+           #echo IS_ORIG=${IS_ORIG}
+           if [[ "${IS_ORIG}" == "" ]]
+           then
+              #echo cp ${BOOTCONFIG} ${BOOTCONFIG}.old
+              cp ${BOOTCONFIG} ${BOOTCONFIG}.old
+              ExitCodeCheck $?
+              #echo mv ${NEWCONFIG} ${BOOTCONFIG}
+              mv ${NEWCONFIG} ${BOOTCONFIG}
+              ExitCodeCheck $?
+              NEEDREBOOT=Y
+              echo ${BOOTCONFIG} replaced. Old version in the ${BOOTCONFIG}.old
+           else
+              echo ${BOOTCONFIG} is not original. Change instead of replace
+              configure_config $1
+           fi
+        else
+           echo ${BOOTCONFIG} is already replaced
         fi
      fi
   fi
@@ -896,9 +908,9 @@ BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${CONFBYNAV} ${UNICORE_CONFIGURE
               ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER} ${CONFIG} \
               ${RTKLIB}/* ${VERSION} ${SETTING_JS_PATCH} ${BASE_PATCH} \
               ${CONFSEPTENTRIO} ${TESTSEPTENTRIO} ${SETTING_HTML_PATCH} \
-              ${PPP_CONF_PATH}"
+              ${PPP_CONF_PATH} ${CONFIG_ORIG}"
 FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
-FILES_DELETE="${CONFIG}"
+FILES_DELETE="${CONFIG} ${CONFIG_ORIG}"
 
 check_phases(){
    if [[ ${1} == "-1" ]]
