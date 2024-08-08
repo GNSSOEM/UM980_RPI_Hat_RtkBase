@@ -151,8 +151,8 @@ replace_config(){
         #echo IS_DIFF=${IS_DIFF}
         if [[ "${IS_DIFF}" != "" ]]
         then
-           #echo diff -q ${CONFIG_ORIG} ${BOOTCONFIG}
-           IS_ORIG=`diff -q ${CONFIG_ORIG} ${BOOTCONFIG}`
+           #echo diff -q ${BASEDIR}/${CONFIG_ORIG} ${BOOTCONFIG}
+           IS_ORIG=`diff -q ${BASEDIR}/${CONFIG_ORIG} ${BOOTCONFIG}`
            #echo IS_ORIG=${IS_ORIG}
            if [[ "${IS_ORIG}" == "" ]]
            then
