@@ -19,6 +19,7 @@ UNICORE_SETTIGNS=UnicoreSettings.sh
 UNICORE_CONFIGURE=UnicoreConfigure.sh
 SETTINGS_NOW=${RTKBASE_GIT}/settings.conf
 SETTINGS_SAVE=${RTKBASE_GIT}/settings.save
+SETTINGS_DEFAULT=${RTKBASE_GIT}/settings.conf.default
 NMEACONF=NmeaConf
 CONF_TAIL=RTCM3_OUT.txt
 CONF980=UM980_${CONF_TAIL}
@@ -792,6 +793,10 @@ configure_settings(){
       #echo sudo -u "${RTKBASE_USER}" mv ${SETTINGS_SAVE} ${SETTINGS_NOW}
       sudo -u "${RTKBASE_USER}" mv ${SETTINGS_SAVE} ${SETTINGS_NOW}
       ExitCodeCheck $?
+
+      source <( grep -v '^#' "${SETTINGS_DEFAULT}" | grep 'version=' )
+      #echo version=${version} VERSION=${VERSION}
+      sudo -u "${RTKBASE_USER}" sed -i s/^version=.*/version=${version}/ "${SETTINGS_NOW}"
    else
       echo '################################'
       echo 'CONFIGURE SETTINGS'
