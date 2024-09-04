@@ -1,8 +1,8 @@
 diff --git a/tools/install.sh b/tools/install.sh
-index 8db3d5e..c0a048b 100755
+index a3972d5..ab0482d 100755
 --- a/tools/install.sh
 +++ b/tools/install.sh
-@@ -288,7 +288,7 @@ install_rtkbase_bundled() {
+@@ -289,7 +289,7 @@ install_rtkbase_bundled() {
      ARCHIVE=$(awk '/^__ARCHIVE__/ {print NR + 1; exit 0; }' "${0}")
      # Check if there is some content after __ARCHIVE__ marker (more than 100 lines)
      [[ $(sed -n '/__ARCHIVE__/,$p' "${0}" | wc -l) -lt 100 ]] && echo "RTKBASE isn't bundled inside install.sh. Please choose another source" && exit 1  
