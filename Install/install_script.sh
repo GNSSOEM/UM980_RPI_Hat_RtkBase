@@ -318,6 +318,24 @@ install_additional_utilies(){
    fi
 }
 
+install_tailscale(){
+   if ! type tailscale >/dev/null 2>&1; then
+      echo '################################'
+      echo 'INSTALL TAILSCALE'
+      echo '################################'
+      #echo curl -fsSL https://tailscale.com/install.sh \| sh
+      curl -fsSL https://tailscale.com/install.sh | sh
+      ExitCodeCheck $?
+      #echo tailscale completion bash \> /etc/bash_completion.d/tailscale
+      tailscale completion bash > /etc/bash_completion.d/tailscale
+      ExitCodeCheck $?
+      #echo source \<\(tailscale completion bash\)
+      #source <(tailscale completion bash)
+      #ExitCodeCheck $?
+   fi
+   #tailscale status
+}
+
 delete_pi_user(){
    FOUND=`sed 's/:.*//' /etc/passwd | grep "${PI}"`
    if [[ -n "${FOUND}" ]]
@@ -953,6 +971,7 @@ have_phase1 && check_version
 have_phase1 && check_boot_configiration
 have_full && do_reboot
 have_receiver && check_port
+have_phase1 && install_tailscale
 have_phase1 && install_additional_utilies
 have_full || delete_pi_user
 have_receiver && change_hostname ${HAVE_FULL}
