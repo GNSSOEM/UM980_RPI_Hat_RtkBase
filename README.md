@@ -36,6 +36,7 @@ Based on RtkBase
 + Adding users via an Windows application  (not only on first boot)
 + Complete [documentation](./ELT_RTKBase_v1.6.0_EN.pdf) with lots of pictures
 + Zeroconfig VPN by [Tailscale](https://tailscale.com)
++ System update & upgrade by buttom in the web-interface
 
 ## License:
 UM980_RPI_Hat_RtkBase is licensed under AGPL 3 (see [LICENSE](./LICENSE) file).

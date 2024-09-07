@@ -1,5 +1,5 @@
 diff --git a/web_app/static/settings.js b/web_app/static/settings.js
-index c63e6e3..8e6fb26 100644
+index c63e6e3..bb84b7a 100644
 --- a/web_app/static/settings.js
 +++ b/web_app/static/settings.js
 @@ -347,8 +347,19 @@ $(document).ready(function () {
@@ -38,3 +38,32 @@ index c63e6e3..8e6fb26 100644
      // ####################### HANDLE REBOOT & SHUTDOWN #######################
  
      $("#reboot-button").on("click", function() {
+@@ -735,5 +755,28 @@ $(document).ready(function () {
+         socket.emit("shutdown device");
+     })
+ 
++    $("#upgrade-button").on("click", function() {
++        $("#upgradeModal .modal-body").html('Update & upgrade linux. Are you sure?');
++        $("#confirm-upgrade-button").prop("hidden", false);
++        $("#confirm-upgrade-button").prop("disabled", false);
++        $("#confirm-upgrade-button").html('Upgrade');
++        $("#upgrade-cancel-button").prop("hidden", false);
++        $("#upgrade-cancel-button").prop("disabled", false);
++        $("#upgrade-cancel-button").html('Cancel');
++        $("#upgradeModal").modal();
++    })
++    $("#confirm-upgrade-button").on("click", function() {
++        $("#upgradeModal .modal-body").html('<div class="align-items-center">Upgrading now...  <div class="spinner-border ml-auto" role="status" aria-hidden="true"></div></div>');
++        $(this).html('<span class="spinner-border spinner-border-sm"></span> Upgrading...');
++        $(this).prop("disabled", true);
++        $("#upgrade-cancel-button").prop("hidden", true);
++        socket.emit("update and upgrade");
++    })
++    socket.on("upgrade_finished", function(msg) {
++        $("#upgradeModal .modal-body").html(msg);
++        $("#confirm-upgrade-button").prop("hidden", true);
++        $("#upgrade-cancel-button").prop("hidden", false);
++        $("#upgrade-cancel-button").html('Continue');
++    })
+     // end of document.ready
+ });

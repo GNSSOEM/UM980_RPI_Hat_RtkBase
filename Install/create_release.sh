@@ -16,7 +16,8 @@ tar --exclude-vcs \
     version.txt settings_js.patch base_html.patch \
     Bynav_RTCM3_OUT.txt Septentrio_TEST.txt \
     Septentrio_RTCM3_OUT.txt settings_html.patch \
-    ppp_conf.patch config.original tailscale_get_href.sh
+    ppp_conf.patch config.original tailscale_get_href.sh \
+    system_upgrade.sh
  
 cat install_script.sh $ARCHIVE_NAME > $BUNDLE_NAME
 chmod +x $BUNDLE_NAME

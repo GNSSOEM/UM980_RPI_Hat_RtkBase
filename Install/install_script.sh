@@ -18,6 +18,7 @@ SET_BASE_POS=UnicoreSetBasePos.sh
 UNICORE_SETTIGNS=UnicoreSettings.sh
 UNICORE_CONFIGURE=UnicoreConfigure.sh
 TAILSCALE_GET_HREF=tailscale_get_href.sh
+SYSTEM_UPGRADE=system_upgrade.sh
 SETTINGS_NOW=${RTKBASE_GIT}/settings.conf
 SETTINGS_SAVE=${RTKBASE_GIT}/settings.save
 SETTINGS_DEFAULT=${RTKBASE_GIT}/settings.conf.default
@@ -708,6 +709,15 @@ configure_for_unicore(){
    chmod +x ${RTKBASE_TOOLS}/${TAILSCALE_GET_HREF}
    ExitCodeCheck $?
 
+   #echo mv ${BASEDIR}/${SYSTEM_UPGRADE} ${RTKBASE_TOOLS}/
+   mv ${BASEDIR}/${SYSTEM_UPGRADE} ${RTKBASE_TOOLS}/
+   ExitCodeCheck $?
+   #echo chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_TOOLS}/${SYSTEM_UPGRADE}
+   chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_TOOLS}/${SYSTEM_UPGRADE}
+   ExitCodeCheck $?
+   #echo chmod +x ${RTKBASE_TOOLS}/${SYSTEM_UPGRADE}
+   chmod +x ${RTKBASE_TOOLS}/${SYSTEM_UPGRADE}
+   ExitCodeCheck $?
 
    #echo mv ${BASEDIR}/${CONF980} ${RTKBASE_RECV}/
    mv ${BASEDIR}/${CONF980} ${RTKBASE_RECV}/
@@ -943,7 +953,8 @@ BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${CONFBYNAV} ${UNICORE_CONFIGURE
               ${SERVER_PATCH} ${STATUS_PATCH} ${TUNE_POWER} ${CONFIG} \
               ${RTKLIB}/* ${VERSION} ${SETTING_JS_PATCH} ${BASE_PATCH} \
               ${CONFSEPTENTRIO} ${TESTSEPTENTRIO} ${SETTING_HTML_PATCH} \
-              ${PPP_CONF_PATH} ${CONFIG_ORIG} ${TAILSCALE_GET_HREF}"
+              ${PPP_CONF_PATH} ${CONFIG_ORIG} ${TAILSCALE_GET_HREF} \
+              ${SYSTEM_UPGRADE}"
 FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
 FILES_DELETE="${CONFIG} ${CONFIG_ORIG}"
 
