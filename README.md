@@ -34,7 +34,7 @@ Based on RtkBase
 + Then speed changed in main settings, speed of receiver will be changing too
 + Configuring WiFi via an Windows application  (not only on first boot)
 + Adding users via an Windows application  (not only on first boot)
-+ Ñomplete documentation with lots of pictures
++ Complete [documentation](./ELT_RTKBase_v1.6.0_EN.pdf) with lots of pictures
 + Zeroconfig VPN by [Tailscale](https://tailscale.com)
 
 ## License:
