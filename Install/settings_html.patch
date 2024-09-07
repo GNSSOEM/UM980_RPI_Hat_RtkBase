@@ -1,5 +1,5 @@
 diff --git a/web_app/templates/settings.html b/web_app/templates/settings.html
-index c8f257b..472a86a 100644
+index c8f257b..9e2b604 100644
 --- a/web_app/templates/settings.html
 +++ b/web_app/templates/settings.html
 @@ -35,7 +35,7 @@
@@ -29,3 +29,19 @@ index c8f257b..472a86a 100644
          {% endif %}
        </span>
      </div>
+@@ -607,6 +607,15 @@
+     </div>
+   </div>
+ 
++  <div class="row py-2 align-items-center">
++    <div class="col-sm-4">
++      <span class="col-sm-3">VPN:</span>
++    </div>
++    <div class="col-sm-8">
++        <a id="tailscale-button" class="btn btn-secondary" role="button">Tailscale admin console</a>
++    </div>
++  </div>
++
+     <div class="row py-2 align-items-center">
+       <div class="col-sm-4">
+         <span class="col-sm-3">Power:</span>

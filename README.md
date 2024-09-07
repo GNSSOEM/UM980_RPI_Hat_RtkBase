@@ -35,6 +35,7 @@ Based on RtkBase
 + Configuring WiFi via an Windows application  (not only on first boot)
 + Adding users via an Windows application  (not only on first boot)
 + Ñomplete documentation with lots of pictures
++ Zeroconfig VPN by [Tailscale](https://tailscale.com)
 
 ## License:
 UM980_RPI_Hat_RtkBase is licensed under AGPL 3 (see [LICENSE](./LICENSE) file).

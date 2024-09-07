@@ -1,5 +1,5 @@
 diff --git a/web_app/static/settings.js b/web_app/static/settings.js
-index c63e6e3..f51313a 100644
+index c63e6e3..8e6fb26 100644
 --- a/web_app/static/settings.js
 +++ b/web_app/static/settings.js
 @@ -347,8 +347,19 @@ $(document).ready(function () {
@@ -22,3 +22,19 @@ index c63e6e3..f51313a 100644
                  // NEW METHOD from https://stackoverflow.com/questions/35154348/trigger-form-submission-with-javascript
                  document.getElementById("main").dispatchEvent(new SubmitEvent('submit', {cancelable: true}));
                  if (response['then_configure']) {
+@@ -703,6 +714,15 @@ $(document).ready(function () {
+           };
+       };
+ 
++    // ########################### HANDLE TAILSCALE ###########################
++
++    document.getElementById('tailscale-button').onclick = function (){
++        socket.emit("get tailscale href");
++    }
++    socket.on("tailscale_href", function(msg) {
++        window.open(msg, '_blank');
++    })
++
+     // ####################### HANDLE REBOOT & SHUTDOWN #######################
+ 
+     $("#reboot-button").on("click", function() {
