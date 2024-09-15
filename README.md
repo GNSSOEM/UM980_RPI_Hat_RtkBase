@@ -1,11 +1,11 @@
 # UM980_RPI_Hat_RtkBase
 
-### Raspbian compatible RtkBase software for Unicore UM98x, Bynav M2x and Spetentrio Mosaic X5
+### Raspbian compatible RtkBase software for Unicore UM98x, Bynav M2x and Septentrio Mosaic X5
 
 Based on RtkBase
 
 ## Easy installation:
-+ Connect your Unicore or Bynav receiver to your raspberry pi/orange pi/....
++ Connect your Unicore, Bynav or Septentrio receiver to your raspberry pi/orange pi/....
 
 + Open a terminal and:
 
