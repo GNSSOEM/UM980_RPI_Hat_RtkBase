@@ -255,6 +255,14 @@ install_packet_if_not_installed(){
    #echo NEED_INSTALL=${NEED_INSTALL} \$\1=${1}
 }
 
+check_platform(){
+   platform=$(uname -m)
+   if [[ ! ${platform} =~ 'aarch64' ]] && [[ ! ${platform} =~ 'armv7l' ]]; then
+      echo ELT_RTKBase cannot be installed on ${platform} architecture
+      exit 1
+   fi
+}
+
 restart_as_root(){
    WHOAMI=`whoami`
    if [[ ${WHOAMI} != "root" ]]
@@ -989,6 +997,7 @@ check_phases(){
    #echo FILES_DELETE=${FILES_DELETE}
 }
 
+check_platform
 restart_as_root ${1}
 check_phases ${1}
 have_phase1 && export LANG=C
