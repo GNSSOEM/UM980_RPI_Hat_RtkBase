@@ -1,6 +1,6 @@
 # UM980_RPI_Hat_RtkBase
 
-### Raspbian compatible RtkBase software for Unicore UM98x, Bynav M2x and Septentrio Mosaic X5
+### Raspberry Pi OS compatible RtkBase software for Unicore UM98x, Bynav M2x and Septentrio Mosaic X5
 
 Based on RtkBase
 
@@ -17,8 +17,8 @@ Based on RtkBase
 + RTFM
 
 ## Two phase installation:
-
 + ./install.sh -1 for part of installation without receiver
++ Connect the GNSS receiver to the Raspberry Pi
 + ./install.sh -2 for part of installation with receiver
 
 ## main feature, added to RtkBase
