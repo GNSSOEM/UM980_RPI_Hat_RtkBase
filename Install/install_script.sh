@@ -521,8 +521,18 @@ add_rtkbase_user(){
    if [[ ${HAVEUSER} == "" ]]
    then
       #echo adduser --comment "RTKBase user" --disabled-password --home ${RTKBASE_PATH} ${RTKBASE_USER}
-      adduser --comment "RTKBase user" --disabled-password --home ${RTKBASE_PATH} ${RTKBASE_USER}
+      adduser --gecos "RTKBase user" --disabled-password --home ${RTKBASE_PATH} ${RTKBASE_USER}
       ExitCodeCheck $?
+      # --gecos instead --comment for raspbian 11
+   fi
+
+   HAVEUSER=`cat /etc/passwd | grep ${RTKBASE_USER}`
+   #echo HAVEUSER=${HAVEUSER}
+   if [[ ${HAVEUSER} == "" ]]
+   then
+      echo Failed to create ${RTKBASE_USER} user
+      delete_all_extarcted
+      exit
    fi
 
    usermod -a -G plugdev,dialout ${RTKBASE_USER}
@@ -555,6 +565,12 @@ add_rtkbase_user(){
       #echo mkdir ${RTKBASE_UPDATE}
       mkdir ${RTKBASE_UPDATE}
       ExitCodeCheck $?
+   fi
+
+   if [[ -d "${RTKBASE_GIT}" ]]
+   then
+      #echo chown -R rtkbase:rtkbase ${RTKBASE_GIT}
+      chown -R rtkbase:rtkbase ${RTKBASE_GIT}
    fi
 }
 
