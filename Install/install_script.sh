@@ -550,16 +550,24 @@ add_rtkbase_user(){
    fi
 }
 
+RTKBASE_ADD_1ST=
 install_rtklib() {
     echo '################################'
     echo 'INSTALLING RTKLIB'
     echo '################################'
-    #echo chmod 711 ${BASEDIR}/${RTKLIB}/*
-    chmod 711 ${BASEDIR}/${RTKLIB}/*
-    ExitCodeCheck $?
-    #echo mv ${BASEDIR}/${RTKLIB}/* /usr/local/bin/
-    mv ${BASEDIR}/${RTKLIB}/* /usr/local/bin/
-    ExitCodeCheck $?
+    platform=$(uname -m)
+    RTKLIB_DIR=${BASEDIR}/${RTKLIB}/${platform}
+    if [[ -d ${RTKLIB_DIR} ]]; then
+       LOCAL_BIN=/usr/local/bin/
+       #echo chmod 711 ${RTKLIB_DIR}/*
+       chmod 711 ${RTKLIB_DIR}/*
+       #echo mv ${RTKLIB_DIR}/* ${LOCAL_BIN}
+       mv ${RTKLIB_DIR}/* ${LOCAL_BIN}
+       ExitCodeCheck $?
+    else
+       echo RtkLib will be installed from original RtkBase
+       RTKBASE_ADD_1ST=-r
+    fi
     #ls -la /usr/local/bin/
     #echo rm -rf ${BASEDIR}/${RTKLIB}
     rm -rf ${BASEDIR}/${RTKLIB}
@@ -660,8 +668,8 @@ install_tune_power(){
 }
 
 rtkbase_install(){
-   #echo ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -r -t -g
-   ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -t -g
+   #echo ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -t -g ${RTKBASE_ADD_1ST}
+   ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -t -g ${RTKBASE_ADD_1ST}
    ExitCodeCheck $?
    if [ $lastcode != 0 ]
    then
