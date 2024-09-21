@@ -342,15 +342,17 @@ install_tailscale(){
       #echo curl -fsSL https://tailscale.com/install.sh \| sh
       curl -fsSL https://tailscale.com/install.sh | sh
       ExitCodeCheck $?
-      #echo mkdir -p /etc/bash_completion.d
-      mkdir -p /etc/bash_completion.d
-      ExitCodeCheck $?
-      #echo tailscale completion bash \> /etc/bash_completion.d/tailscale
-      tailscale completion bash > /etc/bash_completion.d/tailscale
-      ExitCodeCheck $?
-      #echo source \<\(tailscale completion bash\)
-      #source <(tailscale completion bash)
-      #ExitCodeCheck $?
+      if type tailscale >/dev/null 2>&1; then
+         #echo mkdir -p /etc/bash_completion.d
+         mkdir -p /etc/bash_completion.d
+         ExitCodeCheck $?
+         #echo tailscale completion bash \> /etc/bash_completion.d/tailscale
+         tailscale completion bash > /etc/bash_completion.d/tailscale
+         ExitCodeCheck $?
+         #echo source \<\(tailscale completion bash\)
+         #source <(tailscale completion bash)
+         #ExitCodeCheck $?
+      fi
    fi
    #tailscale status
 }
