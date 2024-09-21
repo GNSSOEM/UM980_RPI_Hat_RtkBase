@@ -178,7 +178,7 @@ replace_config(){
   fi
 }
 
-delete_all_extarcted(){
+delete_all_extracted(){
   if [[ "${FILES_EXTRACT}" != "" ]]
   then
      #echo rm -rf ${FILES_EXTRACT}
@@ -205,7 +205,7 @@ check_version(){
      if [ "${NEW_VERSION}" -lt "${OLD_VERSION}" ]
      then
         echo Already installed version'('${OLD_VERSION}')' is newer, than install.sh version'('${NEW_VERSION}')'. Exiting
-        delete_all_extarcted
+        delete_all_extracted
         exit
      else
         echo Update from version ${OLD_VERSION} to version ${NEW_VERSION}
@@ -287,7 +287,7 @@ do_reboot(){
    if [[ ${NEEDREBOOT} == "Y" ]]
    then
       echo Please try again ${0} after reboot
-      delete_all_extarcted
+      delete_all_extracted
       echo Rebooting now!!!!
       reboot now
       exit
@@ -307,7 +307,7 @@ check_port(){
    if [[ ! -c "${RECVPORT}" ]]
    then
       echo port ${RECVPORT} not found. Setup port and try again
-      delete_all_extarcted
+      delete_all_extracted
       exit
    fi
 }
@@ -531,7 +531,7 @@ add_rtkbase_user(){
    if [[ ${HAVEUSER} == "" ]]
    then
       echo Failed to create ${RTKBASE_USER} user
-      delete_all_extarcted
+      delete_all_extracted
       exit
    fi
 
