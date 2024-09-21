@@ -178,6 +178,14 @@ replace_config(){
   fi
 }
 
+delete_all_extarcted(){
+  if [[ "${FILES_EXTRACT}" != "" ]]
+  then
+     #echo rm -rf ${FILES_EXTRACT}
+     rm -rf ${FILES_EXTRACT}
+  fi
+}
+
 check_version(){
   if [ -f ${BASEDIR}/${VERSION} ]
   then
@@ -197,8 +205,7 @@ check_version(){
      if [ "${NEW_VERSION}" -lt "${OLD_VERSION}" ]
      then
         echo Already installed version'('${OLD_VERSION}')' is newer, than install.sh version'('${NEW_VERSION}')'. Exiting
-        #echo rm -f ${FILES_EXTRACT}
-        rm -f ${FILES_EXTRACT}
+        delete_all_extarcted
         exit
      else
         echo Update from version ${OLD_VERSION} to version ${NEW_VERSION}
@@ -280,8 +287,8 @@ do_reboot(){
    if [[ ${NEEDREBOOT} == "Y" ]]
    then
       echo Please try again ${0} after reboot
-      #echo rm -f ${FILES_EXTRACT}
-      rm -f ${FILES_EXTRACT}
+      delete_all_extarcted
+      echo Rebooting now!!!!
       reboot now
       exit
    fi
@@ -300,8 +307,7 @@ check_port(){
    if [[ ! -c "${RECVPORT}" ]]
    then
       echo port ${RECVPORT} not found. Setup port and try again
-      #echo rm -f ${FILES_EXTRACT}
-      rm -f ${FILES_EXTRACT}
+      delete_all_extarcted
       exit
    fi
 }
