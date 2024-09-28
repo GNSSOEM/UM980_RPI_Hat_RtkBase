@@ -19,6 +19,7 @@ UNICORE_SETTIGNS=UnicoreSettings.sh
 UNICORE_CONFIGURE=UnicoreConfigure.sh
 TAILSCALE_GET_HREF=tailscale_get_href.sh
 SYSTEM_UPGRADE=system_upgrade.sh
+EXEC_UPDATE=exec_update.sh
 SETTINGS_NOW=${RTKBASE_GIT}/settings.conf
 SETTINGS_SAVE=${RTKBASE_GIT}/settings.save
 SETTINGS_DEFAULT=${RTKBASE_GIT}/settings.conf.default
@@ -48,6 +49,7 @@ SERVICE_PATH=/etc/systemd/system
 PI=pi
 BANNER=/etc/ssh/sshd_config.d/rename_user.conf
 VERSION=version.txt
+ONLINE_UPDATE=NO
 
 lastcode=N
 exitcode=0
@@ -473,23 +475,27 @@ stop_rtkbase_services(){
      echo '################################'
      echo 'STOP RTKBASE SERVICES'
      echo '################################'
-     for service_name in str2str_ntrip_A.service \
-                         str2str_ntrip_B.service \
-                         str2str_local_ntrip_caster \
-                         str2str_rtcm_svr.service \
-                         str2str_rtcm_client.service \
-                         str2str_rtcm_udp_svr.service \
-                         str2str_rtcm_udp_client.service \
-                         str2str_rtcm_serial.service \
-                         str2str_file.service \
-                         str2str_tcp.service \
-                         rtkrcv_raw2nmea.service \
-                         rtkbase_web.service \
-                         rtkbase_archive.service \
-                         rtkbase_archive.timer \
-                         modem_check.service \
-                         modem_check.timer \
-                         rtkbase_gnss_web_proxy.service
+     serviceList="str2str_ntrip_A.service \
+                  str2str_ntrip_B.service \
+                  str2str_local_ntrip_caster \
+                  str2str_rtcm_svr.service \
+                  str2str_rtcm_client.service \
+                  str2str_rtcm_udp_svr.service \
+                  str2str_rtcm_udp_client.service \
+                  str2str_rtcm_serial.service \
+                  str2str_file.service \
+                  str2str_tcp.service \
+                  rtkrcv_raw2nmea.service \
+                  rtkbase_archive.service \
+                  rtkbase_archive.timer \
+                  modem_check.service \
+                  modem_check.timer \
+                  rtkbase_gnss_web_proxy.service"
+     if [[ "${ONLINE_UPDATE}" != "UPDATE" ]]; then
+        serviceList="${serviceList} rtkbase_web.service"
+     fi
+     #echo serviceList=${serviceList}
+     for service_name in ${serviceList}
      do
          service_active=$(systemctl is-active "${service_name}")
          if [ "${service_active}" != "inactive" ]
@@ -707,6 +713,15 @@ rtkbase_install(){
    #ExitCodeCheck $?
 }
 
+restart_rtkbase_if_started(){
+   if [[ "${ONLINE_UPDATE}" != "UPDATE" ]]; then
+      if ! ischroot
+      then
+         systemctl is-active --quiet rtkbase_web.service && sudo systemctl restart rtkbase_web.service
+      fi
+   fi
+}
+
 configure_for_unicore(){
    echo '################################'
    echo 'CONFIGURE FOR UNICORE'
@@ -760,6 +775,16 @@ configure_for_unicore(){
    ExitCodeCheck $?
    #echo chmod +x ${RTKBASE_TOOLS}/${SYSTEM_UPGRADE}
    chmod +x ${RTKBASE_TOOLS}/${SYSTEM_UPGRADE}
+   ExitCodeCheck $?
+
+   #echo mv ${BASEDIR}/${EXEC_UPDATE} ${RTKBASE_TOOLS}/
+   mv ${BASEDIR}/${EXEC_UPDATE} ${RTKBASE_TOOLS}/
+   ExitCodeCheck $?
+   #echo chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_TOOLS}/${EXEC_UPDATE}
+   chown ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_TOOLS}/${EXEC_UPDATE}
+   ExitCodeCheck $?
+   #echo chmod +x ${RTKBASE_TOOLS}/${EXEC_UPDATE}
+   chmod +x ${RTKBASE_TOOLS}/${EXEC_UPDATE}
    ExitCodeCheck $?
 
    #echo mv ${BASEDIR}/${CONF980} ${RTKBASE_RECV}/
@@ -860,10 +885,7 @@ configure_for_unicore(){
    rm -f ${BASEDIR}/${PPP_CONF_PATH}
    ExitCodeCheck $?
 
-   if ! ischroot
-   then
-      systemctl is-active --quiet rtkbase_web.service && sudo systemctl restart rtkbase_web.service
-   fi
+   restart_rtkbase_if_started
 }
 
 configure_settings(){
@@ -922,10 +944,7 @@ configure_gnss(){
       ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
       ExitCodeCheck $?
 
-      if ! ischroot
-      then
-         systemctl is-active --quiet rtkbase_web.service && sudo systemctl restart rtkbase_web.service
-      fi
+      restart_rtkbase_if_started
    fi
 }
 
@@ -997,7 +1016,7 @@ BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${CONFBYNAV} ${UNICORE_CONFIGURE
               ${RTKLIB}/* ${VERSION} ${SETTING_JS_PATCH} ${BASE_PATCH} \
               ${CONFSEPTENTRIO} ${TESTSEPTENTRIO} ${SETTING_HTML_PATCH} \
               ${PPP_CONF_PATH} ${CONFIG_ORIG} ${TAILSCALE_GET_HREF} \
-              ${SYSTEM_UPGRADE}"
+              ${SYSTEM_UPGRADE} ${EXEC_UPDATE}"
 FILES_EXTRACT="${BASE_EXTRACT} uninstall.sh"
 FILES_DELETE="${CONFIG} ${CONFIG_ORIG}"
 
@@ -1018,6 +1037,13 @@ check_phases(){
    elif [[ ${1} == "-u" ]]
    then
       FILES_EXTRACT="${BASE_EXTRACT}"
+   elif [[ ${1} == "-U" ]]
+   then
+      FILES_EXTRACT="${BASE_EXTRACT}"
+      ONLINE_UPDATE=UPDATE
+   elif [[ ${1} == "-s" ]]
+   then
+      exit 0
    elif [[ ${1} != "" ]]
    then
       echo Invalid argument \"${1}\"
