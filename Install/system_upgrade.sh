@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sudo apt -y update && sudo apt -y upgrade && sudo apt -y autoremove
+sudo apt -q -y update && sudo apt -q -y upgrade && sudo apt -q -y autoremove --purge && sudo apt -q -u clean
