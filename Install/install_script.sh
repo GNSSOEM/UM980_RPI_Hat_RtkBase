@@ -936,6 +936,12 @@ configure_gnss(){
          #echo sleep ${LEFT_TIME}
          sleep ${LEFT_TIME}
       fi
+
+      rtkbase_path=${RTKBASE_GIT}
+      #echo source "${rtkbase_path}/tools/opizero_temp_offset.sh"
+      source "${rtkbase_path}/tools/opizero_temp_offset.sh"
+      ExitCodeCheck $?
+
       #echo ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
       ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -e
       ExitCodeCheck $?

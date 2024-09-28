@@ -1,5 +1,5 @@
 diff --git a/tools/install.sh b/tools/install.sh
-index a3972d5..ab0482d 100755
+index a3972d5..f0c7454 100755
 --- a/tools/install.sh
 +++ b/tools/install.sh
 @@ -289,7 +289,7 @@ install_rtkbase_bundled() {
@@ -11,3 +11,12 @@ index a3972d5..ab0482d 100755
      _add_rtkbase_path_to_environment
  }
  
+@@ -337,7 +337,7 @@ rtkbase_requirements(){
+         cp "${rtkbase_path}/settings.conf.default" "${rtkbase_path}/settings.conf"
+       fi
+       #Then launch check cpu temp script for OPI zero LTS
+-      source "${rtkbase_path}/tools/opizero_temp_offset.sh"
++      #source "${rtkbase_path}/tools/opizero_temp_offset.sh"
+       #venv module installation
+       sudo -u "${RTKBASE_USER}" "${python_venv}" -m pip install --upgrade pip setuptools wheel  --extra-index-url https://www.piwheels.org/simple
+       # install prebuilt wheel for cryptography because it is unavailable on piwheels (2023/01)
