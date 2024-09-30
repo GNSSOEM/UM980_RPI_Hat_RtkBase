@@ -330,7 +330,7 @@ install_additional_utilies(){
    #echo NEED_INSTALL=${NEED_INSTALL}
    if [[ "${NEED_INSTALL}" != "" ]]
    then
-      apt-get install -y ${NEED_INSTALL}
+      apt-get install -q -y ${NEED_INSTALL}
       ExitCodeCheck $?
       NEED_INSTALL=
    fi
