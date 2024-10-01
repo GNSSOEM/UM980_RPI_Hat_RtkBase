@@ -1,7 +1,47 @@
 diff --git a/src/streamsvr.c b/src/streamsvr.c
-index 19733b0..a6c34bd 100644
+index 19733b0..2369174 100644
 --- a/src/streamsvr.c
 +++ b/src/streamsvr.c
+@@ -500,6 +500,19 @@ static void *strsvrthread(void *arg)
+     for (cyc=0;svr->state;cyc++) {
+         tick=tickget();
+         
++        /* read message from output stream if connected */
++        for (i=1;i<svr->nstr;i++) {
++            while (strstat(svr->stream+i,NULL)>=2 &&
++                  (n=strread(svr->stream+i,buff,sizeof(buff)))>0) {
++                /* relay back message from output stream to input stream */
++                if (i==svr->relayback) {
++                    strwrite(svr->stream,buff,n);
++                }
++                /* write data to log stream */
++                strwrite(svr->strlog+i,buff,n);
++            }
++        }
++
+         /* read data from input stream */
+         while ((n=strread(svr->stream,svr->buff,svr->buffsize))>0&&svr->state) {
+             
+@@ -521,19 +534,6 @@ static void *strsvrthread(void *arg)
+             }
+             rtklib_unlock(&svr->lock);
+         }
+-        for (i=1;i<svr->nstr;i++) {
+-            
+-            /* read message from output stream if connected */
+-            while (strstat(svr->stream+i,NULL)>=2 &&
+-                  (n=strread(svr->stream+i,buff,sizeof(buff)))>0) {
+-                /* relay back message from output stream to input stream */
+-                if (i==svr->relayback) {
+-                    strwrite(svr->stream,buff,n);
+-                }
+-                /* write data to log stream */
+-                strwrite(svr->strlog+i,buff,n);
+-            }
+-        }
+         /* write periodic command to input stream */
+         for (i=0;i<svr->nstr;i++) {
+             periodic_cmd(cyc*svr->cycle,svr->cmds_periodic[i],svr->stream+i);
 @@ -761,10 +761,10 @@ extern void strsvrstop(strsvr_t *svr, char **cmds)
  extern void strsvrstat(strsvr_t *svr, int *stat, int *log_stat, int *byte,
                         int *bps, char *msg)
