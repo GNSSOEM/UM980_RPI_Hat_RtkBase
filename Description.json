@@ -1,5 +1,5 @@
 {
-  "version": "162",
-  "new_release": "v1.6.2",
-  "comment": "VPN Tailscale\r\nSystem Upgrade\r\nELT Rtkbase update\r\nMany fixed"
+  "version": "163",
+  "new_release": "v1.6.3",
+  "comment": "VPN Tailscale\r\nSystem Upgrade\r\nELT Rtkbase update\r\nImproved diagnostic logs\r\nLots of fixes"
 }
