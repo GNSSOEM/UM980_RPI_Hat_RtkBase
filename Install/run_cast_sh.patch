@@ -1,5 +1,5 @@
 diff --git a/run_cast.sh b/run_cast.sh
-index db7a656..09f5097 100755
+index db7a656..1050c04 100755
 --- a/run_cast.sh
 +++ b/run_cast.sh
 @@ -8,16 +8,26 @@ BASEDIR="$(dirname "$0")"
@@ -8,8 +8,8 @@ index db7a656..09f5097 100755
  receiver_info="RTKBase ${receiver},${version} ${receiver_firmware}"
 -in_serial="serial://${com_port}:${com_port_settings}#${receiver_format}"
 -in_tcp="tcpcli://localhost:${tcp_port}#${receiver_format}"
-+in_serial="serial://${com_port}:${com_port_settings}#${receiver_format} -s 60000"
-+in_tcp="tcpcli://localhost:${tcp_port}#${receiver_format} -s 60000"
++in_serial="serial://${com_port}:${com_port_settings}#${receiver_format} -s 60000 -d 100"
++in_tcp="tcpcli://localhost:${tcp_port}#${receiver_format} -s 60000 -d 100"
  #in_ext_tcp is mainly for dev purpose to receive a raw stream from another base
  in_ext_tcp="tcpcli://${ext_tcp_source}:${ext_tcp_port}#${receiver_format}"
  
