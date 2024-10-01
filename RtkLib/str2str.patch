@@ -1,0 +1,34 @@
+diff --git a/app/consapp/str2str/str2str.c b/app/consapp/str2str/str2str.c
+index c82f357..b926c28 100644
+--- a/app/consapp/str2str/str2str.c
++++ b/app/consapp/str2str/str2str.c
+@@ -215,7 +215,7 @@ int main(int argc, char **argv)
+ {
+     static char cmd_strs[MAXSTR][MAXRCVCMD]={"","","","",""};
+     static char cmd_periodic_strs[MAXSTR][MAXRCVCMD]={"","","","",""};
+-    const char ss[]={'E','-','W','C','C'};
++    /*const char ss[]={'E','-','W','C','C'};*/
+     strconv_t *conv[MAXSTR]={NULL};
+     double pos[3],stapos[3]={0},stadel[3]={0};
+     static char s1[MAXSTR][MAXSTRPATH]={{0}},s2[MAXSTR][MAXSTRPATH]={{0}};
+@@ -343,14 +343,12 @@ int main(int argc, char **argv)
+         
+         /* get stream server status */
+         strsvrstat(&strsvr,stat,log_stat,byte,bps,strmsg);
+-        
+-        /* show stream server status */
+-        for (i=0,p=buff;i<MAXSTR;i++) p+=sprintf(p,"%c",ss[stat[i]+1]);
+-        
+-        fprintf(stderr,"%s [%s] %10d B %7d bps %s\n",
+-                time_str(utc2gpst(timeget()),0),buff,byte[0],bps[0],strmsg);
+-        
+-        sleepms(dispint);
++
++        if (*strmsg)
++           fprintf(stderr,"%s %s\n",
++                   time_str(utc2gpst(timeget()),0),strmsg);
++        else
++           sleepms(dispint);
+     }
+     for (i=0;i<MAXSTR;i++) {
+         if (*cmdfile[i]) readcmd(cmdfile[i],cmds[i],1);

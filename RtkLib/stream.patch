@@ -1,17 +1,467 @@
 diff --git a/src/stream.c b/src/stream.c
-index 6403e33..3616c90 100644
+index f6d815e..dbdf024 100644
 --- a/src/stream.c
 +++ b/src/stream.c
-@@ -1127,6 +1127,12 @@ static int gentcp(tcp_t *tcp, int type, char *msg)
+@@ -446,7 +446,7 @@ static serial_t *openserial(const char *path, int mode, char *msg)
+         free(serial);
+         return NULL;
+     }
+-    sprintf(msg,"%s",port);
++    sprintf(msg,"open %s",port);
+ #else
+     sprintf(dev,"/dev/%.*s",(int)sizeof(port)-6,port);
+     
+@@ -474,7 +474,7 @@ static serial_t *openserial(const char *path, int mode, char *msg)
+     ios.c_cflag|=!strcmp(fctr,"rts")?CRTSCTS:0;
+     tcsetattr(serial->dev,TCSANOW,&ios);
+     tcflush(serial->dev,TCIOFLUSH);
+-    sprintf(msg,"%s",dev);
++    sprintf(msg,"open %s",dev);
+ #endif
+     serial->tcpsvr=NULL;
+     
+@@ -1095,6 +1095,17 @@ static int send_nb(socket_t sock, uint8_t *buff, int n)
+     ns=send(sock,(char *)buff,n,0);
+     return ns<n?-1:ns;
+ }
++/* get error text ------------------------------------------------------------*/
++static char errbuf[200];
++static char *errorstring(int err)
++{
++    strncpy(errbuf,strerror(err),sizeof(errbuf));
++    errbuf[sizeof(errbuf)-1] = 0;
++    int Len = (int)strlen(errbuf)-1;
++    while ((Len >= 0) && (errbuf[Len] < ' ')) --Len;
++    errbuf[Len+1] = 0;
++    return errbuf;
++}
+ /* generate tcp socket -------------------------------------------------------*/
+ static int gentcp(tcp_t *tcp, int type, char *msg)
+ {
+@@ -1102,13 +1113,15 @@ static int gentcp(tcp_t *tcp, int type, char *msg)
+ #ifdef SVR_REUSEADDR
+     int opt=1;
+ #endif
++    int err;
+     
+     tracet(3,"gentcp: type=%d\n",type);
+     
+     /* generate socket */
+     if ((tcp->sock=socket(AF_INET,SOCK_STREAM,0))==(socket_t)-1) {
+-        sprintf(msg,"socket error (%d)",errsock());
+-        tracet(1,"gentcp: socket error err=%d\n",errsock());
++        int err=errsock();
++        sprintf(msg,"socket error %d (%s)",err,errorstring(err));
++        tracet(1,"gentcp: socket error err=%d\n",err);
+         tcp->state=-1;
+         return 0;
+     }
+@@ -1127,9 +1140,18 @@ static int gentcp(tcp_t *tcp, int type, char *msg)
          setsockopt(tcp->sock,SOL_SOCKET,SO_REUSEADDR,(const char *)&opt,
                     sizeof(opt));
  #endif
 +        if (!(hp=gethostbyname(tcp->saddr))) {
-+            sprintf(msg,"server address error (%s)",tcp->saddr);
-+            tracet(1,"gentcp: gethostbyname error addr=%s err=%d\n",tcp->saddr,errsock());
++            if ((err=errsock())) {
++               sprintf(msg,"server address error %d (%s) at %s",err,errorstring(err),tcp->saddr);
++               tracet(1,"gentcp: gethostbyname error addr=%s err=%d\n",tcp->saddr,err);
++            }
 +        } else
-+          memcpy(&tcp->addr.sin_addr,hp->h_addr,hp->h_length);
++            memcpy(&tcp->addr.sin_addr,hp->h_addr,hp->h_length);
 +
          if (bind(tcp->sock,(struct sockaddr *)&tcp->addr,sizeof(tcp->addr))==-1) {
-             sprintf(msg,"bind error (%d) : %d",errsock(),tcp->port);
-             tracet(1,"gentcp: bind error port=%d err=%d\n",tcp->port,errsock());
+-            sprintf(msg,"bind error (%d) : %d",errsock(),tcp->port);
+-            tracet(1,"gentcp: bind error port=%d err=%d\n",tcp->port,errsock());
++            err=errsock();
++            sprintf(msg,"bind error %d (%s) at %d",err,errorstring(err),tcp->port);
++            tracet(1,"gentcp: bind error port=%d err=%d\n",tcp->port,err);
+             closesocket(tcp->sock);
+             tcp->state=-1;
+             return 0;
+@@ -1138,8 +1160,9 @@ static int gentcp(tcp_t *tcp, int type, char *msg)
+     }
+     else { /* client socket */
+         if (!(hp=gethostbyname(tcp->saddr))) {
+-            sprintf(msg,"address error (%s)",tcp->saddr);
+-            tracet(1,"gentcp: gethostbyname error addr=%s err=%d\n",tcp->saddr,errsock());
++            err=errsock();
++            sprintf(msg,"client address error %d (%s) at %s",err,errorstring(err),tcp->saddr);
++            tracet(1,"gentcp: gethostbyname error addr=%s err=%d\n",tcp->saddr,err);
+             closesocket(tcp->sock);
+             tcp->state=0;
+             tcp->tcon=ticonnect;
+@@ -1217,11 +1240,11 @@ static void updatetcpsvr(tcpsvr_t *tcpsvr, char *msg)
+     }
+     if (n==0) {
+         tcpsvr->svr.state=1;
+-        sprintf(msg,"waiting...");
++        /*sprintf(msg,"waiting...");*/
+         return;
+     }
+     tcpsvr->svr.state=2;
+-    if (n==1) sprintf(msg,"%s",saddr); else sprintf(msg,"%d clients",n);
++    /*if (n==1) sprintf(msg,"client %s",saddr); else sprintf(msg,"%d clients",n);*/
+ }
+ /* accept client connection --------------------------------------------------*/
+ static int accsock(tcpsvr_t *tcpsvr, char *msg)
+@@ -1242,7 +1265,7 @@ static int accsock(tcpsvr_t *tcpsvr, char *msg)
+     }
+     if ((sock=accept_nb(tcpsvr->svr.sock,(struct sockaddr *)&addr,&len))==(socket_t)-1) {
+         err=errsock();
+-        sprintf(msg,"accept error (%d)",err);
++        sprintf(msg,"accept error %d (%s)",err,errorstring(err));
+         tracet(1,"accsock: accept error sock=%d err=%d\n",tcpsvr->svr.sock,err);
+         closesocket(tcpsvr->svr.sock);
+         tcpsvr->svr.state=0;
+@@ -1254,7 +1277,7 @@ static int accsock(tcpsvr_t *tcpsvr, char *msg)
+     tcpsvr->cli[i].sock=sock;
+     memcpy(&tcpsvr->cli[i].addr,&addr,sizeof(addr));
+     strcpy(tcpsvr->cli[i].saddr,inet_ntoa(addr.sin_addr));
+-    sprintf(msg,"%s",tcpsvr->cli[i].saddr);
++    sprintf(msg,"accept client %s",tcpsvr->cli[i].saddr);
+     tracet(3,"accsock: connected sock=%d addr=%s i=%d\n",
+            tcpsvr->cli[i].sock,tcpsvr->cli[i].saddr,i);
+     tcpsvr->cli[i].state=2;
+@@ -1286,12 +1309,19 @@ static int readtcpsvr(tcpsvr_t *tcpsvr, uint8_t *buff, int n, char *msg)
+         if (tcpsvr->cli[i].state!=2) continue;
+         
+         if ((nr=recv_nb(tcpsvr->cli[i].sock,buff,n))==-1) {
+-            if ((err=errsock())) {
+-                tracet(2,"readtcpsvr: recv error sock=%d err=%d\n",
+-                       tcpsvr->cli[i].sock,err);
++            err=errsock();
++            if ((err!=EALREADY) && (err!=EINPROGRESS)) {
++                if (err==0)
++                    sprintf(msg,"tcp server recv disconnected %s",tcpsvr->cli[i].saddr);
++                else  {
++                    tracet(2,"readtcpsvr: recv error sock=%d err=%d\n",
++                           tcpsvr->cli[i].sock,err);
++                    sprintf(msg,"tcp server recv error %d (%s) at %s",
++                            err,errorstring(err),tcpsvr->cli[i].saddr);
++                }
++                discontcp(&tcpsvr->cli[i],ticonnect);
++                updatetcpsvr(tcpsvr,msg);
+             }
+-            discontcp(&tcpsvr->cli[i],ticonnect);
+-            updatetcpsvr(tcpsvr,msg);
+         }
+         if (nr>0) {
+             tcpsvr->cli[i].tact=tickget();
+@@ -1316,7 +1346,9 @@ static int writetcpsvr(tcpsvr_t *tcpsvr, uint8_t *buff, int n, char *msg)
+             if ((err=errsock())) {
+                 tracet(2,"writetcpsvr: send error i=%d sock=%d err=%d\n",i,
+                        tcpsvr->cli[i].sock,err);
+-            }
++                sprintf(msg,"tcp server send error %d (%s) at %s",err,errorstring(err),tcpsvr->cli[i].saddr);
++            } else
++                sprintf(msg,"tcp server send not all, disconnect %s",tcpsvr->cli[i].saddr);
+             discontcp(&tcpsvr->cli[i],ticonnect);
+             updatetcpsvr(tcpsvr,msg);
+         }
+@@ -1382,17 +1414,17 @@ static int consock(tcpcli_t *tcpcli, char *msg)
+     if ((stat=connect_nb(tcpcli->svr.sock,(struct sockaddr *)&tcpcli->svr.addr,
+                          sizeof(tcpcli->svr.addr)))==-1) {
+         err=errsock();
+-        sprintf(msg,"connect error (%d)",err);
++        sprintf(msg,"tcp connect error %d (%s) at %s",err,errorstring(err),tcpcli->svr.saddr);
+         tracet(2,"consock: connect error sock=%d err=%d\n",tcpcli->svr.sock,err);
+         closesocket(tcpcli->svr.sock);
+         tcpcli->svr.state=0;
+         return 0;
+     }
+     if (!stat) { /* not connect */
+-        sprintf(msg,"connecting...");
++        sprintf(msg,"tcp connecting to %s in progress",tcpcli->svr.saddr);
+         return 0;
+     }
+-    sprintf(msg,"%s",tcpcli->svr.saddr);
++    sprintf(msg,"tcp connect %s",tcpcli->svr.saddr);
+     tracet(3,"consock: connected sock=%d addr=%s\n",tcpcli->svr.sock,tcpcli->svr.saddr);
+     tcpcli->svr.state=2;
+     tcpcli->svr.tact=tickget();
+@@ -1410,7 +1442,7 @@ static tcpcli_t *opentcpcli(const char *path, char *msg)
+     *tcpcli=tcpcli0;
+     decodetcppath(path,tcpcli->svr.saddr,port,NULL,NULL,NULL,NULL);
+     if (sscanf(port,"%d",&tcpcli->svr.port)<1) {
+-        sprintf(msg,"port error: %s",port);
++        sprintf(msg,"tcp client port error: %s",port);
+         tracet(2,"opentcp: port error port=%s\n",port);
+         free(tcpcli);
+         return NULL;
+@@ -1444,7 +1476,7 @@ static int waittcpcli(tcpcli_t *tcpcli, char *msg)
+     if (tcpcli->svr.state==2) { /* connect */
+         if (tcpcli->toinact>0&&
+             (int)(tickget()-tcpcli->svr.tact)>tcpcli->toinact) {
+-            sprintf(msg,"timeout");
++            sprintf(msg,"tcp client timeout %s",tcpcli->svr.saddr);
+             tracet(2,"waittcpcli: inactive timeout sock=%d\n",tcpcli->svr.sock);
+             discontcp(&tcpcli->svr,tcpcli->tirecon);
+             return 0;
+@@ -1462,14 +1494,16 @@ static int readtcpcli(tcpcli_t *tcpcli, uint8_t *buff, int n, char *msg)
+     if (!waittcpcli(tcpcli,msg)) return 0;
+     
+     if ((nr=recv_nb(tcpcli->svr.sock,buff,n))==-1) {
+-        if ((err=errsock())) {
+-            tracet(2,"readtcpcli: recv error sock=%d err=%d\n",tcpcli->svr.sock,err);
+-            sprintf(msg,"recv error (%d)",err);
+-        }
+-        else {
+-            sprintf(msg,"disconnected");
++        err=errsock();
++        if ((err!=EALREADY) && (err!=EINPROGRESS)) {
++           if (err==0)
++               sprintf(msg,"tcp client recv disconnected %s",tcpcli->svr.saddr);
++           else  {
++               tracet(2,"readtcpcli: recv error sock=%d err=%d\n",tcpcli->svr.sock,err);
++               sprintf(msg,"tcp client recv error %d (%s) at %s",err,errorstring(err),tcpcli->svr.saddr);
++           }
++           discontcp(&tcpcli->svr,tcpcli->tirecon);
+         }
+-        discontcp(&tcpcli->svr,tcpcli->tirecon);
+         return 0;
+     }
+     if (nr>0) tcpcli->svr.tact=tickget();
+@@ -1488,8 +1522,9 @@ static int writetcpcli(tcpcli_t *tcpcli, uint8_t *buff, int n, char *msg)
+     if ((ns=send_nb(tcpcli->svr.sock,buff,n))==-1) {
+         if ((err=errsock())) {
+             tracet(2,"writetcp: send error sock=%d err=%d\n",tcpcli->svr.sock,err);
+-            sprintf(msg,"send error (%d)",err);
+-        }
++            sprintf(msg,"tcp client send error %d (%s) at %s",err,errorstring(err),tcpcli->svr.saddr);
++        } else
++            sprintf(msg,"tcp client send not all, disconnect %s",tcpcli->svr.saddr);
+         discontcp(&tcpcli->svr,tcpcli->tirecon);
+         return 0;
+     }
+@@ -1591,13 +1626,13 @@ static int rspntrip_s(ntrip_t *ntrip, char *msg)
+         ntrip->nb-=p-q;
+         for (i=0;i<ntrip->nb;i++) *q++=*p++;
+         ntrip->state=2;
+-        sprintf(msg,"%s/%s",ntrip->tcp->svr.saddr,ntrip->mntpnt);
++        sprintf(msg,"ntrip server connected to %s/%s",ntrip->tcp->svr.saddr,ntrip->mntpnt);
+         tracet(3,"rspntrip_s: response ok nb=%d\n",ntrip->nb);
+         return 1;
+     }
+     else if ((p=strstr((char *)ntrip->buff,NTRIP_RSP_ERROR))) { /* error */
+         nb=ntrip->nb<MAXSTATMSG?ntrip->nb:MAXSTATMSG;
+-        sprintf(msg,"%.*s",nb,(char *)ntrip->buff);
++        sprintf(msg,"ntrip server error %.*s",nb,(char *)ntrip->buff);
+         if ((p=strchr(msg,'\r'))) *p='\0';
+         tracet(3,"rspntrip_s: %s nb=%d\n",msg,ntrip->nb);
+         ntrip->nb=0;
+@@ -1606,7 +1641,7 @@ static int rspntrip_s(ntrip_t *ntrip, char *msg)
+         discontcp(&ntrip->tcp->svr,ntrip->tcp->tirecon);
+     }
+     else if (ntrip->nb>=NTRIP_MAXRSP) { /* buffer overflow */
+-        sprintf(msg,"response overflow");
++        sprintf(msg,"ntrip server response overflow to %s/%s",ntrip->tcp->svr.saddr,ntrip->mntpnt);
+         tracet(3,"rspntrip_s: response overflow nb=%d\n",ntrip->nb);
+         ntrip->nb=0;
+         ntrip->buff[0]='\0';
+@@ -1632,7 +1667,7 @@ static int rspntrip_c(ntrip_t *ntrip, char *msg)
+         ntrip->nb-=p-q;
+         for (i=0;i<ntrip->nb;i++) *q++=*p++;
+         ntrip->state=2;
+-        sprintf(msg,"%s/%s",ntrip->tcp->svr.saddr,ntrip->mntpnt);
++        sprintf(msg,"ntrip client connect to %s/%s",ntrip->tcp->svr.saddr,ntrip->mntpnt);
+         tracet(3,"rspntrip_c: response ok nb=%d\n",ntrip->nb);
+         ntrip->tcp->tirecon=ticonnect;
+         return 1;
+@@ -1640,11 +1675,11 @@ static int rspntrip_c(ntrip_t *ntrip, char *msg)
+     if ((p=strstr((char *)ntrip->buff,NTRIP_RSP_SRCTBL))) { /* source table */
+         if (!*ntrip->mntpnt) { /* source table request */
+             ntrip->state=2;
+-            sprintf(msg,"source table received");
++            sprintf(msg,"ntrip client source table received from %s",ntrip->tcp->svr.saddr);
+             tracet(3,"rspntrip_c: receive source table nb=%d\n",ntrip->nb);
+             return 1;
+         }
+-        sprintf(msg,"no mountp. reconnect...");
++        sprintf(msg,"ntrip client no mountpoint at %s/%s",ntrip->tcp->svr.saddr,ntrip->mntpnt);
+         tracet(2,"rspntrip_c: no mount point nb=%d\n",ntrip->nb);
+         ntrip->nb=0;
+         ntrip->buff[0]='\0';
+@@ -1656,16 +1691,16 @@ static int rspntrip_c(ntrip_t *ntrip, char *msg)
+     }
+     else if ((p=strstr((char *)ntrip->buff,NTRIP_RSP_HTTP))) { /* http response */
+         if ((q=strchr(p,'\r'))) *q='\0'; else ntrip->buff[128]='\0';
+-        strcpy(msg,p);
+-        tracet(3,"rspntrip_s: %s nb=%d\n",msg,ntrip->nb);
++        sprintf(msg,"ntrip client error %s",p);
++        tracet(3,"rspntrip_c: %s nb=%d\n",msg,ntrip->nb);
+         ntrip->nb=0;
+         ntrip->buff[0]='\0';
+         ntrip->state=0;
+         discontcp(&ntrip->tcp->svr,ntrip->tcp->tirecon);
+     }
+     else if (ntrip->nb>=NTRIP_MAXRSP) { /* buffer overflow */
+-        sprintf(msg,"response overflow");
+-        tracet(2,"rspntrip_s: response overflow nb=%d\n",ntrip->nb);
++        sprintf(msg,"ntrip client response overflow at %s",ntrip->tcp->svr.saddr);
++        tracet(2,"rspntrip_c: response overflow nb=%d\n",ntrip->nb);
+         ntrip->nb=0;
+         ntrip->buff[0]='\0';
+         ntrip->state=0;
+@@ -1942,7 +1977,7 @@ static void rsp_ntripc(ntripc_t *ntripc, int i)
+     con->state=1;
+     strcpy(con->mntpnt,mntpnt);
+ }
+-/* handle ntrip client connect request ---------------------------------------*/
++/* handle ntrip caster client connect request --------------------------------*/
+ static void wait_ntripc(ntripc_t *ntripc, char *msg)
+ {
+     uint8_t *buff;
+@@ -1962,11 +1997,17 @@ static void wait_ntripc(ntripc_t *ntripc, char *msg)
+         nmax=NTRIP_MAXRSP-ntripc->con[i].nb-1;
+         
+         if ((n=recv_nb(ntripc->tcp->cli[i].sock,buff,nmax))==-1) {
+-            if ((err=errsock())) {
+-                tracet(2,"wait_ntripc: recv error sock=%d err=%d\n",
+-                       ntripc->tcp->cli[i].sock,err);
++            err=errsock();
++            if ((err!=EALREADY) && (err!=EINPROGRESS)) {
++               if (err==0)
++                  sprintf(msg,"ntrip caster handshake recv disconnected %s",ntripc->tcp->cli[i].saddr);
++               else  {
++                   tracet(2,"wait_ntripc: handshake recv error sock=%d err=%d\n",
++                          ntripc->tcp->cli[i].sock,err);
++                   sprintf(msg,"ntrip caster handshake recv error %d (%s) at %s",err,errorstring(err),ntripc->tcp->cli[i].saddr);
++               }
++               discon_ntripc(ntripc,i);
+             }
+-            discon_ntripc(ntripc,i);
+             continue;
+         }
+         if (n<=0) continue;
+@@ -1991,11 +2032,17 @@ static int readntripc(ntripc_t *ntripc, uint8_t *buff, int n, char *msg)
+         nr=recv_nb(ntripc->tcp->cli[i].sock,buff,n);
+         
+         if (nr<0) {
+-            if ((err=errsock())) {
+-                tracet(2,"readntripc: recv error i=%d sock=%d err=%d\n",i,
+-                       ntripc->tcp->cli[i].sock,err);
++            err=errsock();
++            if ((err!=EALREADY) && (err!=EINPROGRESS)) {
++               if (err==0)
++                  sprintf(msg,"ntrip caster recv disconnected %s",ntripc->tcp->cli[i].saddr);
++               else {
++                   tracet(2,"readntripc: recv error i=%d sock=%d err=%d\n",i,
++                          ntripc->tcp->cli[i].sock,err);
++                   sprintf(msg,"ntrip caster recv error %d (%s) at %s",err,errorstring(err),ntripc->tcp->cli[i].saddr);
++               }
++               discon_ntripc(ntripc,i);
+             }
+-            discon_ntripc(ntripc,i);
+         }
+         else if (nr>0) {
+             ntripc->tcp->cli[i].tact=tickget();
+@@ -2022,7 +2069,9 @@ static int writentripc(ntripc_t *ntripc, uint8_t *buff, int n, char *msg)
+             if ((err=errsock())) {
+                 tracet(2,"writentripc: send error i=%d sock=%d err=%d\n",i,
+                        ntripc->tcp->cli[i].sock,err);
+-            }
++                sprintf(msg,"ntrip caster send error %d (%s) at %s",err,errorstring(err),ntripc->tcp->cli[i].saddr);
++            } else
++               sprintf(msg,"ntrip caster send not all, disconnect %s",ntripc->tcp->cli[i].saddr);
+             discon_ntripc(ntripc,i);
+         }
+         else {
+@@ -2066,7 +2115,7 @@ static udp_t *genudp(int type, int port, const char *saddr, char *msg)
+ {
+     udp_t *udp;
+     struct hostent *hp;
+-    int bs=buffsize,opt=1;
++    int bs=buffsize,opt=1,err;
+     
+     tracet(3,"genudp: type=%d\n",type);
+     
+@@ -2078,13 +2127,14 @@ static udp_t *genudp(int type, int port, const char *saddr, char *msg)
+     
+     if ((udp->sock=socket(AF_INET,SOCK_DGRAM,0))==(socket_t)-1) {
+         free(udp);
+-        sprintf(msg,"socket error (%d)",errsock());
++        err=errsock();
++        sprintf(msg,"udp socket error %d (%s)",err,errorstring(err));
+         return NULL;
+     }
+     if (setsockopt(udp->sock,SOL_SOCKET,SO_RCVBUF,(const char *)&bs,sizeof(bs))==-1||
+         setsockopt(udp->sock,SOL_SOCKET,SO_SNDBUF,(const char *)&bs,sizeof(bs))==-1) {
+         tracet(2,"genudp: setsockopt error sock=%d err=%d bs=%d\n",udp->sock,errsock(),bs);
+-        sprintf(msg,"sockopt error: bufsiz");
++        sprintf(msg,"udp sockopt error: bufsiz");
+     }
+     memset(&udp->addr,0,sizeof(udp->addr));
+     udp->addr.sin_family=AF_INET;
+@@ -2096,8 +2146,9 @@ static udp_t *genudp(int type, int port, const char *saddr, char *msg)
+         setsockopt(udp->sock,SOL_SOCKET,SO_REUSEADDR,(const char *)&opt, sizeof(opt));
+ #endif
+         if (bind(udp->sock,(struct sockaddr *)&udp->addr,sizeof(udp->addr))==-1) {
+-            tracet(2,"genudp: bind error sock=%d port=%d err=%d\n",udp->sock,port,errsock());
+-            sprintf(msg,"bind error (%d): %d",errsock(),port);
++            err=errsock();
++            tracet(2,"genudp: bind error sock=%d port=%d err=%d\n",udp->sock,port,err);
++            sprintf(msg,"udp bind error %d (%s) at %d",err,errorstring(err),port);
+             closesocket(udp->sock);
+             free(udp);
+             return NULL;
+@@ -2108,10 +2159,10 @@ static udp_t *genudp(int type, int port, const char *saddr, char *msg)
+             setsockopt(udp->sock,SOL_SOCKET,SO_BROADCAST,(const char *)&opt,
+                        sizeof(opt))==-1) {
+             tracet(2,"genudp: setsockopt error sock=%d err=%d\n",udp->sock,errsock());
+-            sprintf(msg,"sockopt error: broadcast");
++            sprintf(msg,"udp sockopt error: broadcast");
+         }
+         if (!(hp=gethostbyname(saddr))) {
+-            sprintf(msg,"address error (%s)",saddr);
++            sprintf(msg,"udp address error (%s)",saddr);
+             closesocket(udp->sock);
+             free(udp);
+             return NULL;
+@@ -2131,7 +2182,7 @@ static udp_t *openudpsvr(const char *path, char *msg)
+     decodetcppath(path,NULL,sport,NULL,NULL,NULL,NULL);
+     
+     if (sscanf(sport,"%d",&port)<1) {
+-        sprintf(msg,"port error: %s",sport);
++        sprintf(msg,"udp server port error: %s",sport);
+         tracet(2,"openudpsvr: port error port=%s\n",port);
+         return NULL;
+     }
+@@ -2190,7 +2241,7 @@ static udp_t *openudpcli(const char *path, char *msg)
+     decodetcppath(path,saddr,sport,NULL,NULL,NULL,NULL);
+     
+     if (sscanf(sport,"%d",&port)<1) {
+-        sprintf(msg,"port error: %s",sport);
++        sprintf(msg,"udp client port error: %s",sport);
+         tracet(2,"openudpcli: port error port=%s\n",sport);
+         return NULL;
+     }
+@@ -2440,7 +2491,7 @@ static int readftp(ftp_t *ftp, uint8_t *buff, int n, char *msg)
+     }
+     if (ftp->state<=0) { /* ftp/http not executed? */
+         ftp->state=1;
+-        sprintf(msg,"%s://%s",ftp->proto?"http":"ftp",ftp->addr);
++        sprintf(msg,"open %s://%s",ftp->proto?"http":"ftp",ftp->addr);
+     
+ #ifdef WIN32
+         if (!(ftp->thread=CreateThread(NULL,0,ftpthread,ftp,0,NULL))) {
+@@ -2473,7 +2524,7 @@ static int readftp(ftp_t *ftp, uint8_t *buff, int n, char *msg)
+     ftp->tnext=nextdltime(ftp->topts,1);
+     ftp->state=0;
+     
+-    strcpy(msg,"");
++    /*strcpy(msg,"");*/
+     
+     return (int)(p-buff);
+ }
+@@ -2936,7 +2987,11 @@ extern int strstat(stream_t *stream, char *msg)
+     
+     strlock(stream);
+     if (msg) {
+-        strncpy(msg,stream->msg,MAXSTRMSG-1); msg[MAXSTRMSG-1]='\0';
++        if (*stream->msg) {
++           strncpy(msg,stream->msg,MAXSTRMSG-1); msg[MAXSTRMSG-1]='\0';
++           *stream->msg = 0;
++        } else
++           *msg = 0;
+     }
+     if (!stream->port) {
+         strunlock(stream);
