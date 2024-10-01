@@ -697,15 +697,39 @@ install_tune_power(){
   ExitCodeCheck $?
 }
 
+correct_units(){
+   echo '################################'
+   echo 'CORRECT UNITS'
+   echo '################################'
+   for file in ${RTKBASE_GIT}/unit/str2str*
+   do
+      #echo sudo -u "${RTKBASE_USER}" sed -i s/^LogRateLimitBurst=.*/LogRateLimitBurst=100/ "${file}"
+      sudo -u "${RTKBASE_USER}" sed -i s/^LogRateLimitBurst=.*/LogRateLimitBurst=100/ "${file}"
+      ExitCodeCheck $?
+   done
+}
+
 rtkbase_install(){
-   #echo ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -t -g ${RTKBASE_ADD_1ST}
-   ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d -t -g ${RTKBASE_ADD_1ST}
+   #echo ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d ${RTKBASE_ADD_1ST}
+   ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -j -d ${RTKBASE_ADD_1ST}
    ExitCodeCheck $?
    if [ $lastcode != 0 ]
    then
-      echo BUG: ${RTKBASE_INSTALL} finished with exitcode = $lastcode
+      echo BUG: ${RTKBASE_INSTALL} -j -d ${RTKBASE_ADD_1ST} finished with exitcode = $lastcode
       #ls -la ${RTKBASE_PATH}/${RTKBASE_INSTALL}
    fi
+
+   correct_units
+
+   #echo ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -t -g
+   ${RTKBASE_PATH}/${RTKBASE_INSTALL} -u ${RTKBASE_USER} -t -g
+   ExitCodeCheck $?
+   if [ $lastcode != 0 ]
+   then
+      echo BUG: ${RTKBASE_INSTALL} -t -g finished with exitcode = $lastcode
+      #ls -la ${RTKBASE_PATH}/${RTKBASE_INSTALL}
+   fi
+
    #echo rm -f ${RTKBASE_PATH}/${RTKBASE_INSTALL}
    rm -f ${RTKBASE_PATH}/${RTKBASE_INSTALL}
    #echo chown -R ${RTKBASE_USER}:${RTKBASE_USER} ${RTKBASE_GIT}
