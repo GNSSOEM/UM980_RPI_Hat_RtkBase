@@ -1,5 +1,5 @@
 diff --git a/web_app/server.py b/web_app/server.py
-index 4c822aa..b1e8577 100755
+index 4c822aa..bae5238 100755
 --- a/web_app/server.py
 +++ b/web_app/server.py
 @@ -108,7 +108,7 @@ services_list = [{"service_unit" : "str2str_tcp.service", "name" : "main"},
@@ -52,7 +52,7 @@ index 4c822aa..b1e8577 100755
 +           #print("response_json=", response_json)
 +           #print("current_release=", current_release)
 +           #print("latest_release=", latest_release)
-+           if latest_release >= current_release:
++           if latest_release > current_release:
 +               new_release = response_json
 +        else:
 +           new_release = { "error" : "Description.json not downloded, error " + str(response.status_code)}
