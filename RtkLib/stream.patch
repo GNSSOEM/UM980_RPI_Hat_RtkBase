@@ -43,6 +43,17 @@ index f6d815e..3925b71 100644
 +    errbuf[Len+1] = 0;
 +    return errbuf;
 +}
++/* disconnect tcp ------------------------------------------------------------*/
++static void discontcp(tcp_t *tcp, int tcon)
++{
++    tracet(3,"discontcp: sock=%d tcon=%d\n",tcp->sock,tcon);
++
++    closesocket(tcp->sock);
++    tcp->state=0;
++    tcp->connect_state=0;
++    tcp->tcon=tcon;
++    tcp->tdis=tickget();
++}
  /* generate tcp socket -------------------------------------------------------*/
  static int gentcp(tcp_t *tcp, int type, char *msg)
  {
@@ -91,13 +102,16 @@ index f6d815e..3925b71 100644
          if (!(hp=gethostbyname(tcp->saddr))) {
 -            sprintf(msg,"address error (%s)",tcp->saddr);
 -            tracet(1,"gentcp: gethostbyname error addr=%s err=%d\n",tcp->saddr,errsock());
+-            closesocket(tcp->sock);
+-            tcp->state=0;
+-            tcp->tcon=ticonnect;
+-            tcp->tdis=tickget();
 +            err=errsock();
 +            sprintf(msg,"client address error %d (%s) at %s",err,errorstring(err),tcp->saddr);
 +            tracet(1,"gentcp: gethostbyname error addr=%s err=%d\n",tcp->saddr,err);
-             closesocket(tcp->sock);
-             tcp->state=0;
-             tcp->tcon=ticonnect;
-@@ -1149,6 +1173,7 @@ static int gentcp(tcp_t *tcp, int type, char *msg)
++            discontcp(tcp, ticonnect);
+             return 0;
+         }
          memcpy(&tcp->addr.sin_addr,hp->h_addr,hp->h_length);
      }
      tcp->state=1;
@@ -105,15 +119,21 @@ index f6d815e..3925b71 100644
      tcp->tact=tickget();
      tracet(5,"gentcp: exit sock=%d\n",tcp->sock);
      return 1;
-@@ -1160,6 +1185,7 @@ static void discontcp(tcp_t *tcp, int tcon)
-     
-     closesocket(tcp->sock);
-     tcp->state=0;
-+    tcp->connect_state=0;
-     tcp->tcon=tcon;
-     tcp->tdis=tickget();
  }
-@@ -1217,11 +1243,11 @@ static void updatetcpsvr(tcpsvr_t *tcpsvr, char *msg)
+-/* disconnect tcp ------------------------------------------------------------*/
+-static void discontcp(tcp_t *tcp, int tcon)
+-{
+-    tracet(3,"discontcp: sock=%d tcon=%d\n",tcp->sock,tcon);
+-    
+-    closesocket(tcp->sock);
+-    tcp->state=0;
+-    tcp->tcon=tcon;
+-    tcp->tdis=tickget();
+-}
+ /* open tcp server -----------------------------------------------------------*/
+ static tcpsvr_t *opentcpsvr(const char *path, char *msg)
+ {
+@@ -1217,11 +1240,11 @@ static void updatetcpsvr(tcpsvr_t *tcpsvr, char *msg)
      }
      if (n==0) {
          tcpsvr->svr.state=1;
