@@ -36,7 +36,7 @@ ExitCodeCheck $?
 doPatch src/stream.c stream.patch
 doPatch src/streamsvr.c streamsvr.patch
 doPatch app/consapp/str2str/str2str.c str2str.patch
-doPatch app/consapp/str2str/gcc/makefile
+doPatch app/consapp/str2str/gcc/makefile str2str_makefile.patch
 
 cd app/consapp/str2str/gcc
 ExitCodeCheck $?
