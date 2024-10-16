@@ -107,6 +107,21 @@ configure_config(){
         HAVE_CORE_FREQ=`grep "^core_freq=250" ${BOOTCONFIG}`
         #echo HAVE_CORE_FREQ=${HAVE_CORE_FREQ}
 
+        PI4_SECTION=`awk '/^\[pi4\]/ {print NR + 1; exit 0; }' ${BOOTCONFIG}`
+        #echo PI4_SECTION=${PI4_SECTION}
+        if [[ ${PI4_SECTION} != "" ]]; then
+           #echo tail -n+${PI4_SECTION} ${BOOTCONFIG}
+           #tail -n+${PI4_SECTION} ${BOOTCONFIG}
+           NEXT_SECTION=`tail -n+${PI4_SECTION} ${BOOTCONFIG} | awk '/^\[/ {print NR; exit 0; }'`
+           #echo NEXT_SECTION=${NEXT_SECTION}
+           if [[ ${NEXT_SECTION} == "" ]]; then
+              HAVE_OTG=`tail -n+${PI4_SECTION} ${BOOTCONFIG} | grep "^otg_mode=1"`
+           else
+              HAVE_OTG=`tail -n+${PI4_SECTION} ${BOOTCONFIG} | head -n+${NEXT_SECTION} | grep "^otg_mode=1"`
+           fi
+           #echo HAVE_OTG=${HAVE_OTG}
+        fi
+
         if [[ ${HAVE_UART} == "" ]] || [[ ${HAVE_MINI_BT} == "" ]] || [[ ${HAVE_CORE_FREQ} == "" ]]
         then
            echo [all] >> ${BOOTCONFIG}
@@ -136,6 +151,14 @@ configure_config(){
         then
            echo core_freq=250 >> ${BOOTCONFIG}
            echo Core freq added to ${BOOTCONFIG}
+        fi
+
+        if [[ ${HAVE_OTG} == "" ]]
+        then
+           echo [pi4] >> ${BOOTCONFIG}
+           echo otg_mode=1 >> ${BOOTCONFIG}
+           echo Otg mode added to ${BOOTCONFIG}
+           NEEDREBOOT=Y
         fi
      fi
   fi
