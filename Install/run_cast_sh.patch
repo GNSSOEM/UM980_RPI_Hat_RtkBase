@@ -1,5 +1,5 @@
 diff --git a/run_cast.sh b/run_cast.sh
-index db7a656..f29c93b 100755
+index db7a656..a3f47d1 100755
 --- a/run_cast.sh
 +++ b/run_cast.sh
 @@ -8,16 +8,26 @@ BASEDIR="$(dirname "$0")"
@@ -75,3 +75,17 @@ index db7a656..f29c93b 100755
      #echo ${cast} -in ${!1} -out $out_tcp
      # What is this ${!1} ? It's variable indirection
      ${cast} -in ${!1} -out ${out_tcp} -b 1 -t ${level} -fl ${logdir}/str2str_tcp.log &
+@@ -63,11 +89,11 @@ mkdir -p ${logdir}
+ 
+   out_caster_A)
+     #echo ${cast} -in ${!1} -out $out_caster
+-    ${cast} -in ${!1} -out ${out_caster_A} -i "${receiver_info}" -a "${antenna_info}" -t ${level} -fl ${logdir}/str2str_ntrip_A.log &
++    ${cast} -in ${!1} -out ${out_caster_A} -i "${receiver_info}" -a "${antenna_info}" -t ${level} -fl ${logdir}/str2str_ntrip_A.log -fg ${BASEDIR}/ntrip_A.flg &
+     ;;
+ 
+   out_caster_B)
+-    ${cast} -in ${!1} -out ${out_caster_B} -i "${receiver_info}" -a "${antenna_info}" -t ${level} -fl ${logdir}/str2str_ntrip_B.log &
++    ${cast} -in ${!1} -out ${out_caster_B} -i "${receiver_info}" -a "${antenna_info}" -t ${level} -fl ${logdir}/str2str_ntrip_B.log -fg ${BASEDIR}/ntrip_B.flg &
+     ;;
+ 
+   out_local_caster)
