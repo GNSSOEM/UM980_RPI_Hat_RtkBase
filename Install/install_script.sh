@@ -119,8 +119,8 @@ configure_config(){
            else
               HAVE_OTG=`tail -n+${PI4_SECTION} ${BOOTCONFIG} | head -n+${NEXT_SECTION} | grep "^otg_mode=1"`
            fi
-           #echo HAVE_OTG=${HAVE_OTG}
         fi
+        #echo HAVE_OTG=${HAVE_OTG}
 
         if [[ ${HAVE_UART} == "" ]] || [[ ${HAVE_MINI_BT} == "" ]] || [[ ${HAVE_CORE_FREQ} == "" ]]
         then
@@ -309,9 +309,10 @@ restart_as_root(){
 
 do_reboot(){
    #echo NEEDREBOOT=${NEEDREBOOT}
-   if [[ ${NEEDREBOOT} == "Y" ]]
-   then
-      echo Please try again ${0} after reboot
+   if [[ ${NEEDREBOOT} == "Y" ]]; then
+      if [[ "${1}" != "END" ]]; then
+         echo Please try again ${0} after reboot
+      fi
       delete_all_extracted
       echo Rebooting now!!!!
       reboot now
@@ -1051,6 +1052,7 @@ info_bug(){
 HAVE_RECEIVER=0
 HAVE_PHASE1=0
 HAVE_FULL=0
+CAN_REBOOT=0
 
 have_receiver(){
    return ${HAVE_RECEIVER}
@@ -1060,6 +1062,9 @@ have_phase1(){
 }
 have_full(){
    return ${HAVE_FULL}
+}
+can_reboot(){
+   return ${CAN_REBOOT}
 }
 
 BASE_EXTRACT="${NMEACONF} ${CONF980} ${CONF982} ${CONFBYNAV} ${UNICORE_CONFIGURE} \
@@ -1094,6 +1099,7 @@ check_phases(){
    then
       FILES_EXTRACT="${BASE_EXTRACT}"
       ONLINE_UPDATE=UPDATE
+      CAN_REBOOT=1
    elif [[ ${1} == "-s" ]]
    then
       exit 0
@@ -1115,7 +1121,7 @@ have_phase1 && export LANG=C
 unpack_files
 have_phase1 && check_version
 have_phase1 && check_boot_configiration
-have_full && do_reboot
+have_full && can_reboot && do_reboot
 have_receiver && check_port
 have_phase1 && install_tailscale
 have_phase1 && install_additional_utilies
@@ -1141,6 +1147,7 @@ cd ${ORIGDIR}
 have_full || info_reboot
 have_receiver && info_open
 have_receiver || info_bug
+can_reboot || do_reboot END
 #echo exit $exitcode
 exit $exitcode
 
