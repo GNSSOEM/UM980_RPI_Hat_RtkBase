@@ -990,13 +990,23 @@ configure_gnss(){
       source "${rtkbase_path}/tools/opizero_temp_offset.sh"
       ExitCodeCheck $?
 
-      #echo ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
-      ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -e
-      ExitCodeCheck $?
+      for i in `seq 1 3`; do
+         #echo ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
+         ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -e
+         ExitCodeCheck $?
+         if [[ $lastcode == 0 ]]; then
+            break;
+         fi
+      done
 
-      #echo ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
-      ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
-      ExitCodeCheck $?
+      for i in `seq 1 3`; do
+         #echo ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
+         ${RTKBASE_TOOLS}/${UNICORE_CONFIGURE} -u ${RTKBASE_USER} -c
+         ExitCodeCheck $?
+         if [[ $lastcode == 0 ]]; then
+            break;
+         fi
+      done
 
       restart_rtkbase_if_started
    fi
