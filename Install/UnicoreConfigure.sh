@@ -5,7 +5,7 @@ declare -a detected_gnss
 declare RTKBASE_USER
 BASEDIR=`realpath $(dirname $(readlink -f "$0"))`
 NMEACONF=NmeaConf
-
+DEFAULT_ANT=ELT0123
 
 _check_user() {
   # RTKBASE_USER is a global variable
@@ -243,6 +243,7 @@ detect_configure() {
             echo recv_port=${detected_gnss[0]}>${RECEIVER_CONF}
             echo recv_speed=${detected_gnss[2]}>>${RECEIVER_CONF}
             echo recv_position=>>${RECEIVER_CONF}
+            echo recv_ant=>>${RECEIVER_CONF}
             chown ${RTKBASE_USER}:${RTKBASE_USER} ${RECEIVER_CONF}
           else
             echo 'settings.conf is missing'
@@ -348,6 +349,7 @@ configure_unicore(){
        echo recv_port=${com_port}>${RECEIVER_CONF}
        echo recv_speed=${SPEED}>>${RECEIVER_CONF}
        echo recv_position=>>${RECEIVER_CONF}
+       echo recv_ant=${DEFAULT_ANT}>>${RECEIVER_CONF}
        chown ${RTKBASE_USER}:${RTKBASE_USER} ${RECEIVER_CONF}
        return ${exitcode}
     else
@@ -413,6 +415,7 @@ configure_bynav(){
        echo recv_port=${com_port}>${RECEIVER_CONF}
        echo recv_speed=${SPEED}>>${RECEIVER_CONF}
        echo recv_position=>>${RECEIVER_CONF}
+       echo recv_ant=${DEFAULT_ANT}>>${RECEIVER_CONF}
        chown ${RTKBASE_USER}:${RTKBASE_USER} ${RECEIVER_CONF}
        return ${exitcode}
     else
@@ -508,6 +511,7 @@ configure_septentrio_RTCM3() {
        echo recv_port=${com_port}>${RECEIVER_CONF}
        echo recv_speed=${SPEED}>>${RECEIVER_CONF}
        echo recv_position=>>${RECEIVER_CONF}
+       echo recv_ant=${DEFAULT_ANT}>>${RECEIVER_CONF}
        chown ${RTKBASE_USER}:${RTKBASE_USER} ${RECEIVER_CONF}
        return ${exitcode}
     else
