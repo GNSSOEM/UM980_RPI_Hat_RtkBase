@@ -388,12 +388,12 @@ configure_bynav(){
 
     if [[ -f "${RECVCONF}" ]]
     then
+       recv_com=`${rtkbase_path}/NmeaConf ${RECVPORT} TEST COM | grep "^COM.$"`
+       #echo recv_com=${recv_com}
        if [[ "${RECVSPEED}" != "115200" ]]
        then
-          RECVCOM=`${rtkbase_path}/NmeaConf ${RECVPORT} TEST COM | grep COM`
-          #echo RECVCOM=${RECVCOM}
-          #echo ${rtkbase_path}/${NMEACONF} ${RECVPORT} \"SERIALCONFIG ${RECVCOM} 115200\" QUIET
-          ${rtkbase_path}/${NMEACONF} ${RECVPORT} "SERIALCONFIG ${RECVCOM} 115200" QUIET
+          #echo ${rtkbase_path}/${NMEACONF} ${RECVPORT} \"SERIALCONFIG ${recv_com} 115200\" QUIET
+          ${rtkbase_path}/${NMEACONF} ${RECVPORT} "SERIALCONFIG ${recv_com} 115200" QUIET
           RECVPORT=${RECVDEV}:115200
           #echo NEW RECVPORT=${RECVPORT}
        fi
@@ -418,6 +418,7 @@ configure_bynav(){
        echo recv_speed=${SPEED}>>${RECEIVER_CONF}
        echo recv_position=>>${RECEIVER_CONF}
        echo recv_ant=${DEFAULT_ANT}>>${RECEIVER_CONF}
+       echo recv_com=${recv_com}>>${RECEIVER_CONF}
        chown ${RTKBASE_USER}:${RTKBASE_USER} ${RECEIVER_CONF}
        return ${exitcode}
     else
