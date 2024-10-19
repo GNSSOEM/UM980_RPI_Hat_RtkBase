@@ -331,8 +331,9 @@ configure_unicore(){
     if [[ -f "${RECVCONF}" ]]
     then
        #echo ${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVCONF} QUIET
-       ${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVCONF} QUIET
+       recv_com=`${rtkbase_path}/${NMEACONF} ${RECVPORT} ${RECVCONF} COM | tee /dev/stderr | grep "^COM.$"`
        exitcode=$?
+       #echo recv_com=${recv_com}
        #echo exitcode=${exitcode}
        SPEED=115200
        if [[ ${exitcode} == 0 ]]
@@ -350,6 +351,7 @@ configure_unicore(){
        echo recv_speed=${SPEED}>>${RECEIVER_CONF}
        echo recv_position=>>${RECEIVER_CONF}
        echo recv_ant=${DEFAULT_ANT}>>${RECEIVER_CONF}
+       echo recv_com=${recv_com}>>${RECEIVER_CONF}
        chown ${RTKBASE_USER}:${RTKBASE_USER} ${RECEIVER_CONF}
        return ${exitcode}
     else
