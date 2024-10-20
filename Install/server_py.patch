@@ -1,5 +1,5 @@
 diff --git a/web_app/server.py b/web_app/server.py
-index 4c822aa..6399a3e 100755
+index 4c822aa..b1cb537 100755
 --- a/web_app/server.py
 +++ b/web_app/server.py
 @@ -96,8 +96,8 @@ rtk = RTKLIB(socketio,
@@ -59,7 +59,7 @@ index 4c822aa..6399a3e 100755
 +def check_updateELT():
 +    print("Check update ELT started")
 +    new_release = {}
-+    source_url = "https://raw.githubusercontent.com/GNSSOEM/UM980_RPI_Hat_RtkBase/refs/heads/dev/Description.json"
++    source_url = "https://raw.githubusercontent.com/GNSSOEM/ELT_RTKBase/refs/heads/main/Description.json"
 +    version_txt = os.path.join(rtkbase_path, "..", "version.txt")
 +    try:
 +        with open(version_txt, 'rt') as f:
@@ -91,7 +91,7 @@ index 4c822aa..6399a3e 100755
 +    """
 +    print("update rtkbase ELT started")
 +
-+    update_url = "https://raw.githubusercontent.com/GNSSOEM/UM980_RPI_Hat_RtkBase/refs/heads/dev/install.sh"
++    update_url = "https://raw.githubusercontent.com/GNSSOEM/ELT_RTKBase/refs/heads/main/install.sh"
 +    update_archive = os.path.join(rtkbase_path, "..", "update", "update.sh")
 +    update_dir = os.path.join(rtkbase_path, "..", "update")
 +
