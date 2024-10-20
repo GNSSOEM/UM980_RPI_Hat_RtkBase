@@ -310,10 +310,12 @@ configure_unicore(){
     #echo RECVVER=${RECVVER}
     RECVERROR=`echo ${RECVVER} | grep ERROR`
     #echo RECVERROR=${RECVERROR}
+    RECVGOOD=`echo ${RECVVER} | grep "^>#VERSION"`
+    #echo RECVERROR=${RECVERROR}
 
     RECVNAME=
     FIRMWARE=
-    if [[ ${RECVERROR} == "" ]] && [[ "${RECVVER}" != "" ]]
+    if [[ ${RECVERROR} == "" ]] && [[ "${RECVGOOD}" != "" ]] && [[ "${RECVVER}" != "" ]]
     then
        RECVNAME=`echo ${RECVVER} | awk -F ';' '{print $2}'| awk -F ',' '{print $1}'`
        #echo RECVNAME=${RECVNAME}
