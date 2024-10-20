@@ -1,15 +1,27 @@
 diff --git a/src/streamsvr.c b/src/streamsvr.c
-index 19733b0..2369174 100644
+index 19733b0..228b6c2 100644
 --- a/src/streamsvr.c
 +++ b/src/streamsvr.c
-@@ -500,6 +500,19 @@ static void *strsvrthread(void *arg)
+@@ -490,7 +490,7 @@ static void *strsvrthread(void *arg)
+     sol_t sol_nmea={{0}};
+     uint32_t tick,tick_nmea;
+     uint8_t buff[1024];
+-    int i,n,cyc;
++    int i,n,cyc,nsum;
+     
+     tracet(3,"strsvrthread:\n");
+     
+@@ -499,10 +499,25 @@ static void *strsvrthread(void *arg)
+     
      for (cyc=0;svr->state;cyc++) {
          tick=tickget();
++        nsum=0;
          
 +        /* read message from output stream if connected */
 +        for (i=1;i<svr->nstr;i++) {
 +            while (strstat(svr->stream+i,NULL)>=2 &&
 +                  (n=strread(svr->stream+i,buff,sizeof(buff)))>0) {
++                nsum+=n;
 +                /* relay back message from output stream to input stream */
 +                if (i==svr->relayback) {
 +                    strwrite(svr->stream,buff,n);
@@ -21,8 +33,12 @@ index 19733b0..2369174 100644
 +
          /* read data from input stream */
          while ((n=strread(svr->stream,svr->buff,svr->buffsize))>0&&svr->state) {
-             
-@@ -521,19 +534,6 @@ static void *strsvrthread(void *arg)
+-            
++            nsum+=n;
+             /* write data to output streams */
+             for (i=1;i<svr->nstr;i++) {
+                 if (svr->conv[i-1]) {
+@@ -521,19 +536,6 @@ static void *strsvrthread(void *arg)
              }
              rtklib_unlock(&svr->lock);
          }
@@ -42,7 +58,17 @@ index 19733b0..2369174 100644
          /* write periodic command to input stream */
          for (i=0;i<svr->nstr;i++) {
              periodic_cmd(cyc*svr->cycle,svr->cmds_periodic[i],svr->stream+i);
-@@ -761,10 +761,10 @@ extern void strsvrstop(strsvr_t *svr, char **cmds)
+@@ -547,7 +549,8 @@ static void *strsvrthread(void *arg)
+             strsendnmea(svr->stream,&sol_nmea);
+             tick_nmea=tick;
+         }
+-        sleepms(svr->cycle-(int)(tickget()-tick));
++        if (!nsum)
++           sleepms(svr->cycle-(int)(tickget()-tick));
+     }
+     for (i=0;i<svr->nstr;i++) strclose(svr->stream+i);
+     for (i=0;i<svr->nstr;i++) strclose(svr->strlog+i);
+@@ -761,10 +764,10 @@ extern void strsvrstop(strsvr_t *svr, char **cmds)
  extern void strsvrstat(strsvr_t *svr, int *stat, int *log_stat, int *byte,
                         int *bps, char *msg)
  {
@@ -54,7 +80,7 @@ index 19733b0..2369174 100644
      
      for (i=0;i<svr->nstr;i++) {
          if (i==0) {
-@@ -773,9 +773,9 @@ extern void strsvrstat(strsvr_t *svr, int *stat, int *log_stat, int *byte,
+@@ -773,9 +776,9 @@ extern void strsvrstat(strsvr_t *svr, int *stat, int *log_stat, int *byte,
          else {
              strsum(svr->stream+i,NULL,&bps_in,byte+i,bps+i);
          }
