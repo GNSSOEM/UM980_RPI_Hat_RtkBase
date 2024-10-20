@@ -1,5 +1,5 @@
 diff --git a/src/stream.c b/src/stream.c
-index f6d815e..e3a5795 100644
+index f6d815e..a2be053 100644
 --- a/src/stream.c
 +++ b/src/stream.c
 @@ -124,6 +124,9 @@
@@ -234,7 +234,7 @@ index f6d815e..e3a5795 100644
          }
          if (nr>0) {
              tcpsvr->cli[i].tact=tickget();
-@@ -1313,11 +1376,13 @@ static int writetcpsvr(tcpsvr_t *tcpsvr, uint8_t *buff, int n, char *msg)
+@@ -1313,11 +1376,16 @@ static int writetcpsvr(tcpsvr_t *tcpsvr, uint8_t *buff, int n, char *msg)
          if (tcpsvr->cli[i].state!=2) continue;
          
          if ((ns=send_nb(tcpsvr->cli[i].sock,buff,n))==-1) {
@@ -245,15 +245,18 @@ index f6d815e..e3a5795 100644
 -            discontcp(&tcpsvr->cli[i],ticonnect);
 +            err=errsock();
 +            tracet(2,"writetcpsvr: send error i=%d sock=%d err=%d\n",i,tcpsvr->cli[i].sock,err);
-+            if (err)
-+                sprintf(msg,"tcp server send error %d (%s) at %s",err,errorstring(err),tcpsvr->cli[i].saddr);
-+            else
++            if (err) {
++               if ((err==EPIPE) && !recv(tcpsvr->cli[i].sock,(char *)buff,1,0))
++                  sprintf(msg,"tcp server send disconnected by %s",tcpsvr->cli[i].saddr);
++               else
++                   sprintf(msg,"tcp server send error %d (%s) at %s",err,errorstring(err),tcpsvr->cli[i].saddr);
++            } else
 +                sprintf(msg,"tcp server send not all, disconnected by %s",tcpsvr->cli[i].saddr);
 +            discontcp(&tcpsvr->cli[i],ticonnect,msg);
              updatetcpsvr(tcpsvr,msg);
          }
          else {
-@@ -1374,28 +1439,46 @@ static int consock(tcpcli_t *tcpcli, char *msg)
+@@ -1374,28 +1442,46 @@ static int consock(tcpcli_t *tcpcli, char *msg)
      tracet(4,"consock: sock=%d\n",tcpcli->svr.sock);
      
      /* wait re-connect */
@@ -306,7 +309,7 @@ index f6d815e..e3a5795 100644
      return 1;
  }
  /* open tcp client -----------------------------------------------------------*/
-@@ -1410,7 +1493,7 @@ static tcpcli_t *opentcpcli(const char *path, char *msg)
+@@ -1410,7 +1496,7 @@ static tcpcli_t *opentcpcli(const char *path, char *msg)
      *tcpcli=tcpcli0;
      decodetcppath(path,tcpcli->svr.saddr,port,NULL,NULL,NULL,NULL);
      if (sscanf(port,"%d",&tcpcli->svr.port)<1) {
@@ -315,7 +318,7 @@ index f6d815e..e3a5795 100644
          tracet(2,"opentcp: port error port=%s\n",port);
          free(tcpcli);
          return NULL;
-@@ -1444,9 +1527,16 @@ static int waittcpcli(tcpcli_t *tcpcli, char *msg)
+@@ -1444,9 +1530,16 @@ static int waittcpcli(tcpcli_t *tcpcli, char *msg)
      if (tcpcli->svr.state==2) { /* connect */
          if (tcpcli->toinact>0&&
              (int)(tickget()-tcpcli->svr.tact)>tcpcli->toinact) {
@@ -334,7 +337,7 @@ index f6d815e..e3a5795 100644
              return 0;
          }
      }
-@@ -1462,14 +1552,15 @@ static int readtcpcli(tcpcli_t *tcpcli, uint8_t *buff, int n, char *msg)
+@@ -1462,14 +1555,15 @@ static int readtcpcli(tcpcli_t *tcpcli, uint8_t *buff, int n, char *msg)
      if (!waittcpcli(tcpcli,msg)) return 0;
      
      if ((nr=recv_nb(tcpcli->svr.sock,buff,n))==-1) {
@@ -357,7 +360,7 @@ index f6d815e..e3a5795 100644
          return 0;
      }
      if (nr>0) tcpcli->svr.tact=tickget();
-@@ -1486,11 +1577,13 @@ static int writetcpcli(tcpcli_t *tcpcli, uint8_t *buff, int n, char *msg)
+@@ -1486,11 +1580,16 @@ static int writetcpcli(tcpcli_t *tcpcli, uint8_t *buff, int n, char *msg)
      if (!waittcpcli(tcpcli,msg)) return 0;
      
      if ((ns=send_nb(tcpcli->svr.sock,buff,n))==-1) {
@@ -368,15 +371,18 @@ index f6d815e..e3a5795 100644
 -        discontcp(&tcpcli->svr,tcpcli->tirecon);
 +        err=errsock();
 +        tracet(2,"writetcp: send error sock=%d err=%d\n",tcpcli->svr.sock,err);
-+        if (err)
-+            sprintf(msg,"tcp client send error %d (%s) at %s",err,errorstring(err),tcpcli->svr.saddr);
-+        else
++        if (err) {
++            if ((err==EPIPE) && !recv(tcpcli->svr.sock,(char *)buff,1,0))
++               sprintf(msg,"tcp client send disconnected by %s",tcpcli->svr.saddr);
++            else
++               sprintf(msg,"tcp client send error %d (%s) at %s",err,errorstring(err),tcpcli->svr.saddr);
++        } else
 +            sprintf(msg,"tcp client send not all, disconnected by %s",tcpcli->svr.saddr);
 +        discontcp(&tcpcli->svr,tcpcli->tirecon,msg);
          return 0;
      }
      if (ns>0) tcpcli->svr.tact=tickget();
-@@ -1591,27 +1684,28 @@ static int rspntrip_s(ntrip_t *ntrip, char *msg)
+@@ -1591,27 +1690,28 @@ static int rspntrip_s(ntrip_t *ntrip, char *msg)
          ntrip->nb-=p-q;
          for (i=0;i<ntrip->nb;i++) *q++=*p++;
          ntrip->state=2;
@@ -410,7 +416,7 @@ index f6d815e..e3a5795 100644
      }
      tracet(5,"rspntrip_s: exit state=%d nb=%d\n",ntrip->state,ntrip->nb);
      return 0;
-@@ -1632,19 +1726,20 @@ static int rspntrip_c(ntrip_t *ntrip, char *msg)
+@@ -1632,19 +1732,20 @@ static int rspntrip_c(ntrip_t *ntrip, char *msg)
          ntrip->nb-=p-q;
          for (i=0;i<ntrip->nb;i++) *q++=*p++;
          ntrip->state=2;
@@ -434,7 +440,7 @@ index f6d815e..e3a5795 100644
          tracet(2,"rspntrip_c: no mount point nb=%d\n",ntrip->nb);
          ntrip->nb=0;
          ntrip->buff[0]='\0';
-@@ -1652,24 +1747,24 @@ static int rspntrip_c(ntrip_t *ntrip, char *msg)
+@@ -1652,24 +1753,24 @@ static int rspntrip_c(ntrip_t *ntrip, char *msg)
          /* increase subsequent disconnect time to avoid too many reconnect requests */
          if (ntrip->tcp->tirecon>300000) ntrip->tcp->tirecon=ntrip->tcp->tirecon*5/4;
  
@@ -466,7 +472,7 @@ index f6d815e..e3a5795 100644
      }
      tracet(5,"rspntrip_c: exit state=%d nb=%d\n",ntrip->state,ntrip->nb);
      return 0;
-@@ -1713,6 +1808,7 @@ static ntrip_t *openntrip(const char *path, int type, char *msg)
+@@ -1713,6 +1814,7 @@ static ntrip_t *openntrip(const char *path, int type, char *msg)
      char addr[256]="",port[256]="",tpath[MAXSTRPATH];
      
      tracet(3,"openntrip: path=%s type=%d\n",path,type);
@@ -474,7 +480,7 @@ index f6d815e..e3a5795 100644
      
      if (!(ntrip=(ntrip_t *)malloc(sizeof(ntrip_t)))) return NULL;
      
-@@ -1744,6 +1840,7 @@ static ntrip_t *openntrip(const char *path, int type, char *msg)
+@@ -1744,6 +1846,7 @@ static ntrip_t *openntrip(const char *path, int type, char *msg)
          free(ntrip);
          return NULL;
      }
@@ -482,7 +488,7 @@ index f6d815e..e3a5795 100644
      return ntrip;
  }
  /* close ntrip ---------------------------------------------------------------*/
-@@ -1753,6 +1850,7 @@ static void closentrip(ntrip_t *ntrip)
+@@ -1753,6 +1856,7 @@ static void closentrip(ntrip_t *ntrip)
      
      closetcpcli(ntrip->tcp);
      free(ntrip);
@@ -490,7 +496,7 @@ index f6d815e..e3a5795 100644
  }
  /* read ntrip ----------------------------------------------------------------*/
  static int readntrip(ntrip_t *ntrip, uint8_t *buff, int n, char *msg)
-@@ -1860,7 +1958,7 @@ static void discon_ntripc(ntripc_t *ntripc, int i)
+@@ -1860,7 +1964,7 @@ static void discon_ntripc(ntripc_t *ntripc, int i)
  {
      tracet(3,"discon_ntripc: i=%d\n",i);
      
@@ -499,7 +505,7 @@ index f6d815e..e3a5795 100644
      ntripc->con[i].nb=0;
      ntripc->con[i].buff[0]='\0';
      ntripc->con[i].state=0;
-@@ -1942,7 +2040,7 @@ static void rsp_ntripc(ntripc_t *ntripc, int i)
+@@ -1942,7 +2046,7 @@ static void rsp_ntripc(ntripc_t *ntripc, int i)
      con->state=1;
      strcpy(con->mntpnt,mntpnt);
  }
@@ -508,7 +514,7 @@ index f6d815e..e3a5795 100644
  static void wait_ntripc(ntripc_t *ntripc, char *msg)
  {
      uint8_t *buff;
-@@ -1962,11 +2060,15 @@ static void wait_ntripc(ntripc_t *ntripc, char *msg)
+@@ -1962,11 +2066,15 @@ static void wait_ntripc(ntripc_t *ntripc, char *msg)
          nmax=NTRIP_MAXRSP-ntripc->con[i].nb-1;
          
          if ((n=recv_nb(ntripc->tcp->cli[i].sock,buff,nmax))==-1) {
@@ -528,7 +534,7 @@ index f6d815e..e3a5795 100644
              continue;
          }
          if (n<=0) continue;
-@@ -1991,11 +2093,15 @@ static int readntripc(ntripc_t *ntripc, uint8_t *buff, int n, char *msg)
+@@ -1991,11 +2099,15 @@ static int readntripc(ntripc_t *ntripc, uint8_t *buff, int n, char *msg)
          nr=recv_nb(ntripc->tcp->cli[i].sock,buff,n);
          
          if (nr<0) {
@@ -548,7 +554,7 @@ index f6d815e..e3a5795 100644
          }
          else if (nr>0) {
              ntripc->tcp->cli[i].tact=tickget();
-@@ -2019,10 +2125,12 @@ static int writentripc(ntripc_t *ntripc, uint8_t *buff, int n, char *msg)
+@@ -2019,10 +2131,15 @@ static int writentripc(ntripc_t *ntripc, uint8_t *buff, int n, char *msg)
          ns=send_nb(ntripc->tcp->cli[i].sock,buff,n);
          
          if (ns<n) {
@@ -558,14 +564,17 @@ index f6d815e..e3a5795 100644
 -            }
 +            err=errsock();
 +            tracet(2,"writentripc: send error i=%d sock=%d err=%d\n",i,ntripc->tcp->cli[i].sock,err);
-+            if (err)
-+                sprintf(msg,"ntrip caster send error %d (%s) at %s",err,errorstring(err),ntripc->tcp->cli[i].saddr);
-+            else
++            if (err) {
++                if ((err==EPIPE) && !recv(ntripc->tcp->cli[i].sock,(char *)buff,1,0))
++                   sprintf(msg,"ntrip caster send disconnected by %s",ntripc->tcp->cli[i].saddr);
++                else
++                    sprintf(msg,"ntrip caster send error %d (%s) at %s",err,errorstring(err),ntripc->tcp->cli[i].saddr);
++            } else
 +                sprintf(msg,"ntrip caster send not all, disconnected by %s",ntripc->tcp->cli[i].saddr);
              discon_ntripc(ntripc,i);
          }
          else {
-@@ -2066,7 +2174,7 @@ static udp_t *genudp(int type, int port, const char *saddr, char *msg)
+@@ -2066,7 +2183,7 @@ static udp_t *genudp(int type, int port, const char *saddr, char *msg)
  {
      udp_t *udp;
      struct hostent *hp;
@@ -574,7 +583,7 @@ index f6d815e..e3a5795 100644
      
      tracet(3,"genudp: type=%d\n",type);
      
-@@ -2078,13 +2186,14 @@ static udp_t *genudp(int type, int port, const char *saddr, char *msg)
+@@ -2078,13 +2195,14 @@ static udp_t *genudp(int type, int port, const char *saddr, char *msg)
      
      if ((udp->sock=socket(AF_INET,SOCK_DGRAM,0))==(socket_t)-1) {
          free(udp);
@@ -591,7 +600,7 @@ index f6d815e..e3a5795 100644
      }
      memset(&udp->addr,0,sizeof(udp->addr));
      udp->addr.sin_family=AF_INET;
-@@ -2096,8 +2205,9 @@ static udp_t *genudp(int type, int port, const char *saddr, char *msg)
+@@ -2096,8 +2214,9 @@ static udp_t *genudp(int type, int port, const char *saddr, char *msg)
          setsockopt(udp->sock,SOL_SOCKET,SO_REUSEADDR,(const char *)&opt, sizeof(opt));
  #endif
          if (bind(udp->sock,(struct sockaddr *)&udp->addr,sizeof(udp->addr))==-1) {
@@ -603,7 +612,7 @@ index f6d815e..e3a5795 100644
              closesocket(udp->sock);
              free(udp);
              return NULL;
-@@ -2108,10 +2218,10 @@ static udp_t *genudp(int type, int port, const char *saddr, char *msg)
+@@ -2108,10 +2227,10 @@ static udp_t *genudp(int type, int port, const char *saddr, char *msg)
              setsockopt(udp->sock,SOL_SOCKET,SO_BROADCAST,(const char *)&opt,
                         sizeof(opt))==-1) {
              tracet(2,"genudp: setsockopt error sock=%d err=%d\n",udp->sock,errsock());
@@ -616,7 +625,7 @@ index f6d815e..e3a5795 100644
              closesocket(udp->sock);
              free(udp);
              return NULL;
-@@ -2131,7 +2241,7 @@ static udp_t *openudpsvr(const char *path, char *msg)
+@@ -2131,7 +2250,7 @@ static udp_t *openudpsvr(const char *path, char *msg)
      decodetcppath(path,NULL,sport,NULL,NULL,NULL,NULL);
      
      if (sscanf(sport,"%d",&port)<1) {
@@ -625,7 +634,7 @@ index f6d815e..e3a5795 100644
          tracet(2,"openudpsvr: port error port=%s\n",port);
          return NULL;
      }
-@@ -2190,7 +2300,7 @@ static udp_t *openudpcli(const char *path, char *msg)
+@@ -2190,7 +2309,7 @@ static udp_t *openudpcli(const char *path, char *msg)
      decodetcppath(path,saddr,sport,NULL,NULL,NULL,NULL);
      
      if (sscanf(sport,"%d",&port)<1) {
@@ -634,7 +643,7 @@ index f6d815e..e3a5795 100644
          tracet(2,"openudpcli: port error port=%s\n",sport);
          return NULL;
      }
-@@ -2440,7 +2550,7 @@ static int readftp(ftp_t *ftp, uint8_t *buff, int n, char *msg)
+@@ -2440,7 +2559,7 @@ static int readftp(ftp_t *ftp, uint8_t *buff, int n, char *msg)
      }
      if (ftp->state<=0) { /* ftp/http not executed? */
          ftp->state=1;
@@ -643,7 +652,7 @@ index f6d815e..e3a5795 100644
      
  #ifdef WIN32
          if (!(ftp->thread=CreateThread(NULL,0,ftpthread,ftp,0,NULL))) {
-@@ -2473,7 +2583,7 @@ static int readftp(ftp_t *ftp, uint8_t *buff, int n, char *msg)
+@@ -2473,7 +2592,7 @@ static int readftp(ftp_t *ftp, uint8_t *buff, int n, char *msg)
      ftp->tnext=nextdltime(ftp->topts,1);
      ftp->state=0;
      
@@ -652,7 +661,7 @@ index f6d815e..e3a5795 100644
      
      return (int)(p-buff);
  }
-@@ -2936,7 +3046,11 @@ extern int strstat(stream_t *stream, char *msg)
+@@ -2936,7 +3055,11 @@ extern int strstat(stream_t *stream, char *msg)
      
      strlock(stream);
      if (msg) {
