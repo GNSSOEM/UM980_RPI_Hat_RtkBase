@@ -47,4 +47,4 @@ Based on RtkBase
 ## License:
 UM980_RPI_Hat_RtkBase is licensed under AGPL 3 (see [LICENSE](./LICENSE) file).
 
-UM980_RPI_Hat_RtkBase uses [RtkBase](https://github.com/Stefal/rtkbase) (GPL v3)
+UM980_RPI_Hat_RtkBase uses [RtkBase](https://github.com/Stefal/rtkbase) (AGPL v3)
