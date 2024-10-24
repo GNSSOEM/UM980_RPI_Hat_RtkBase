@@ -1,7 +1,7 @@
 #!/bin/bash
 #Tar command to create a release, excluding unuseful folders and files.
 
-ARCHIVE_NAME='UM980_RPI_Hat_rtkbase.tar.xz'
+ARCHIVE_NAME='ELT_RTKBase.tar.xz'
 BUNDLE_NAME='../install.sh'
 TAR_ARG='-cJf'
 

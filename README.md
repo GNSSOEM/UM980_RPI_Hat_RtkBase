@@ -1,4 +1,4 @@
-# UM980_RPI_Hat_RtkBase
+# ELT_RTKBase
 
 ### Raspberry Pi OS compatible RtkBase software for Unicore UM98x, Bynav M2x and Septentrio Mosaic X5
 
@@ -10,7 +10,7 @@ Based on RtkBase
 + Open a terminal and:
 
   ```bash
-  wget https://raw.githubusercontent.com/GNSSOEM/UM980_RPI_Hat_RtkBase/main/install.sh
+  wget https://raw.githubusercontent.com/GNSSOEM/ELT_RTKBase/main/install.sh
   chmod +x install.sh
   ./install.sh
   ```
@@ -45,6 +45,6 @@ Based on RtkBase
 + Support for static IP addresses
 
 ## License:
-UM980_RPI_Hat_RtkBase is licensed under AGPL 3 (see [LICENSE](./LICENSE) file).
+ELT_RTKBase is licensed under AGPL 3 (see [LICENSE](./LICENSE) file).
 
-UM980_RPI_Hat_RtkBase uses [RtkBase](https://github.com/Stefal/rtkbase) (AGPL v3)
+ELT_RTKBase uses [RtkBase](https://github.com/Stefal/rtkbase) (AGPL v3)
