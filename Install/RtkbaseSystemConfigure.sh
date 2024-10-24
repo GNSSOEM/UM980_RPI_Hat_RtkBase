@@ -44,8 +44,8 @@ fi
 
 if [[ -n "${COUNTRY}" ]]
 then
-   #echo sudo raspi-config nonint do_wifi_country "${COUNTRY}"
-   sudo raspi-config nonint do_wifi_country "${COUNTRY}"
+   #echo raspi-config nonint do_wifi_country "${COUNTRY}"
+   raspi-config nonint do_wifi_country "${COUNTRY}"
    ExitCodeCheck $?
    echo Wifi country set to ${COUNTRY} -- code ${exitcode}
    WORK=Y
@@ -73,8 +73,8 @@ then
       ExitCodeCheck $?
    else
       #https://www.raspberrypi.com/documentation/computers/configuration.html
-      #echo sudo raspi-config nonint do_wifi_ssid_passphrase "${SSID}" "${KEY}" ${HIDnum}
-      sudo raspi-config nonint do_wifi_ssid_passphrase "${SSID}" "${KEY}" ${HIDnum}
+      #echo raspi-config nonint do_wifi_ssid_passphrase "${SSID}" "${KEY}" ${HIDnum}
+      raspi-config nonint do_wifi_ssid_passphrase "${SSID}" "${KEY}" ${HIDnum}
       ExitCodeCheck $?
    fi
    echo Wifi SSID set to ${SSID} -- code ${exitcode}
@@ -152,8 +152,8 @@ then
          echo This ssh public key for ${LOGIN} already present
       fi
    fi
-   #echo sudo raspi-config nonint do_ssh 0
-   sudo raspi-config nonint do_ssh 0
+   #echo raspi-config nonint do_ssh 0
+   raspi-config nonint do_ssh 0
    ExitCodeCheck $?
    WORK=Y
 fi
