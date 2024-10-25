@@ -1,5 +1,5 @@
 diff --git a/web_app/server.py b/web_app/server.py
-index 4c822aa..b1cb537 100755
+index bb39670..23efc1f 100755
 --- a/web_app/server.py
 +++ b/web_app/server.py
 @@ -96,8 +96,8 @@ rtk = RTKLIB(socketio,
@@ -13,7 +13,7 @@ index 4c822aa..b1cb537 100755
                   {"service_unit" : "str2str_local_ntrip_caster.service", "name" : "local_ntrip_caster"},
                   {"service_unit" : "str2str_rtcm_svr.service", "name" : "rtcm_svr"},
                   {'service_unit' : 'str2str_rtcm_serial.service', "name" : "rtcm_serial"},
-@@ -108,7 +108,7 @@ services_list = [{"service_unit" : "str2str_tcp.service", "name" : "main"},
+@@ -109,7 +109,7 @@ services_list = [{"service_unit" : "str2str_tcp.service", "name" : "main"},
                   ]
  
  #Delay before rtkrcv will stop if no user is on status.html page
@@ -22,7 +22,7 @@ index 4c822aa..b1cb537 100755
  connected_clients = 0
  
  class StandaloneApplication(gunicorn.app.base.BaseApplication):
-@@ -205,12 +205,23 @@ def repaint_services_button(services_list):
+@@ -206,12 +206,23 @@ def repaint_services_button(services_list):
          result = exit-code => red button (danger)
      """ 
      for service in services_list:
@@ -51,7 +51,7 @@ index 4c822aa..b1cb537 100755
          elif service.get("status") == "auto-restart":
              service["btn_color"] = "warning"
  
-@@ -381,6 +392,92 @@ def download_update(update_path):
+@@ -382,6 +393,92 @@ def download_update(update_path):
      else:
          return update_archive
  
@@ -144,7 +144,7 @@ index 4c822aa..b1cb537 100755
  @app.before_request
  def inject_release():
      """
-@@ -415,7 +512,7 @@ def settings_page():
+@@ -416,7 +513,7 @@ def settings_page():
      if request.method == 'POST':
          uploaded_file = request.files['file']
          if uploaded_file.filename != '':
@@ -153,16 +153,7 @@ index 4c822aa..b1cb537 100755
          else:
              print("wrong update file")
          return ('', 204)
-@@ -502,13 +599,15 @@ def diagnostic():
-     """
-     getServicesStatus()
-     rtkbase_web_service = {'service_unit' : 'rtkbase_web.service', 'name' : 'RTKBase Web Server', 'active' : True}
-+    rtkbase_gnss_web_proxy_service = {'service_unit' : 'rtkbase_gnss_web_proxy.service', 'name' : 'RTKBase Reverse Proxy for Gnss receiver Web Server'}
-+    rtkbase_gnss_web_proxy_service["active"] = ServiceController(rtkbase_gnss_web_proxy_service["service_unit"]).isActive()
-     logs = []
--    for service in services_list + [rtkbase_web_service]:
-+    for service in services_list + [rtkbase_web_service, rtkbase_gnss_web_proxy_service]:
-         sysctl_status = subprocess.run(['systemctl', 'status', service['service_unit']],
+@@ -509,7 +606,7 @@ def diagnostic():
                                  stdout=subprocess.PIPE,
                                  universal_newlines=True,
                                  check=False)
@@ -171,7 +162,7 @@ index 4c822aa..b1cb537 100755
                                   stdout=subprocess.PIPE, 
                                   universal_newlines=True,
                                   check=False)
-@@ -528,11 +627,12 @@ def diagnostic():
+@@ -529,11 +626,12 @@ def diagnostic():
  def clientConnect():
      global connected_clients
      connected_clients += 1
@@ -187,7 +178,7 @@ index 4c822aa..b1cb537 100755
      rtk.sendState()
  
  @socketio.on("disconnect", namespace="/test")
-@@ -607,7 +707,7 @@ def deleteLog(json_msg):
+@@ -608,7 +706,7 @@ def deleteLog(json_msg):
  def detect_receiver(json_msg):
      print("Detecting gnss receiver")
      #print("DEBUG json_msg: ", json_msg)
@@ -196,7 +187,7 @@ index 4c822aa..b1cb537 100755
      if answer.returncode == 0 and "/dev/" in answer.stdout:
          #print("DEBUG ok stdout: ", answer.stdout)
          try:
-@@ -625,6 +725,20 @@ def detect_receiver(json_msg):
+@@ -626,6 +724,20 @@ def detect_receiver(json_msg):
      #print('DEBUG result: ', result)
      socketio.emit("gnss_detection_result", json.dumps(result), namespace="/test")
  
@@ -217,7 +208,7 @@ index 4c822aa..b1cb537 100755
  @socketio.on("configure_receiver", namespace="/test")
  def configure_receiver(brand="", model=""):
      # only some receiver could be configured automaticaly
-@@ -639,7 +753,7 @@ def configure_receiver(brand="", model=""):
+@@ -640,7 +752,7 @@ def configure_receiver(brand="", model=""):
          restart_main = False
  
      print("configuring {} gnss receiver model {}".format(brand, model))
@@ -226,7 +217,7 @@ index 4c822aa..b1cb537 100755
      #print("DEBUG - stdout: ", answer.stdout)
      #print("DEBUG - returncode: ", answer.returncode)
  
-@@ -767,6 +881,15 @@ def shutdownRtkbase():
+@@ -768,6 +880,15 @@ def shutdownRtkbase():
      #socketio.stop()
      subprocess.check_output(["shutdown", "now"])
  
@@ -242,7 +233,7 @@ index 4c822aa..b1cb537 100755
  @socketio.on("turn off wi-fi", namespace="/test")
  def turnOffWiFi():
      print("Turning off wi-fi")
-@@ -943,6 +1066,15 @@ def update_settings(json_msg):
+@@ -944,6 +1065,15 @@ def update_settings(json_msg):
          elif source_section == "local_storage":
              restartServices(("file",))
  
